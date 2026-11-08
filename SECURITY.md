@@ -4,6 +4,7 @@
 
 - It reads the source folder you give it with `--source`, as text. It never runs your code.
 - For the purpose line it also reads the README, the package files and the docs folder inside that folder.
+- The TypeScript checker follows imports and a `tsconfig.json`'s `extends`, `paths` and `typeRoots` the way `tsc` does, so it may open files those name outside the source folder; only each file's name and the names it declares reach the map (as `excluded:<file>` in `map/calls.json`), never its text, and it is not blocked because that would break monorepos whose `tsconfig` extends a parent file.
 - It writes only into the `.faultline` folder, or the folder you give with `--project`.
 - After install it uses no network. The one exception is `setup`, which downloads one file and checks its hash.
 

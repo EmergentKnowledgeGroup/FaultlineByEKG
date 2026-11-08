@@ -4,6 +4,7 @@ import fs from 'node:fs';
 import { fileURLToPath } from 'node:url';
 import { HELP } from './args.mjs';
 import { CliError } from '../src/build/project.mjs';
+import { jsonWhere } from '../src/story/canon.mjs';
 
 // Windows looks for a bare program name (python, py, git) in the current folder before PATH. Faultline is often run from inside a repo it did not write,
 // so that search is off for every program it starts.
@@ -37,7 +38,8 @@ export async function main(argv) {
     return typeof code === 'number' ? code : 0;
   } catch (e) {
     if (e && e.cli) { console.error(`faultline: ${e.message}`); return e.code || 1; }
-    console.error(`faultline: ${e && e.message ? e.message.split('\n')[0] : e}`);
+    // a JSON.parse that nothing handled: V8's message quotes the start of the file, which may be one this run was never meant to show, so it says only that and where (a SyntaxError that is not about JSON keeps its message)
+    console.error(`faultline: ${e instanceof SyntaxError && /JSON/.test(e.message) ? `a file is ${jsonWhere(e)}` : e && e.message ? e.message.split('\n')[0] : e}`);
     if (process.env.FAULTLINE_DEBUG) console.error(e && e.stack);
     else console.error('(set FAULTLINE_DEBUG=1 for the stack)');
     return 1;

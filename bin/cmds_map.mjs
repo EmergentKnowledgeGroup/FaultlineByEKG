@@ -2,7 +2,7 @@
 //   map reads the code and writes a true map and a readable page with no agent. review and story work on what map wrote (<project>/map).
 import fs from 'node:fs';
 import path from 'node:path';
-import { resolveProject, projectKind, CliError, rootSetAsideNote } from '../src/build/project.mjs';
+import { resolveProject, projectKind, CliError, rootSetAsideNote, NAME } from '../src/build/project.mjs';
 import { RootedSource } from '../src/story/source.mjs';
 import { jsonWhere } from '../src/story/canon.mjs';
 import { parse } from './args.mjs';
@@ -140,6 +140,13 @@ async function docFolderNote(source) {
 // The folder the map was made from: --source, else what the project remembers. A project on another drive cannot remember it as a relative path, so the code is looked for and, when it is not there, the person is asked.
 function sourceRoot(o, p, dir) {
   const root = abs(o.source || o.root || p.root);
+  // No --source: the folder is only a guess, and a map someone else made lists the files it likes. Quoting lines of a guessed folder would show files that map was never about (.env), so the person is asked.
+  if (!(o.source || o.root)) {
+    const same = (a, b) => (process.platform === 'win32' ? a.toLowerCase() === b.toLowerCase() : a === b);
+    const note = rootSetAsideNote(p);
+    if (!same(dir, abs(path.join(p.dir, 'map')))) throw new CliError(`This map folder (${dir}) is not the map folder of the project in ${abs(p.dir)}, so Faultline does not know which code folder it was made from and will not read a guess. Pass --source <the folder you gave to faultline map>.${note ? ` ${note}` : ''}`, 2);
+    if (path.basename(p.dir) !== NAME && p.rootFrom === 'guess') throw new CliError(`The project folder ${abs(p.dir)} is not a .faultline folder and does not remember its code folder, so the code folder would only be a guess (${root}). Pass --source <the folder you gave to faultline map>.${note ? ` ${note}` : ''}`, 2);
+  }
   let first = null;
   try { first = JSON.parse(fs.readFileSync(path.join(dir, 'review-index.json'), 'utf8')).mods?.[0] ?? null; } catch { /* no index: the commands say so themselves */ }
   const gate = new RootedSource(root);

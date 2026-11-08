@@ -14,18 +14,25 @@ import { importLogFile } from './logs.mjs';
 import { exportStatechart } from './statechart_export.mjs';
 import { main as exploreMain } from './explorer/runner.mjs';
 import { resolveRoot } from '../extract/root.mjs';
+import { CliError } from '../build/project.mjs';
+import { jsonWhere } from '../story/canon.mjs';
+
+// A project file that is not JSON is named and nothing of it is quoted: V8's message quotes the start of the file, and the project may be someone else's.
+const readJsonFile = (file) => {
+  try { return JSON.parse(fs.readFileSync(file, 'utf8')); } catch (e) { throw e instanceof SyntaxError ? new CliError(`${file.replace(/\\/g, '/')} is ${jsonWhere(e)}`, 1) : e; }
+};
 
 export function loadProject(dir) {
-  const facts = fs.existsSync(path.join(dir, 'facts.json')) ? JSON.parse(fs.readFileSync(path.join(dir, 'facts.json'), 'utf8')) : null;
+  const facts = fs.existsSync(path.join(dir, 'facts.json')) ? readJsonFile(path.join(dir, 'facts.json')) : null;
   if (facts) facts.root = resolveRoot(facts.root, dir);      // facts.json stores the root as '..' steps; the importer wants the folder on this machine
   let model = null;
   const merged = path.join(dir, 'model.merged.json');
   const frag = path.join(dir, 'model');
-  if (fs.existsSync(merged)) model = JSON.parse(fs.readFileSync(merged, 'utf8'));
+  if (fs.existsSync(merged)) model = readJsonFile(merged);
   else if (fs.existsSync(frag)) {
     model = { boxes: [], routes: [], stages: [] };
     for (const f of fs.readdirSync(frag).filter((x) => x.endsWith('.json')).sort()) {
-      const j = JSON.parse(fs.readFileSync(path.join(frag, f), 'utf8'));
+      const j = readJsonFile(path.join(frag, f));
       for (const k of Object.keys(model)) if (j[k]) model[k].push(...j[k]);
     }
   }

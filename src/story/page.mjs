@@ -6,7 +6,7 @@ import { fileURLToPath } from 'node:url';
 import { CANNOT_SEE, WORD_FLAGS, isMark } from './check.mjs';
 import { flagText } from './texts.mjs';
 import { NOT_DRAWN } from './arm.mjs';
-import { plain } from './canon.mjs';
+import { plain, jsonWhere } from './canon.mjs';
 
 const HERE = fileURLToPath(new URL('.', import.meta.url));
 const START = '<!--story-overlay-->';
@@ -86,7 +86,8 @@ export function overlayData(check) {
 
 /** @returns {{html, dataBytes, nRoads, nBoxes}} */
 export function buildPage(checkPath, pagePath) {
-  const check = JSON.parse(fs.readFileSync(checkPath, 'utf8'));
+  let check;
+  try { check = JSON.parse(fs.readFileSync(checkPath, 'utf8')); } catch (e) { throw e instanceof SyntaxError ? new Error(`the check file ${checkPath} is ${jsonWhere(e)}`) : e; } // V8's message would quote the start of the file
   if (check.refused) throw new Error('the check was refused, so there is nothing to show: ' + check.refused.map((x) => x.msg).join('; '));
   let html = fs.readFileSync(pagePath, 'utf8');
   const a = html.indexOf(START), b = html.indexOf(END);

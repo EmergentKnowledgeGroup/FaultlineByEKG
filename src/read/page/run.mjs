@@ -24,6 +24,7 @@ import { buildModel } from './project.mjs';
 import { injectPage } from './inject.mjs';
 import { buildAsk } from './agentx.mjs';
 import { CliError } from '../../build/project.mjs';
+import { jsonWhere } from '../../story/canon.mjs';
 import { plural } from '../../build/util.mjs';
 import { HOT_BYTES } from '../charts.mjs';
 
@@ -32,6 +33,10 @@ const MIN_PY = [3, 10];
 export const PAGE_LIMIT = 15500000;   // a page stays under 16 000 000 bytes; this leaves room for what the estimate cannot see
 const fwd = (p) => path.resolve(p).replace(/\\/g, '/');
 const secs = (t0) => +((performance.now() - t0) / 1000).toFixed(1);
+// A project file that is not JSON is named and nothing of it is quoted: V8's message quotes the start of the file, and the project may be someone else's.
+const readJsonFile = (file) => {
+  try { return JSON.parse(fs.readFileSync(file, 'utf8')); } catch (e) { throw e instanceof SyntaxError ? new CliError(`${fwd(file)} is ${jsonWhere(e)}`, 1) : e; }
+};
 
 /** The folders of one tool-map project. */
 export function layout(project) {
@@ -127,7 +132,7 @@ export async function rebuildToolPage(projDir, { root = null, excerpts = false, 
   if (missing.length) throw new CliError(`This tool map's reading is incomplete (${missing.join(', ')} not in ${L.read}). Fix: ${fix}`, 1);
   if (!fs.existsSync(`${L.dir}/page/side.json`)) throw new CliError(`This tool map has no page/side.json. Fix: ${fix}`, 1);
   if (!fs.existsSync(`${L.dir}/page/ask.json`)) {       // a project made before the text commands shared the page's questions
-    const J = (x) => JSON.parse(fs.readFileSync(`${L.read}/${x}`, 'utf8'));
+    const J = (x) => readJsonFile(`${L.read}/${x}`);
     fs.writeFileSync(`${L.dir}/page/ask.json`, stableStringify(buildAsk({ reading: J('reading.json'), charts: J('charts.json') })));
   }
   const refuseUnplaced = (ids) => `${ids.length} chart(s) have no layout (${ids.slice(0, 6).join(', ')}${ids.length > 6 ? ', ...' : ''}), so the page cannot be rebuilt as it was made. Fix: ${fix}`;
@@ -157,7 +162,7 @@ export async function mapToPage(opt, say = console.log) {
   fs.mkdirSync(L.dir, { recursive: true });
   const cfgFile = `${L.dir}/config.json`;
   if (!fs.existsSync(cfgFile)) fs.writeFileSync(cfgFile, JSON.stringify({ include: [], exclude: [] }, null, 2) + '\n');
-  const cfg = JSON.parse(fs.readFileSync(cfgFile, 'utf8')) || {};
+  const cfg = readJsonFile(cfgFile) || {};
   const { config, noPython } = await chooseLanguages(root, opt, notes, cfg);
   config.root = root;
   config.work = opt.work ? fwd(opt.work) : `${L.map}/_work`;
