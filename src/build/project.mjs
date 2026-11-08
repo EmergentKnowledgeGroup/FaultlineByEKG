@@ -1,5 +1,6 @@
 // Project directory handling: where the .faultline folder is, what is in it, and plain JSON reads and writes.
-//   resolveProject({project, root, cwd}) -> {dir, root, exists, fresh}   (exists: a project was named or found; fresh: none was, dir is where init would make one)
+//   resolveProject({project, root, cwd}) -> {dir, root, rootKnown, rootFrom, rootSetAside, exists, fresh}   (exists: a project was named or found; fresh: none was, dir is where init would make one;
+//                                            rootFrom: 'flag' | 'config' | 'facts' | 'guess'; rootSetAside: a remembered root outside the project's folder, not used)
 //   readProject(dir) -> {facts, census, signals, graph, dismissed, config}
 // "Every step works from a project dir": run from the repo, from inside .faultline, or pass --project.
 import fs from 'node:fs';
@@ -54,13 +55,34 @@ export function resolveProject({ project, root, cwd = process.cwd() } = {}) {
   const facts = readJson(path.join(dir, 'facts.json'));
   const cfg = readJson(path.join(dir, 'config.json'), {}) || {};
   let src = root ? path.resolve(cwd, root) : null;
-  if (!src && cfg.root) src = path.resolve(dir, cfg.root);
+  let rootFrom = src ? 'flag' : null;
+  // A root the project remembers (config.json, facts.json) travels with a cloned repo or a map someone else made, so it is taken only when it is the
+  // folder that holds the project or a folder inside it. One that points anywhere else is set aside: the commands that read code then ask for --source.
+  const holder = path.basename(dir) === NAME ? path.dirname(dir) : dir;
+  let rootSetAside = null;
+  const remembered = (cand, from) => {
+    if (src || !cand) return;
+    if (holds(holder, cand)) { src = cand; rootFrom = from; } else if (!rootSetAside) rootSetAside = cand;
+  };
+  if (cfg.root) remembered(path.resolve(dir, cfg.root), 'config');
   const stored = resolveRoot(facts && facts.root, dir);                    // facts.json holds '..'-style or an older absolute root
-  if (!src && stored && isDir(stored)) src = stored;
+  if (stored && isDir(stored)) remembered(stored, 'facts');
   const rootKnown = !!src;                                                // false: the folder below is a guess (the project's parent), not something the project remembers
   if (!src) src = path.basename(dir) === NAME ? path.dirname(dir) : path.resolve(cwd);
-  return { dir, root: src, rootKnown, exists: !fresh && isDir(dir), fresh, named: !!project };
+  return { dir, root: src, rootKnown, rootFrom: rootFrom || 'guess', rootSetAside, exists: !fresh && isDir(dir), fresh, named: !!project };
 }
+
+// Is `inner` the folder `outer` or below it? Links are resolved first, so a linked folder inside `outer` that leads elsewhere does not count.
+function holds(outer, inner) {
+  const real = (p) => { try { return lower(fs.realpathSync(p).replace(/\\/g, '/')); } catch { return lower(path.resolve(p).replace(/\\/g, '/')); } };
+  const a = real(outer).replace(/\/+$/, ''), b = real(inner).replace(/\/+$/, '');
+  return b === a || b.startsWith(a + '/');
+}
+
+/** The line a command prints when the project remembered a root outside the folder that holds it and that root was not used. '' when nothing was set aside. */
+export const rootSetAsideNote = (p) => (p && p.rootSetAside && !p.rootKnown
+  ? `This project remembers its code at ${p.rootSetAside.replace(/\\/g, '/')}, outside the folder that holds the project, so Faultline did not read there. If that is right, pass  --source ${p.rootSetAside.replace(/\\/g, '/')}`
+  : '');
 
 /**
  * What a project folder holds: 'tool-map' (faultline map made it), 'hand' (a map written by hand, or its extract), 'unfinished' (faultline map began

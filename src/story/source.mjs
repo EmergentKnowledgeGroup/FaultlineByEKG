@@ -4,6 +4,10 @@
 //   src.ref('src/a.py')   -> { ok: true, rel } | { ok: false, why }   (lexical test only: nothing is opened)
 //   src.lines('src/a.py') -> string[] | null                          (null: not a readable file inside the root)
 //   src.line('src/a.py', 7) -> string | null
+//   src.resolve('src/a.py') -> real path | null                       (for readers that need bytes, a stat or a walk: open only this path)
+//
+// It is also the one gate for every other reader of project code (review, the reading, excerpts, the digest, the mirror): they go through
+// RootedSource, resolveInside or realInside, never path.join(root, rel) on its own.
 //
 // A path is refused, and its file never opened, when it is not a plain relative path that stays inside the root: absolute paths, drive letters,
 // backslashes, `..` that climbs out, control characters. A path that passes the text test is also refused when the file it names is a link that
@@ -37,6 +41,17 @@ export class RootedSource {
     return { ok: true, rel: clean };
   }
 
+  /** The real path (forward slashes) of what `rel` names, when it passes the text test and does not lead outside the root through a link; else null.
+   *  Nothing is read. Callers that need bytes, a stat or a folder walk open this path and nothing else. */
+  resolve(rel) {
+    const r = this.ref(rel);
+    if (!r.ok) return null;
+    try {
+      const real = fs.realpathSync(path.join(this.root, r.rel)).replace(/\\/g, '/');
+      return realInside(this.real, real) ? real : null;
+    } catch { return null; }
+  }
+
   /** The lines of a file inside the root (CRLF and CR read as LF), or null. A link that leads outside the root is not read. */
   lines(rel) {
     const r = this.ref(rel);
@@ -45,10 +60,8 @@ export class RootedSource {
     if (this.cache.has(key)) return this.cache.get(key);
     let out = null;
     try {
-      const abs = path.join(this.root, key);
-      const real = fs.realpathSync(abs).replace(/\\/g, '/');
-      const inside = this.real != null && (real === this.real || real.startsWith(this.real.endsWith('/') ? this.real : this.real + '/'));
-      if (inside) {
+      const real = this.resolve(key);
+      if (real) {
         const st = fs.statSync(real);
         if (st.isFile() && st.size <= MAX_SOURCE_BYTES) out = fs.readFileSync(real, 'utf8').replace(/\r\n?/g, '\n').split('\n');
       }
@@ -63,8 +76,7 @@ export class RootedSource {
     if (!r.ok) return 'outside';
     try {
       const real = fs.realpathSync(path.join(this.root, r.rel)).replace(/\\/g, '/');
-      const inside = this.real != null && (real === this.real || real.startsWith(this.real.endsWith('/') ? this.real : this.real + '/'));
-      return inside ? 'unreadable' : 'outside';
+      return realInside(this.real, real) ? 'unreadable' : 'outside';
     } catch { return 'missing'; }
   }
 
@@ -73,3 +85,12 @@ export class RootedSource {
     return ls == null || !Number.isInteger(n) || n < 1 || n > ls.length ? null : ls[n - 1];
   }
 }
+
+/** True when the real path `real` is the real root `realRoot` or below it (both forward slashes, both from realpath). A null root holds nothing. */
+export function realInside(realRoot, real) {
+  if (realRoot == null || real == null) return false;
+  return real === realRoot || real.startsWith(realRoot.endsWith('/') ? realRoot : realRoot + '/');
+}
+
+/** One-off form of RootedSource.resolve for a reader that holds no RootedSource: the real path of `rel` under `root`, or null. */
+export const resolveInside = (root, rel) => new RootedSource(root).resolve(rel);
