@@ -1,0 +1,223 @@
+{
+ "note": "one real symbol per legend row. Each file is a crop of the product's own drawing of the chart named in \"from\", with the product's own CSS; light and dark. The \"?\" box and the dashed road carry the two marks the viewer adds when a box or road is not confident. Inline the SVG to restyle it with the --a-* variables.",
+ "commit": "tree e9176552d7",
+ "rows": [
+  {
+   "id": "decision",
+   "copy": "Decision: the road out is labelled with its condition",
+   "extra": false,
+   "files": {
+    "light": "decision.light.svg",
+    "dark": "decision.dark.svg"
+   },
+   "from": {
+    "chart": "c3307",
+    "chartTitle": "gdPath",
+    "box": "f3307.2",
+    "boxText": "ids.length >= 2",
+    "kind": "decision",
+    "road": "r2230",
+    "condition": "yes"
+   },
+   "crop": [
+    -6,
+    426,
+    203.5,
+    132.5
+   ],
+   "notConfident": false
+  },
+  {
+   "id": "loop",
+   "copy": "Loop: with what limits it, when the code shows that",
+   "extra": false,
+   "files": {
+    "light": "loop.light.svg",
+    "dark": "loop.dark.svg"
+   },
+   "from": {
+    "chart": "c900",
+    "chartTitle": "neverSent",
+    "box": "f900.4",
+    "boxText": "For each c in raw.consts || []",
+    "kind": "decision",
+    "road": "r8316",
+    "condition": "each time round"
+   },
+   "crop": [
+    375.5,
+    147.9,
+    371,
+    98
+   ],
+   "notConfident": false
+  },
+  {
+   "id": "wait",
+   "copy": "Wait: something else has to wake it",
+   "extra": false,
+   "files": {
+    "light": "wait.light.svg",
+    "dark": "wait.dark.svg"
+   },
+   "from": {
+    "chart": "c923",
+    "chartTitle": "main",
+    "box": "f923.1",
+    "boxText": "Waits for t.join",
+    "kind": "wait"
+   },
+   "crop": [
+    9.5,
+    144,
+    201,
+    80
+   ],
+   "notConfident": false
+  },
+  {
+   "id": "store",
+   "copy": "Store or send: a place that writes, deletes or calls out",
+   "extra": false,
+   "files": {
+    "light": "store.light.svg",
+    "dark": "store.dark.svg"
+   },
+   "from": {
+    "chart": "c315",
+    "chartTitle": "top-level code of autochannels.mjs",
+    "box": "f315.8",
+    "boxText": "Prints console +1",
+    "kind": "store"
+   },
+   "crop": [
+    352,
+    698.5,
+    209,
+    80
+   ],
+   "notConfident": false
+  },
+  {
+   "id": "ending",
+   "copy": "Ending: success, failure, refusal, or neutral",
+   "extra": false,
+   "files": {
+    "light": "ending.light.svg",
+    "dark": "ending.dark.svg"
+   },
+   "from": {
+    "chart": "c2649",
+    "chartTitle": "Source.exitExpr",
+    "box": "f2649.s1",
+    "boxText": "Returns null",
+    "kind": "end"
+   },
+   "crop": [
+    338.5,
+    540,
+    182,
+    80
+   ],
+   "notConfident": false
+  },
+  {
+   "id": "road",
+   "copy": "Road: what leads to what",
+   "extra": false,
+   "files": {
+    "light": "road.light.svg",
+    "dark": "road.dark.svg"
+   },
+   "from": {
+    "chart": "c540",
+    "chartTitle": "main",
+    "road": "r6041",
+    "condition": "calls",
+    "boxes": [
+     "f540.6",
+     "f540.c4"
+    ]
+   },
+   "crop": [
+    93.2,
+    445,
+    225,
+    212
+   ],
+   "notConfident": false
+  },
+  {
+   "id": "road-dashed",
+   "copy": "Road, dashed: not confident, and the panel says why",
+   "extra": false,
+   "files": {
+    "light": "road-dashed.light.svg",
+    "dark": "road-dashed.dark.svg"
+   },
+   "from": {
+    "chart": "c2368",
+    "chartTitle": "segCaps",
+    "road": "r2862",
+    "condition": "possibly calls",
+    "boxes": [
+     "f2368.4",
+     "f2368.c4"
+    ]
+   },
+   "crop": [
+    79.5,
+    540,
+    251.6,
+    248
+   ],
+   "notConfident": true
+  },
+  {
+   "id": "box-question",
+   "copy": "Box with \"?\": the tool wrote a label, but the evidence is thinner than the words",
+   "extra": false,
+   "files": {
+    "light": "box-question.light.svg",
+    "dark": "box-question.dark.svg"
+   },
+   "from": {
+    "chart": "c2572",
+    "chartTitle": "top-level code of place.mjs",
+    "box": "f2572.c3",
+    "boxText": "→? log",
+    "kind": "step"
+   },
+   "crop": [
+    1101.5,
+    435,
+    182,
+    80
+   ],
+   "notConfident": true
+  },
+  {
+   "id": "external",
+   "copy": "(extra) a call out of the system",
+   "extra": true,
+   "files": {
+    "light": "external.light.svg",
+    "dark": "external.dark.svg"
+   },
+   "from": {
+    "chart": "c126",
+    "chartTitle": "Queue.claim",
+    "box": "f126.2",
+    "boxText": "Uses db (execute)",
+    "kind": "external"
+   },
+   "crop": [
+    13.5,
+    267,
+    209,
+    80
+   ],
+   "notConfident": false
+  }
+ ]
+}

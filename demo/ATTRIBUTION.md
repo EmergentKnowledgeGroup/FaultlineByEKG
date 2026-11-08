@@ -1,0 +1,1 @@
+BullMQ, https://github.com/taskforcesh/bullmq, MIT licence, Copyright (c) 2018 BullForce Labs AB and contributors. Mapped at commit a0ec9c04279e7f88440f5131f9624a4c102015bb. BullMQ is an independent project and has no connection to Faultline.

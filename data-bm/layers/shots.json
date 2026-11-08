@@ -1,0 +1,65 @@
+{
+ "about": "Crops of the two live pages at 1440x900, 100% zoom. See build/layers-shots.mjs.",
+ "window": [
+  1440,
+  900
+ ],
+ "crops": {
+  "tool-light": {
+   "chart": "c802",
+   "crop": {
+    "x": 46,
+    "y": 198,
+    "width": 1040,
+    "height": 650
+   },
+   "saved": [
+    1440,
+    900
+   ],
+   "bytes": 67916
+  },
+  "tool-dark": {
+   "chart": "c802",
+   "crop": {
+    "x": 46,
+    "y": 198,
+    "width": 1040,
+    "height": 650
+   },
+   "saved": [
+    1440,
+    900
+   ],
+   "bytes": 66484
+  },
+  "story-light": {
+   "chart": "stage_fetch_4",
+   "crop": {
+    "x": 196,
+    "y": 190,
+    "width": 1040,
+    "height": 650
+   },
+   "saved": [
+    1440,
+    900
+   ],
+   "bytes": 63168
+  },
+  "story-dark": {
+   "chart": "stage_fetch_4",
+   "crop": {
+    "x": 196,
+    "y": 190,
+    "width": 1040,
+    "height": 650
+   },
+   "saved": [
+    1440,
+    900
+   ],
+   "bytes": 64556
+  }
+ }
+}

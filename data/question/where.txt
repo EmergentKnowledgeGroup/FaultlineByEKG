@@ -1,0 +1,14 @@
+$ faultline where f1775.2
+WHERE f1775.2  [d16 Bin]  end  live  c1775
+Fails with Error (2x)
+Raises Error: "fetching ${url} failed: HTTP ${res.status}". The same ending is reached at 2 places in fetchChecked.
+level: drawn
+ending: STOPS HERE (no road out)
+who hears: thrown or returned to the code that called (the caller (the error travels up to the code that called this))
+ROADS IN 2
+  <- f1775.1 "yes" (r11987)
+  <- f1775.3 "yes" (r11988)
+ROADS OUT none (it stops here)
+in function f1775 src/map/tools.mjs::fetchChecked: faultline where f1775 gives its body
+src: src/map/tools.mjs:96 fetchChecked
+open: .faultline/dist/atlas.html#chart=c1775&node=f1775.2

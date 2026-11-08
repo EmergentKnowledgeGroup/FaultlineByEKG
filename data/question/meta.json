@@ -1,0 +1,40 @@
+{
+ "note": "The one failing ending shown on the page. Real data from the Faultline tool map; no ranked question is attached to this chart (checked by build/question.mjs).",
+ "chart": "c1775",
+ "chartTitle": "fetchChecked",
+ "alt": "Part of the chart of fetchChecked in Faultline: two checks, \"!res.ok\" and \"got !== sha\", each with a road labelled yes into one ending, \"Fails with Error (2x)\".",
+ "viewBoxSize": [
+  263,
+  349
+ ],
+ "nodes": [
+  "f1775.1",
+  "f1775.3",
+  "f1775.2"
+ ],
+ "roads": [
+  "r11987",
+  "r11988"
+ ],
+ "fnName": "fetchChecked",
+ "box": "f1775.2",
+ "label": "Fails with Error (2x)",
+ "where": [
+  "src/map/tools.mjs:96",
+  "src/map/tools.mjs:99"
+ ],
+ "plain": [
+  "Raises Error: \"fetching ${url} failed: HTTP ${res.status}\".",
+  "Raises Error: \"sha256 mismatch for ${label}: got ${got}, pinned ${sha}\"."
+ ],
+ "whoHears": {
+  "by": "caller",
+  "how": "the caller (the error travels up to the code that called this)"
+ },
+ "viewBox": [
+  -4,
+  155,
+  262.7,
+  349
+ ]
+}

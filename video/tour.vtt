@@ -1,0 +1,165 @@
+WEBVTT
+
+1
+00:00:00.600 --> 00:00:03.660
+Somewhere in your code,
+something is failing right now.
+
+2
+00:00:04.020 --> 00:00:04.840
+It won't crash.
+
+3
+00:00:05.420 --> 00:00:08.360
+It will fail quietly,
+somewhere nobody is looking.
+
+4
+00:00:08.900 --> 00:00:11.640
+So here's a question
+almost nobody can answer.
+
+5
+00:00:12.180 --> 00:00:14.220
+When it fails, who hears about it?
+
+6
+00:00:14.900 --> 00:00:17.000
+This is Faultline, by EKG.
+
+7
+00:00:17.100 --> 00:00:20.240
+It reads a codebase and draws
+what it does, on one map.
+
+8
+00:00:20.780 --> 00:00:24.540
+Every decision. Every
+wait. Every way it can end.
+
+9
+00:00:25.060 --> 00:00:29.160
+The map you're looking at is Faultline's
+own code, drawn by Faultline.
+
+10
+00:00:29.924 --> 00:00:31.384
+No model draws it.
+
+11
+00:00:32.224 --> 00:00:35.764
+Programs read the code, a type
+checker settles who calls whom,
+
+12
+00:00:35.944 --> 00:00:38.284
+and plain rules turn each decision,
+
+13
+00:00:38.764 --> 00:00:41.164
+loop and ending into boxes and roads.
+
+14
+00:00:41.944 --> 00:00:45.204
+Run it twice on the same commit,
+and you get the same bytes.
+
+15
+00:00:46.086 --> 00:00:49.426
+Geologists draw a fault solid
+where they know where it is,
+
+16
+00:00:49.506 --> 00:00:51.546
+and dashed where they're inferring it.
+
+17
+00:00:52.246 --> 00:00:53.446
+Faultline does the same.
+
+18
+00:00:54.406 --> 00:00:55.886
+Solid where the code proves it.
+
+19
+00:00:56.426 --> 00:01:00.426
+Dashed, with a question mark, where it
+doesn't, and the panel tells you why.
+
+20
+00:01:01.212 --> 00:01:03.552
+Go from the whole system, to one stage,
+
+21
+00:01:03.792 --> 00:01:06.232
+to one function, to one line of code,
+
+22
+00:01:06.332 --> 00:01:07.552
+without losing your place.
+
+23
+00:01:08.396 --> 00:01:12.156
+One map, two readers. People
+get one page to explore.
+
+24
+00:01:12.916 --> 00:01:17.676
+Agents get the same map as short text,
+with a token cap on every answer.
+
+25
+00:01:18.496 --> 00:01:23.296
+Same box, same id, so you can hand
+your agent the exact spot you mean.
+
+26
+00:01:24.045 --> 00:01:27.565
+At every failure, it asks
+who finds out. A person?
+
+27
+00:01:27.885 --> 00:01:31.125
+The calling code? A log? Or nobody at all?
+
+28
+00:01:31.425 --> 00:01:34.685
+When the code doesn't say, the
+map says so, instead of guessing.
+
+29
+00:01:35.592 --> 00:01:37.612
+An agent can't draw on the map.
+
+30
+00:01:38.232 --> 00:01:40.772
+It can answer the
+questions the tool flagged,
+
+31
+00:01:41.052 --> 00:01:45.132
+and write the story on top, and
+every word stays marked as words.
+
+32
+00:01:46.044 --> 00:01:51.264
+We tried it on BullMQ, an open source
+job queue of thirty thousand lines,
+
+33
+00:01:51.424 --> 00:01:56.044
+both ways: programs alone, and
+with an agent's story on top.
+
+34
+00:01:56.804 --> 00:01:59.244
+It's all on the site,
+including what didn't work.
+
+35
+00:02:00.026 --> 00:02:02.766
+Faultline, by EKG. Free and open source.
+
+36
+00:02:03.326 --> 00:02:04.406
+Point it at your own code.
