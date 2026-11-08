@@ -1,0 +1,93 @@
+/* ================================================================ THE PHONE (narrow, or a phone held sideways)
+   The poster and the whole map are drawings that need a big screen. Here a plain list of the stages stands in their place (viewer/phone.js builds it), the header is
+   one short row, and the tools that belong to a drawing are left out. A chart of one stage keeps its drawing. On any other window the list is not shown. */
+.ph-stages{display:none}
+@media (max-width:800px),(max-height:520px) and (max-width:1000px){
+  /* the header: the name, then one row of buttons */
+  .top{padding:6px 10px 8px;gap:4px 8px}
+  .brand{flex:1 1 100%;display:block}
+  .brand h1{font-size:1rem;line-height:1.25}
+  .top-actions{flex:1 1 100%;gap:6px}
+  .top .btn{padding:4px 9px;font-size:.82rem;min-height:32px}
+  #followBtn{display:none}
+  /* the walk follows boxes on a drawing; here the drawing is a small map whose names do not show, so the walk is not offered (the stage list and the two pages carry the story). Every way into it is left out together: the button, the "walk it" buttons on the pages and in the Regions list */
+  #walkBtn,[data-walk],[data-rg-walk]{display:none!important}
+  .rg-row:has(.rg-walk){grid-template-columns:minmax(0,1fr) 26px 26px}
+  .rg-row:has(.rg-walk) .rg-eye{grid-column:2}
+  .rg-row:has(.rg-walk) .rg-add{grid-column:3}
+  body:has(#chartView:not([hidden])[data-kind=overview]) #chartStep,body:has(#chartView:not([hidden]).slim) #chartStep{display:none}
+  /* the Legend explains a drawing; on the stage list there is none, so there is no button for it */
+  body:has(#chartView:not([hidden])[data-kind=overview]) #legendBtn,body:has(#chartView:not([hidden]).slim) #legendBtn{display:none}
+  /* the line saying who made the page may break inside its address; a long word reading on a page may break too, so nothing sends the page wider than the screen */
+  .tb-made a{white-space:normal;overflow-wrap:anywhere}
+  .reading .gd p,.reading .gd li{overflow-wrap:anywhere}
+  .cstep.off{display:none}      /* a reading page has no previous/next chart: no empty band where they would be */
+  .nav-select-wrap{padding:6px 10px}
+  .nav-select{height:38px;font-size:.95rem}
+
+  /* the poster and the whole map: the list replaces the drawing */
+  .chart-view[data-kind=overview],.chart-view.slim{display:flex;flex-direction:column}
+  .chart-view[data-kind=overview] .toolbar,.chart-view.slim .toolbar{order:1}
+  .chart-view[data-kind=overview] .ph-stages,.chart-view.slim .ph-stages{display:block;order:2}
+  .chart-view[data-kind=overview] .draftbar,.chart-view.slim .draftbar{order:3}
+  .chart-view[data-kind=overview] .canvas-wrap,.chart-view.slim .canvas-wrap,.chart-view[data-kind=overview] .onboard,.chart-view.slim .onboard{display:none}
+  .chart-view[data-kind=overview] .tb-toggles,.chart-view.slim .tb-toggles{display:none}
+  .chart-view[data-kind=overview] .toolbar,.chart-view.slim .toolbar{padding:8px 10px 6px;gap:6px 8px}
+  .chart-view[data-kind=overview] .tb-head h2{white-space:normal;font-size:1.15rem}
+  .chart-view[data-kind=overview] .tb-sub{flex:1 1 100%}
+  .chart-view.slim .toolbar .tb-title{display:none}
+
+  .ph-stages{padding:6px 10px 12px;background:var(--bg)}
+  .ph-lead{margin:0 0 10px;font-size:.92rem;line-height:1.45;color:var(--ink)}
+  .ph-pages{display:flex;flex-wrap:wrap;gap:6px 8px;align-items:center;margin:0 0 12px}
+  .ph-pl{flex:1 1 100%;font-size:.82rem;color:var(--muted)}
+  .ph-pages .hw-page{color:var(--ink);background:var(--panel2);border:1px solid var(--line2);font-size:.9rem;padding:6px 12px;min-height:34px}
+  .ph-pages .hw-page b{color:var(--accent)}
+  .ph-list{list-style:none;margin:0;padding:0;display:grid;grid-template-columns:minmax(0,1fr);gap:8px}
+  .ph-row{display:grid;grid-template-columns:28px minmax(0,1fr) 12px;gap:10px;align-items:start;width:100%;text-align:left;font:inherit;color:var(--ink);background:var(--panel);border:1px solid var(--line2);border-left:4px solid hsl(var(--sh) var(--ss) var(--sl));border-radius:10px;padding:9px 10px;cursor:pointer}
+  .ph-row:active{background:var(--panel2)}
+  .ph-no{display:grid;place-items:center;width:26px;height:26px;border-radius:50%;background:hsl(var(--sh) var(--ss) var(--sl));color:#0e1d25;font-weight:800;font-size:.84rem;font-variant-numeric:tabular-nums}
+  :root[data-theme=light] .ph-no{color:#fff}
+  .ph-main{display:flex;flex-direction:column;gap:2px;min-width:0}
+  .ph-nm{font-size:1rem;line-height:1.3;font-weight:700;overflow-wrap:anywhere}
+  .ph-bl{font-size:.86rem;line-height:1.4;color:var(--muted);display:-webkit-box;-webkit-line-clamp:3;-webkit-box-orient:vertical;overflow:hidden}
+  .ph-meta{font-size:.78rem;color:var(--faint)}
+  .ph-on{color:var(--accent);font-weight:650}
+  .ph-go{align-self:center;color:var(--faint);font-size:1.3rem;line-height:1}
+
+  /* a chart that is not a stage part has no "here" cell in its flow bar: its Back chip and its roads still take the whole width, not a half of it (the chip was cut at the half) */
+  .flowbar.no-here .fb-row{grid-template-columns:minmax(0,1fr)}
+
+  /* the part buttons of a stage say "Previous part" and "Next part" (they were two bare arrows in wide empty bars) */
+  .crumb .cr-bt{display:inline}
+  .crumb .cr-b{width:auto;padding:0 10px;justify-content:center}
+
+  /* a long box name on a chip in the details panel is cut at the screen edge with dots, not run past it (it widened the whole page) */
+  .inspector .hchip{display:inline-block;max-width:100%;overflow:hidden;text-overflow:ellipsis;line-height:18px;vertical-align:middle}
+  /* on a reading page a long name on a chip breaks into two lines inside its chip rather than running past the screen */
+  .reading .hchip{max-width:100%;height:auto;min-height:20px;padding-top:2px;padding-bottom:2px;white-space:normal;overflow-wrap:anywhere;line-height:1.2}
+
+  /* on a drawing: a note over the map takes the width of the screen, above the zoom bar (it was a column a few letters wide beside the bar) */
+  .bdock{flex-wrap:wrap;align-items:stretch}
+  .bd-mid{flex:1 1 100%;order:-1}
+  .bd-mid .ov-note{max-width:100%;text-align:left}
+}
+/* held sideways: one row of header, the stages in two columns */
+@media (max-height:520px) and (max-width:1000px){
+  .top{flex-wrap:wrap}
+  .brand{flex:1 1 auto;display:block;order:0}
+  .top-actions{flex:0 1 auto;order:1}
+  .nav-select-wrap{position:static}
+  .ph-list{grid-template-columns:repeat(2,minmax(0,1fr))}
+}
+/* the "Details" button of a phone (viewer/phone.js): a small pill at the bottom edge while the pinned box's details are under the map */
+.ph-details{display:none}
+@media (max-width:800px),(max-height:520px) and (max-width:1000px){
+  .ph-details:not([hidden]){display:inline-flex;align-items:center;gap:6px;position:fixed;right:12px;bottom:12px;z-index:45;min-height:40px;padding:0 16px;border-radius:99px;border:1px solid var(--accent);background:var(--panel);color:var(--ink);font-weight:700;font-size:.9rem;box-shadow:var(--shadow)}
+}
+.ph-fns{list-style:none;margin:6px 0 4px 14px;padding:0 0 0 10px;border-left:3px solid var(--line2);display:grid;gap:4px}
+.ph-fns[hidden]{display:none}
+.ph-fn{display:flex;justify-content:space-between;gap:10px;align-items:baseline;width:100%;text-align:left;font:inherit;font-size:.92rem;color:var(--ink);background:var(--panel2);border:1px solid var(--line);border-radius:8px;padding:8px 10px;min-height:38px;cursor:pointer}
+.ph-fn:active{background:var(--panel)}
+.ph-fnm{overflow-wrap:anywhere;font-weight:600}
+.ph-fnn{flex:none;color:var(--muted);font-size:.82rem;font-variant-numeric:tabular-nums}

@@ -1,0 +1,27 @@
+{
+  "_faultline": {
+    "tool": "place",
+    "key": "f7feddffaf31542b",
+    "seed": 1,
+    "boxes": 7
+  },
+  "gapX": 150,
+  "gapY": 84,
+  "nodeMaxChars": 22,
+  "edgeMaxChars": 20,
+  "spine": [
+    "trouble.fail",
+    "trouble.backoff"
+  ],
+  "route": {
+    "crossingPenalty": 200
+  },
+  "map": [
+    "trouble.fail trouble.backoff .",
+    "trouble.failed . trouble.release_refused",
+    ". . trouble.hold_address",
+    "trouble.hold_customs trouble.release ."
+  ],
+  "colGap": {},
+  "rowGap": {}
+}

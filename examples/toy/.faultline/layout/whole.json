@@ -1,0 +1,358 @@
+{
+  "_faultline": {
+    "tool": "place",
+    "key": "168feccc7ff55095",
+    "seed": 1,
+    "boxes": 35
+  },
+  "gapX": 150,
+  "gapY": 84,
+  "nodeMaxChars": 22,
+  "edgeMaxChars": 20,
+  "spine": [
+    "web.submit",
+    "intake.submit",
+    "intake.required",
+    "intake.weight",
+    "intake.format",
+    "intake.dedupe",
+    "intake.lane",
+    "intake.enqueue",
+    "queue.pending",
+    "work.loop",
+    "work.tick",
+    "queue.reclaim",
+    "queue.claim",
+    "queue.leased",
+    "work.route",
+    "work.book",
+    "queue.complete",
+    "queue.done",
+    "report.summarize",
+    "report.render",
+    "report.write",
+    "report.saved"
+  ],
+  "route": {
+    "crossingPenalty": 450
+  },
+  "map": [
+    ". . intake.enqueue queue.pending . . report.returned report.saved",
+    ". intake.dedupe intake.lane queue.reclaim . . report.busy report.write",
+    "intake.refused intake.format intake.fast_done queue.claim . . report.summarize report.render",
+    "intake.required intake.weight . queue.leased queue.complete queue.done . .",
+    "intake.submit web.submit . . . . . .",
+    ". trouble.failed trouble.fail work.book work.lease_lost . . .",
+    ". . trouble.backoff work.route work.idle . . .",
+    "trouble.release . trouble.hold_address work.tick work.loop . . .",
+    "trouble.hold_customs . trouble.release_refused . . . . ."
+  ],
+  "colGap": {
+    "2": 220,
+    "5": 220
+  },
+  "rowGap": {
+    "4": 170
+  },
+  "groups": [
+    {
+      "id": "s_intake",
+      "title": "1 · INTAKE",
+      "nodes": [
+        "intake.enqueue",
+        "intake.dedupe",
+        "intake.lane",
+        "intake.refused",
+        "intake.format",
+        "intake.fast_done",
+        "intake.required",
+        "intake.weight",
+        "intake.submit",
+        "web.submit"
+      ],
+      "pad": 34,
+      "tone": "#72a6cb"
+    },
+    {
+      "id": "s_queue",
+      "title": "2 · QUEUE",
+      "nodes": [
+        "queue.pending",
+        "queue.reclaim",
+        "queue.claim",
+        "queue.leased",
+        "queue.complete",
+        "queue.done"
+      ],
+      "pad": 34,
+      "tone": "#cb728c"
+    },
+    {
+      "id": "s_work",
+      "title": "3 · WORK",
+      "nodes": [
+        "work.book",
+        "work.lease_lost",
+        "work.route",
+        "work.idle",
+        "work.tick",
+        "work.loop"
+      ],
+      "pad": 34,
+      "tone": "#72cb72"
+    },
+    {
+      "id": "s_trouble",
+      "title": "4 · RETRY AND HOLD",
+      "nodes": [
+        "trouble.failed",
+        "trouble.fail",
+        "trouble.backoff",
+        "trouble.release",
+        "trouble.hold_address",
+        "trouble.hold_customs",
+        "trouble.release_refused"
+      ],
+      "pad": 34,
+      "tone": "#8c72cb"
+    },
+    {
+      "id": "s_report",
+      "title": "5 · REPORT",
+      "nodes": [
+        "report.returned",
+        "report.saved",
+        "report.busy",
+        "report.write",
+        "report.summarize",
+        "report.render"
+      ],
+      "pad": 34,
+      "tone": "#cba672"
+    }
+  ],
+  "via": {
+    "r_release_ok": [
+      [
+        0,
+        4.5,
+        0,
+        0
+      ],
+      [
+        2.5,
+        4.5,
+        -18,
+        0
+      ],
+      [
+        2.5,
+        0,
+        -18,
+        0
+      ]
+    ],
+    "r_reclaim_fail": [
+      [
+        2.5,
+        1,
+        18,
+        0
+      ],
+      [
+        2.5,
+        4.5,
+        18,
+        18
+      ],
+      [
+        1,
+        4.5,
+        0,
+        18
+      ]
+    ],
+    "r_backoff_pending": [
+      [
+        2.5,
+        6,
+        0,
+        0
+      ],
+      [
+        2.5,
+        0,
+        0,
+        0
+      ]
+    ]
+  },
+  "ports": {
+    "r_release_ok": {
+      "from": "N",
+      "to": "W"
+    },
+    "r_reclaim_fail": {
+      "from": "W",
+      "to": "N"
+    },
+    "r_backoff_pending": {
+      "from": "E",
+      "to": "W"
+    }
+  },
+  "viaMode": "channel",
+  "labelAt": {
+    "r_required_ok": {
+      "seg": 0,
+      "t": 0.5,
+      "dy": 23
+    },
+    "r_required_bad": {
+      "seg": 0,
+      "t": 0.48
+    },
+    "r_weight_ok": {
+      "seg": 0,
+      "t": 0.48
+    },
+    "r_weight_bad": {
+      "seg": 1,
+      "t": 0.64
+    },
+    "r_shape_ok": {
+      "seg": 0,
+      "t": 0.48
+    },
+    "r_shape_bad": {
+      "seg": 0,
+      "t": 0.48
+    },
+    "r_dedupe_new": {
+      "seg": 0,
+      "t": 0.48
+    },
+    "r_dedupe_dup": {
+      "seg": 1,
+      "t": 0.52
+    },
+    "r_lane_fast": {
+      "seg": 0,
+      "t": 0.48
+    },
+    "r_lane_normal": {
+      "seg": 0,
+      "t": 0.48
+    },
+    "r_pending_loop": {
+      "seg": 3,
+      "t": 0.44
+    },
+    "r_reclaim_ok": {
+      "seg": 0,
+      "t": 0.48
+    },
+    "r_reclaim_requeue": {
+      "seg": 0,
+      "t": 0.48
+    },
+    "r_reclaim_fail": {
+      "seg": 2,
+      "t": 0.88
+    },
+    "r_claim_leased": {
+      "seg": 0,
+      "t": 0.48
+    },
+    "r_claim_empty": {
+      "seg": 3,
+      "t": 0.28
+    },
+    "r_complete_ok": {
+      "seg": 0,
+      "t": 0.48
+    },
+    "r_complete_lost": {
+      "seg": 0,
+      "t": 0.48
+    },
+    "r_done_report": {
+      "seg": 1,
+      "t": 0.48
+    },
+    "r_done_loop": {
+      "seg": 0,
+      "t": 0.72
+    },
+    "r_idle_loop": {
+      "seg": 0,
+      "t": 0.48
+    },
+    "r_route_customs": {
+      "seg": 4,
+      "t": 0.64
+    },
+    "r_route_address": {
+      "seg": 0,
+      "t": 0.56
+    },
+    "r_route_book": {
+      "seg": 0,
+      "t": 0.48
+    },
+    "r_book_ok": {
+      "seg": 0,
+      "t": 0.92
+    },
+    "r_book_down": {
+      "seg": 0,
+      "t": 0.32
+    },
+    "r_fail_retry": {
+      "seg": 0,
+      "t": 0.48
+    },
+    "r_fail_final": {
+      "seg": 0,
+      "t": 0.48
+    },
+    "r_fail_lost": {
+      "seg": 2,
+      "t": 0.2
+    },
+    "r_backoff_pending": {
+      "seg": 0,
+      "t": 0.4
+    },
+    "r_hold_customs_release": {
+      "seg": 0,
+      "t": 0.48
+    },
+    "r_hold_address_release": {
+      "seg": 0,
+      "t": 0.48
+    },
+    "r_release_ok": {
+      "seg": 0,
+      "t": 0.08
+    },
+    "r_release_no_papers": {
+      "seg": 0,
+      "t": 0.48
+    },
+    "r_write_saved": {
+      "seg": 0,
+      "t": 0.48
+    },
+    "r_write_busy": {
+      "seg": 0,
+      "t": 0.44
+    },
+    "r_busy_write": {
+      "seg": 0,
+      "t": 0.48
+    }
+  },
+  "labelPinFirst": true,
+  "labelSearch": "wide"
+}

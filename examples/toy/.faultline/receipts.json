@@ -1,0 +1,222 @@
+{
+ "schema": "faultline.receipts/1",
+ "state": "finished",
+ "result": "clean",
+ "pin": {
+  "model": "6469920d6b6d9a31c37c1f60fe38d9e3cd6a1762ca0305b1fa2c79c0fcba653e",
+  "facts": "0eee0014e3a220787df39e1869982d082e4bd51c2f8f750bca28dff1d34ceeae",
+  "census": "7f1c9e28c5c22bb8ac62879a365476153f003d85b7a8653cf095b001845b4f68"
+ },
+ "gates": [
+  {
+   "code": "G1",
+   "status": "pass",
+   "count": 0
+  },
+  {
+   "code": "G2",
+   "status": "pass",
+   "count": 0
+  },
+  {
+   "code": "G3",
+   "status": "pass",
+   "count": 0
+  },
+  {
+   "code": "G4",
+   "status": "pass",
+   "count": 0
+  },
+  {
+   "code": "G5",
+   "status": "pass",
+   "count": 0
+  },
+  {
+   "code": "K1",
+   "status": "pass",
+   "count": 0
+  },
+  {
+   "code": "L1",
+   "status": "pass",
+   "count": 0
+  },
+  {
+   "code": "T1",
+   "status": "pass",
+   "count": 0
+  },
+  {
+   "code": "B1",
+   "status": "pass",
+   "count": 0
+  },
+  {
+   "code": "B2",
+   "status": "pass",
+   "count": 0
+  },
+  {
+   "code": "M1",
+   "status": "pass",
+   "count": 0
+  },
+  {
+   "code": "S1",
+   "status": "pass",
+   "count": 0
+  },
+  {
+   "code": "S2",
+   "status": "pass",
+   "count": 0
+  },
+  {
+   "code": "E1",
+   "status": "pass",
+   "count": 0
+  },
+  {
+   "code": "A1",
+   "status": "pass",
+   "count": 0
+  }
+ ],
+ "refusals": [],
+ "gapItems": [],
+ "warnings": [],
+ "tally": {
+  "boxes": 35,
+  "routes": 47,
+  "stages": 5,
+  "inferredRoutes": 5,
+  "endings": {
+   "total": 21,
+   "required": 21,
+   "accounted": 21
+  },
+  "branches": {
+   "total": 44,
+   "required": 18,
+   "accounted": 18
+  },
+  "passes": {
+   "total": 4
+  },
+  "switches": {
+   "total": 9
+  },
+  "modules": {
+   "total": 11,
+   "cited": 9,
+   "excluded": 2,
+   "uncited": 0
+  }
+ },
+ "notDrawn": {
+  "endings": {
+   "count": 0,
+   "ids": []
+  },
+  "branches": {
+   "count": 0,
+   "ids": []
+  },
+  "modules": {
+   "count": 0,
+   "ids": []
+  },
+  "findings": {
+   "count": 0,
+   "ids": []
+  }
+ },
+ "findings": [
+  {
+   "key": "declared-never-produced:report.returned",
+   "check": "declared-never-produced",
+   "boxes": [
+    "report.returned"
+   ],
+   "routes": [],
+   "level": "suspected",
+   "question": "Outcome lists \"returned_to_sender\" but no ending in the code sets it: is it kept for later, or left over?",
+   "evidence": "Outcome declares \"returned_to_sender\" (parcelworks/schema.py:14), and the census finds no ending that produces it. No code refers to Outcome.RETURNED. Assignments and dict literals were not searched (no signals.json with a produced list: run faultline signals), so a value set only that way would not be seen. The box has no road in. Another check finds the same boxes (no way in): No road comes in; 0 roads go out. The box's kind is end.",
+   "cluster": "s_report",
+   "agree": 2,
+   "also": [
+    "no-way-in"
+   ],
+   "resolution": {
+    "state": "suspect",
+    "why": "Outcome.RETURNED is declared and printed in every report as zero, but no code path assigns it; kept as a suspect for the owner to decide"
+   },
+   "shown": true
+  },
+  {
+   "key": "can-only-go-back:trouble.hold_address",
+   "check": "can-only-go-back",
+   "boxes": [
+    "trouble.hold_address",
+    "trouble.release_refused"
+   ],
+   "routes": [
+    "r_route_address",
+    "r_hold_address_release",
+    "r_release_other"
+   ],
+   "level": "suspected",
+   "question": "1 road in, every road on leads back to the same 2 boxes: what lets flow out of trouble.hold_address reach an ending?",
+   "evidence": "2 boxes reach no ending by any road. 1 road comes in, from work.route. Inside, the roads run from trouble.hold_address to trouble.release_refused, when \"Operator sends release\"; from trouble.release_refused to trouble.hold_address. The way on waits for an outside event (\"Operator sends release\").",
+   "cluster": "s_trouble",
+   "agree": 1,
+   "resolution": {
+    "state": "suspect",
+    "why": "a ZZ postcode is parked and the release command answers 'still on hold' every time; confirmed by the address-hold walk"
+   },
+   "shown": true
+  },
+  {
+   "key": "ending-no-test:work.lease_lost",
+   "check": "ending-no-test",
+   "boxes": [
+    "work.lease_lost"
+   ],
+   "routes": [],
+   "level": "suspected",
+   "question": "No test or run reached the outcome \"stale\" at parcelworks/worker.py:28: what would make it happen, and is it worth a test?",
+   "evidence": "Not seen in the loaded test evidence: outcome \"stale\" at parcelworks/worker.py:28; outcome \"lease_lost\" at parcelworks/worker.py:32 (trace.py@1: no lease expired in this run).",
+   "cluster": "s_work",
+   "agree": 1,
+   "resolution": {
+    "state": "suspect",
+    "why": "no test and no run reaches the lease-lost ending; coverage shows worker.py line 32 never ran"
+   },
+   "shown": true
+  },
+  {
+   "key": "no-limit-loop:l_report_write",
+   "check": "no-limit-loop",
+   "boxes": [
+    "report.write",
+    "report.busy"
+   ],
+   "routes": [],
+   "level": "suspected",
+   "question": "Loop \"Report write retry\" shows no limit: what stops it?",
+   "evidence": "No limit is shown on the loop. Code shows a retry at parcelworks/report.py:38 (while True; exits only on success (line 43), no count or limit).",
+   "cluster": "s_report",
+   "agree": 1,
+   "resolution": {
+    "state": "suspect",
+    "why": "write_report retries on OSError with while True and no count; only a success ends it"
+   },
+   "shown": true
+  }
+ ],
+ "findingNotes": [
+  "no signals.json: the pair, flag, message, handler and swallowed-error checks were skipped (faultline signals writes it)"
+ ]
+}

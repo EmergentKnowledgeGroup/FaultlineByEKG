@@ -1,0 +1,34 @@
+{
+  "_faultline": {
+    "tool": "place",
+    "key": "073310a58cdea11a",
+    "seed": 1,
+    "boxes": 10
+  },
+  "gapX": 150,
+  "gapY": 84,
+  "nodeMaxChars": 22,
+  "edgeMaxChars": 20,
+  "spine": [
+    "web.submit",
+    "intake.submit",
+    "intake.required",
+    "intake.weight",
+    "intake.format",
+    "intake.dedupe",
+    "intake.lane",
+    "intake.enqueue"
+  ],
+  "route": {
+    "crossingPenalty": 200
+  },
+  "map": [
+    "web.submit intake.submit intake.required",
+    ". intake.refused intake.weight",
+    ". intake.dedupe intake.format",
+    "intake.enqueue intake.lane .",
+    ". intake.fast_done ."
+  ],
+  "colGap": {},
+  "rowGap": {}
+}

@@ -1,0 +1,28 @@
+{
+  "_faultline": {
+    "tool": "place",
+    "key": "cd88c1b185a905d9",
+    "seed": 1,
+    "boxes": 6
+  },
+  "gapX": 150,
+  "gapY": 84,
+  "nodeMaxChars": 22,
+  "edgeMaxChars": 20,
+  "spine": [
+    "work.loop",
+    "work.tick",
+    "work.route",
+    "work.book"
+  ],
+  "route": {
+    "crossingPenalty": 200
+  },
+  "map": [
+    "work.loop work.tick",
+    "work.idle work.route",
+    "work.lease_lost work.book"
+  ],
+  "colGap": {},
+  "rowGap": {}
+}

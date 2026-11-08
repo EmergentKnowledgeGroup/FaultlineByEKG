@@ -1,0 +1,64 @@
+{
+  "name": "@emergentknowledgegroup/faultline",
+  "version": "0.1.0",
+  "description": "One system, one map, two readers. A map read from the code with no agent, an interactive atlas for people and a token-efficient view for agents, showing where things start to break.",
+  "type": "module",
+  "bin": {
+    "faultline": "bin/faultline.mjs"
+  },
+  "files": [
+    "bin/",
+    "src/",
+    "viewer/*.js",
+    "viewer/*.css",
+    "viewer/shell.html",
+    "skills/",
+    "docs/CONTRACTS.md",
+    "docs/DESIGN_BARS.md",
+    "docs/SCALE.md",
+    "examples/toy/",
+    "THIRD_PARTY.md",
+    "README.md"
+  ],
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/EmergentKnowledgeGroup/FaultlineByEKG.git"
+  },
+  "homepage": "https://emergentknowledgegroup.github.io/FaultlineByEKG/",
+  "bugs": {
+    "url": "https://github.com/EmergentKnowledgeGroup/FaultlineByEKG/issues"
+  },
+  "keywords": [
+    "code-map",
+    "code-visualization",
+    "static-analysis",
+    "call-graph",
+    "architecture",
+    "failure-modes",
+    "python",
+    "typescript",
+    "javascript",
+    "lua",
+    "cli"
+  ],
+  "author": "Emergent Knowledge Group",
+  "publishConfig": {
+    "access": "public"
+  },
+  "engines": {
+    "node": ">=24"
+  },
+  "scripts": {
+    "test": "node --test test/*.test.mjs"
+  },
+  "dependencies": {
+    "libavoid-js": "^0.5.0-beta.5",
+    "typescript": "5.9.3",
+    "web-tree-sitter": "0.27.1"
+  },
+  "optionalDependencies": {
+    "@tree-sitter-grammars/tree-sitter-lua": "0.4.1",
+    "playwright-core": "^1.64.1"
+  }
+}

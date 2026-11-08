@@ -1,0 +1,63 @@
+/* ================================================================ walk a declared path (viewer/walk.js) and the marks it leaves on a chart */
+.walkbar{position:fixed;left:calc(50% + 70px);bottom:14px;transform:translateX(-50%);z-index:40;display:flex;align-items:stretch;gap:0;width:clamp(420px,calc(100vw - 760px),760px);background:var(--panel);border:1px solid var(--line2);border-radius:14px;box-shadow:var(--shadow);overflow:hidden}
+.walkbar[hidden]{display:none}
+.wk-b{flex:none;width:46px;border:0;background:var(--panel2);color:var(--ink);font-size:1.7rem;line-height:1;display:flex;align-items:center;justify-content:center}
+.wk-b:hover:not(:disabled){background:var(--accent-bg);color:var(--accent)}
+.wk-b:disabled{opacity:.35;cursor:default}
+.wk-body{flex:1;min-width:0;padding:8px 14px 11px}
+.wk-top{display:flex;align-items:center;gap:10px;font-size:.78rem;color:var(--muted);white-space:nowrap;overflow:hidden}
+.wk-kind{font-weight:800;letter-spacing:.07em;text-transform:uppercase;color:var(--accent)}
+.wk-pos b{color:var(--ink)}
+.wk-stage{padding:0 8px;border-radius:99px;border:1px solid hsl(var(--sh,200) var(--ss) var(--sl) / .7);color:hsl(var(--sh,200) var(--ss) var(--sl));overflow:hidden;text-overflow:ellipsis;min-width:0}
+.wk-name{font-weight:700;font-size:1.05rem;line-height:1.25;margin-top:2px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.wk-next{font-size:.82rem;color:var(--muted);margin-top:1px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.wk-next b{color:var(--ink);font-weight:600}
+.wk-next em{font-style:normal;color:var(--accent)}
+.wk-x{flex:none;width:34px;border:0;border-left:1px solid var(--line);background:transparent;color:var(--muted);font-size:1.3rem}
+.wk-x:hover{color:var(--ink);background:var(--panel2)}
+.wk-prog{position:absolute;left:0;right:0;bottom:0;height:3px;background:var(--line)}
+.wk-prog i{display:block;height:100%;width:0;background:var(--spine,#b6f04a);transition:width .2s}
+#walkBtn[aria-pressed=true]{background:#fff;color:#123944;border-color:#fff}
+/* where the path arrives from another chart and where it leaves for one (only while the Main path switch is on) */
+.atlas-svg .sp-io{display:none;pointer-events:none}
+.atlas-svg.show-spine .sp-io{display:inline}
+.atlas-svg .sp-io path{fill:var(--spine);stroke:var(--a-bg);stroke-width:1.4;stroke-linejoin:round}
+.atlas-svg.show-spine .node.sp-enter .node-box,.atlas-svg.show-spine .node.sp-leave .node-box{stroke-dasharray:none}
+.rg-walk{flex:none;width:26px;border:1px solid var(--line);background:var(--panel2);color:var(--accent);border-radius:6px;font-size:.7rem}
+.rg-walk:hover{background:var(--accent-bg)}
+@media (max-width:900px){.walkbar{width:calc(100vw - 24px);min-width:0;bottom:64px}}
+
+.mp-note{display:flex;gap:9px;align-items:flex-start;margin:10px 0 4px;padding:8px 10px;border-radius:8px;border:1px solid color-mix(in srgb,var(--spine,#b6f04a) 55%,var(--line));background:color-mix(in srgb,var(--spine,#b6f04a) 9%,var(--panel2));font-size:.92rem;line-height:1.45}
+.mp-note i{flex:none;width:9px;height:9px;margin-top:6px;border-radius:50%;background:var(--spine,#b6f04a)}
+.mp-note.none{border-color:var(--line);background:var(--panel2);color:var(--muted)}
+.mp-note.none i{background:var(--line2)}
+.mp-b{background:transparent;border:0;padding:0;color:var(--accent);font-weight:650;text-align:left;text-decoration:underline}
+.rg-node.main{border-left-color:var(--spine,#b6f04a)}
+.rg-row:has(.rg-walk){grid-template-columns:minmax(0,1fr) 26px 26px 26px}
+.rg-row .rg-walk{width:24px;height:24px;padding:0;display:grid;place-items:center;font-size:.64rem;grid-column:2}
+.rg-row:has(.rg-walk) .rg-eye{grid-column:3}
+.rg-row:has(.rg-walk) .rg-add{grid-column:4}
+
+/* skip to the next stage; a road that is inferred or missing is said in the bar */
+.wk-s{flex:none;border:0;border-left:1px solid var(--line);background:var(--panel2);color:var(--accent);font-weight:700;font-size:.84rem;padding:0 14px;white-space:nowrap}
+.wk-s:hover:not(:disabled){background:var(--accent-bg)}.wk-s:disabled{opacity:.35;cursor:default}
+.wk-next em.wk-warn{color:var(--out)}
+.nav-walk .ni-chip{color:var(--accent)}
+.nav-wh{display:flex;align-items:center;gap:8px;width:100%;background:transparent;border:0;color:var(--muted);font:inherit;font-size:.74rem;font-weight:750;letter-spacing:.12em;text-transform:uppercase;padding:0;cursor:pointer;text-align:left}
+.nav-wh .nw-n{font-variant-numeric:tabular-nums;letter-spacing:0}.nav-wh .nw-c{margin-left:auto;transition:transform .15s}.nav-wh[aria-expanded=true] .nw-c{transform:rotate(90deg)}
+.nav-scen[hidden]{display:none}
+.app[data-nav=collapsed] .nav-scen,.app[data-nav=collapsed] .nav-wh{display:none}
+
+/* the stage chip is never cut to "1 · ..." (walk.js walkFit): all of it, or the number alone */
+.wk-stage{flex:none;text-overflow:clip}
+.wk-top.no-kind .wk-kind{display:none}
+.wk-stage.no-name .ws-name{display:none}
+.wk-stage.no-name .ws-no{font-weight:700;padding:0 2px}
+
+/* a laptop-sized window: the walk bar's buttons take less room, so the stage's name keeps more of the top line (the bar itself keeps one place whether the rail is open or slim) */
+@media (max-width:1499px){
+  .wk-b{width:38px}
+  .wk-s{padding:0 10px;font-size:.8rem}
+  .wk-x{width:30px}
+  .wk-body{padding-left:12px;padding-right:10px}
+}

@@ -1,0 +1,220 @@
+/* the frame around the drawing (toolbar, first-visit card, bottom dock, flow bar, top bar). Inlined last. */
+
+/* ---- the toolbar is a grid: the title row can never run under the search field ---- */
+.toolbar{display:grid;grid-template-columns:minmax(0,1fr) auto;grid-template-areas:"head head" "codes tools" "sub sub" "sum sum";align-items:center;gap:3px 14px;padding:6px 12px}
+.tb-title{display:contents}
+.tb-head{grid-area:head;display:flex;align-items:center;gap:2px 14px;min-width:0}
+.tb-head h2{min-width:0;flex:0 1 auto}
+.toolbar .codes{grid-area:codes;min-width:0;max-width:100%}
+.toolbar .tb-sub{grid-area:sub}
+.toolbar .tb-summary{grid-area:sum}
+.toolbar .tb-made{grid-area:made}
+.tb-tools{grid-area:tools;display:flex;align-items:center;gap:6px 14px;justify-self:end;min-width:0}
+.tb-tools .search{width:240px;flex:0 1 240px;min-width:150px}
+@media (min-width:1800px){
+  .toolbar{grid-template-areas:"head tools" "codes tools" "sub sub" "sum sum"}
+  .tb-tools .search{width:300px;flex-basis:300px;min-width:210px}
+}
+/* the overview and the whole map have a short title: the tools sit beside it at any width */
+.chart-view[data-kind=overview] .toolbar{grid-template-columns:auto minmax(0,1fr) auto;grid-template-areas:"head sub tools" "sum sum sum" "made made made"}
+.chart-view.slim .toolbar{grid-template-columns:minmax(0,1fr) auto;grid-template-areas:"head tools"}
+.chart-view[data-kind=overview] .tb-sub{margin:0;color:var(--muted);align-self:center}
+.chart-view[data-kind=overview] .tb-head h2{white-space:nowrap}
+
+/* the summary shows its whole first sentence; the rest of it opens with a click */
+.toolbar .tb-summary{display:block;-webkit-line-clamp:unset;overflow:visible;margin-top:0}
+.tb-summary .sum-rest{display:none}
+.tb-summary.open .sum-rest{display:inline}
+.tb-summary .sum-more{color:var(--accent);font-weight:650;white-space:nowrap;margin-left:.45em}
+.tb-summary .sum-more::before{content:"\00b7\00a0"}
+.tb-summary.open .sum-more{display:none}
+
+/* the stage breadcrumb: the part's name keeps its room, the stage name and the counts go before anything overlaps, and there is always a gap after the bead */
+.crumb{gap:8px}
+.crumb .cr-st{flex:0 1 auto;min-width:0;max-width:30ch}
+.crumb .cr-no{flex:none}
+.crumb .cr-stn{min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.crumb .cr-part{flex:0 1 auto;min-width:14ch;max-width:62ch}
+.crumb .cr-b{display:inline-flex;align-items:center;gap:4px}
+.crumb-title .crumb{flex:1 1 0;min-width:0;container-type:inline-size;container-name:crumb}
+@container crumb (max-width:900px){ .crumb .cr-cnt{display:none} }
+@container crumb (max-width:700px){ .crumb .cr-stn{display:none} }
+@container crumb (max-width:560px){ .crumb .cr-bt{display:none} .crumb .cr-b{width:30px;justify-content:center;padding:0} }
+
+/* ---- the first-visit card is a strip under the drawing, never on it ---- */
+.onboard{position:static;flex:none;display:flex;align-items:center;gap:4px 16px;flex-wrap:wrap;width:auto;max-width:none;margin:0;border:0;border-top:1px solid var(--accent);border-radius:0;box-shadow:none;background:color-mix(in srgb,var(--accent) 9%,var(--panel));padding:5px 12px}
+.onboard h3{font-size:.84rem;margin:0;white-space:nowrap;color:var(--accent)}
+.onboard ol{display:flex;flex-wrap:wrap;gap:2px 20px;list-style:none;margin:0;padding:0;font-size:.86rem;line-height:1.35;flex:1 1 320px}
+.onboard li{margin:0}
+.onboard .btn-solid{padding:3px 14px;font-size:.84rem;flex:none;margin-left:auto}
+
+/* ---- the bottom dock: the zoom bar, the notice and the walk bar share one row and cannot sit on each other ---- */
+.bdock{position:absolute;left:12px;right:12px;bottom:12px;z-index:13;display:flex;align-items:flex-end;gap:12px;pointer-events:none;min-width:0}
+.bdock>*{pointer-events:auto}
+.bdock .zoom-group{position:static;flex:none;max-width:100%}
+.bd-mid{flex:1 1 0;min-width:0;display:flex;flex-direction:column;align-items:center;gap:8px;pointer-events:none}
+.bd-mid>*{pointer-events:auto}
+.bd-mid .ov-note{position:static;transform:none;max-width:100%;border-radius:14px;text-align:center}
+/* the walk bar keeps its place in the window while the panels open and close (a walk pins, a pin opens the panel: the next arrow must not move under the pointer); it sits between the zoom bar and the details panel at their widest */
+.bd-mid .walkbar{position:fixed;left:calc(var(--nav-open) + 12px + var(--zb-w) + 12px);right:calc(var(--insp-open) + 12px);bottom:14px;transform:none;width:auto;max-width:760px;min-width:0;margin:0 auto}
+@media (max-width:1000px){ .bd-mid .walkbar{left:12px;right:12px} }
+/* 1001 to 1365 px: beside the sidebar and the details panel the canvas is too narrow for the zoom bar and a readable walk bar side by side (the step's title would be a few pixels).
+   The walk bar takes the canvas's width and stands over the zoom bar. viewer.js walkLift() keeps the walked box clear of it. */
+@media (min-width:1001px) and (max-width:1365px){ .bd-mid .walkbar{left:calc(var(--nav-open) + 12px);right:calc(var(--insp-open) + 12px);bottom:62px} }
+.bd-mid .walkbar[hidden],.bd-mid .ov-note[hidden]{display:none}
+:root{--nav-open:clamp(250px,18.5vw,300px);--insp-open:clamp(300px,22vw,340px);--zb-w:326px}      /* --zb-w: the zoom bar's width (it is the same on every chart, so the walk bar can stand clear of it) */
+@media (max-width:1180px){ :root{--insp-open:300px;--nav-open:clamp(226px,19vw,252px)} }
+
+/* ---- the flow bar: a side with nothing to say is not drawn ---- */
+.flowbar.no-here .fb-here{display:none}
+.flowbar.no-here .fb-row{grid-template-columns:minmax(0,1fr) minmax(0,1fr)}
+
+/* ---- the phone keeps the older stacked layout ---- */
+@media (max-width:800px),(max-height:520px) and (max-width:1000px){
+  .toolbar,.chart-view[data-kind=overview] .toolbar,.chart-view.slim .toolbar{display:flex;flex-wrap:wrap}
+  .tb-title{display:flex;flex-wrap:wrap;flex:1 1 100%;min-width:0}
+  .tb-head{flex:1 1 100%}
+  .toolbar .codes,.toolbar .tb-sub,.toolbar .tb-summary{flex:1 1 100%}
+  .tb-tools{flex:1 1 100%;flex-wrap:wrap;justify-self:stretch}
+  .tb-tools .search{flex:1 1 100%;min-width:0}
+  .onboard{max-height:45%;overflow:auto}
+  .bdock{left:8px;right:8px;bottom:8px;flex-wrap:wrap}
+}
+
+/* the handle chips are one line, fitted by width (viewer.js fitCodesNow) */
+.toolbar .codes{flex-wrap:nowrap;overflow:hidden}
+.toolbar .codes>*{flex:none}
+
+/* ---- the top bar: the tool's name, and the how-to line in a form that fits ---- */
+.howto .hw-short,.howto .hw-min{display:none}
+@media (max-width:1699px){ .howto .hw-long{display:none} .howto .hw-short{display:inline} }
+@media (max-width:1400px){ .howto .hw-short{display:none} .howto .hw-min{display:inline} }
+.brand h1{flex:0 1 auto;min-width:0;overflow:hidden;text-overflow:ellipsis}      /* a long name is cut with dots, never printed over a button */
+/* on a laptop-sized window (under 1500 px) the left rail is slim glyphs, so the top bar names the two pages a newcomer looks for first, in words, where the how-to line was (the how-to is on the first-visit strip and in the Legend) */
+.howto .hw-pages{display:none}
+@media (max-width:1499px){
+  .howto .hw-long,.howto .hw-short,.howto .hw-min{display:none}
+  .howto .hw-pages{display:inline-flex;gap:8px;align-items:center;vertical-align:middle}
+}
+.hw-page{font:inherit;font-size:.86rem;line-height:1.3;color:#fff;background:rgba(255,255,255,.13);border:1px solid rgba(255,255,255,.34);border-radius:999px;padding:2px 10px;white-space:nowrap;cursor:pointer;display:inline-flex;gap:6px;align-items:baseline}
+.hw-page:hover{background:rgba(255,255,255,.24)}
+.hw-page b{font-weight:700;font-variant-numeric:tabular-nums;color:#ffd79a}
+.hw-page[aria-current=page]{background:rgba(255,255,255,.26);border-color:#fff}
+
+/* ---- the top bar at every width (a window or a tablet; the phone has its own, in phone.css) ----
+   1440 and up: one row, as drawn.
+   1181-1439: still one row. The previous/next pair keeps its place as two arrows with the position between them, and under 1280 the two pages drop their counts, so the pages stay named in words and nothing runs under a button.
+   801-1180: two rows. Row one is the rail button, the name and the buttons; row two is the previous/next pair and the two pages, drawn in full. The page is never wider than the window. */
+@media (min-width:1181px) and (max-width:1439px){
+  .top{gap:8px}
+  .brand{gap:12px}
+  .cstep .cs-w{display:none}
+  .top .cs-b{width:32px;height:28px;padding:0 0 3px;font-size:1.5rem;line-height:1;font-weight:700}
+  .cs-n{width:7.6em}
+}
+@media (min-width:1181px) and (max-width:1279px){ #hwPages .hw-page b{display:none} }
+@media (min-width:801px) and (max-width:1180px) and (min-height:521px), (min-width:1001px) and (max-width:1180px){
+  :root{--top-h:74px}
+  .top{--top-h:74px;flex-wrap:wrap;align-content:center;gap:2px 12px}
+  .top::after{content:"";order:4;flex:0 0 100%;height:0}
+  #navToggle{order:1}
+  .brand,.howto{display:contents}
+  .brand h1{order:2;flex:1 1 0}
+  .top-actions{order:3}
+  #chartStep{order:5}
+  #chartStep.off{display:none}
+  #hwPages{order:6;margin-left:8px}
+}
+
+/* the first-visit strip drops its heading on a narrower window so the three lines fit on one row */
+@media (max-width:1599px){ .onboard h3{display:none} }
+
+/* the dock on the first screen: Regions, the main path and Evidence; the halo and label switches appear when the Regions list is open, next to what they change */
+.rd-bar #rdHalos,.rd-bar #rdLabels{display:none}
+.rdock:has(#rdRegions[aria-expanded=true]) #rdHalos,.rdock:has(#rdRegions[aria-expanded=true]) #rdLabels{display:inline-flex}
+
+/* label pills are measured in the weight a lit pill uses */
+.atlas-svg.fl-measure .elabel-text{font-weight:650!important}
+
+/* the "more" tabs are placed by viewer/look.js (placeCues) */
+.edgecue i{position:absolute}
+.legend,.hpanel,.tracepanel,.rpanel{max-height:calc(100% - 92px)}
+
+/* the census is a credibility line, said quietly */
+.draftbar{min-height:26px;padding:2px 12px;font-size:.8rem;gap:4px 14px}
+.draftbar:not(.is-draft){background:var(--panel)}
+.db-state{font-size:.68rem;padding:0 8px;letter-spacing:.08em}
+.db-state.done{border-color:var(--line2);color:var(--muted)}
+.db-state.db-who{text-transform:none;letter-spacing:0;font-weight:600;font-size:.7rem;border-color:var(--line2);color:var(--muted)}
+.db-tally{gap:2px 14px}
+.db-row b{font-weight:650}
+.nav-h .nav-h-n{float:right;font-weight:600;letter-spacing:.04em;text-transform:none;opacity:.8}
+
+/* the search field: room for its words until a match count needs the right side (viewer.js fitSearchPad) */
+.search input{padding-right:30px;text-overflow:ellipsis}      /* a field squeezed narrow shows "Find a st…", not half a letter */
+
+/* the how-to line is about boxes and roads: a reading page has none */
+.is-reading .howto span:not(.hw-pages){visibility:hidden}
+/* the Legend explains the symbols of a drawing; a reading page has none, and its panel lives inside the hidden drawing, so on a reading page the button would light and show nothing */
+.is-reading #legendBtn{display:none}
+/* a pressed top-bar button is a lit one, not the brightest thing on a dark page */
+.btn[aria-expanded=true],#walkBtn[aria-pressed=true],#followBtn[aria-pressed=true]{background:rgba(255,255,255,.2);color:#fff;border-color:rgba(255,255,255,.75)}
+
+/* the Regions bar in the toolbar (laptop-sized windows, part charts) */
+.tb-tools .rd-bar{flex:none;display:flex;flex-wrap:nowrap;gap:6px;align-items:center;padding:0;background:none;border:0;box-shadow:none}
+.tb-tools .rd-bar .chip-btn{height:28px;font-size:.82rem}
+body.rg-open .rd-bar #rdHalos,body.rg-open .rd-bar #rdLabels{display:inline-flex}
+/* a laptop-sized window with the chart list open: the toolbar is about 860 px wide, and the Regions button, the pill of the path being walked, the search field and the rest do not all fit at full size. The path's name gives way (its full name is in the pill's tooltip) and the search field is allowed a little less, so the bar stays inside the toolbar and never runs left over the list */
+@media (max-width:1499px){
+  .app[data-nav=open] .tb-tools .rd-bar #rdSpine{display:block;max-width:132px;overflow:hidden;text-overflow:ellipsis;line-height:26px;padding:0 10px}
+  .app[data-nav=open] .tb-tools:has(#rdSpine:not([hidden])) .search{width:184px;flex-basis:184px;min-width:128px}
+}
+
+/* 801 to 1199 px with the details panel open: the canvas beside the rail and the panel is 460 to 850 px wide, and the tools (the Regions bar, the search field, the toggles) do not fit one row.
+   The toolbar wraps like the phone's: the title on its own row, then the tools, each row inside the canvas. (With the panel closed the one-row bar fits, as it always did.) */
+@media (min-width:801px) and (max-width:1199px){
+  .app:not([data-insp=collapsed]):not([data-mode=reading]) .toolbar,
+  .app:not([data-insp=collapsed]):not([data-mode=reading]) .chart-view[data-kind=overview] .toolbar,
+  .app:not([data-insp=collapsed]):not([data-mode=reading]) .chart-view.slim .toolbar{display:flex;flex-wrap:wrap}
+  .app:not([data-insp=collapsed]):not([data-mode=reading]) .tb-title{display:flex;flex-wrap:wrap;flex:1 1 100%;min-width:0}
+  .app:not([data-insp=collapsed]):not([data-mode=reading]) .tb-head{flex:1 1 100%}
+  .app:not([data-insp=collapsed]):not([data-mode=reading]) .toolbar .codes,
+  .app:not([data-insp=collapsed]):not([data-mode=reading]) .toolbar .tb-sub,
+  .app:not([data-insp=collapsed]):not([data-mode=reading]) .toolbar .tb-summary{flex:1 1 100%}
+  .app:not([data-insp=collapsed]):not([data-mode=reading]) .tb-tools{flex:1 1 100%;flex-wrap:wrap;justify-self:stretch;min-width:0}
+  .app:not([data-insp=collapsed]):not([data-mode=reading]) .tb-tools .search{flex:1 1 190px;width:auto;min-width:150px}
+  .app:not([data-insp=collapsed]):not([data-mode=reading]) .tb-tools .rd-bar{flex-wrap:wrap}
+  .app:not([data-insp=collapsed]):not([data-mode=reading]) .tb-toggles{flex:0 1 auto;flex-wrap:wrap;margin-left:auto;justify-content:flex-end}
+}
+
+/* the first screen says what the page is and who made it, in one quiet line (viewer.js drawChartHead) */
+.tb-made{margin:0;font-size:.78rem;line-height:1.35;color:var(--faint);min-width:0}
+.tb-made[hidden]{display:none}
+.tb-made a{color:var(--muted);text-decoration:underline;text-decoration-color:color-mix(in srgb,var(--muted) 45%,transparent);text-underline-offset:2px;white-space:nowrap}
+.tb-made a:hover{color:var(--accent)}
+.db-why{color:var(--faint);font-size:.78rem;min-width:0}
+
+/* the slim rail: a picture per guide and a tooltip that comes at once and says the name and the count (viewer.js railTip) */
+.rail-ic{display:block}
+.app[data-nav=collapsed] .nav-item .ni-chip .rail-ic{margin:0 auto}
+.rail-tip{position:fixed;z-index:60;pointer-events:none;background:var(--panel);color:var(--ink);border:1px solid var(--line2);border-radius:7px;padding:4px 10px;font-size:.84rem;line-height:1.3;font-weight:600;white-space:nowrap;box-shadow:var(--shadow)}
+.rail-tip[hidden]{display:none}
+.rail-tip b{font-weight:700;color:var(--out);margin-left:8px;font-variant-numeric:tabular-nums}
+.app[data-nav=collapsed] .nav-item:focus-visible{outline:2px solid var(--accent);outline-offset:-2px}
+
+/* a short window: the Regions list keeps more of its room (its hint card is shorter) and the top rows give back a little height to the chart */
+@media (max-height:940px){
+  .rp-card{height:112px}
+  .rp-card .rpc-b{-webkit-line-clamp:2}
+}
+.ref a,.ref-loc{overflow-wrap:break-word}
+
+/* light theme: a handle tab is a light tint of its family colour with dark words, so a box's name outweighs the tab that hangs on it (the dark fills were near-black on the pale page) */
+:root[data-theme=light] .atlas-svg .chip .chip-bg{fill:color-mix(in srgb,var(--chl) 20%,#fff)}
+:root[data-theme=light] .atlas-svg .chip .chip-text{fill:color-mix(in srgb,var(--chl) 38%,#000)}
+/* the left rail: a soft shadow on the edge that has more beyond it (the list scrolls when the window is short) */
+.nav{background:linear-gradient(var(--panel2) 30%,transparent) top/100% 26px no-repeat local,linear-gradient(transparent,var(--panel2) 70%) bottom/100% 26px no-repeat local,radial-gradient(farthest-side at 50% 0,rgba(0,0,0,.30),transparent) top/100% 10px no-repeat scroll,radial-gradient(farthest-side at 50% 100%,rgba(0,0,0,.30),transparent) bottom/100% 10px no-repeat scroll,var(--panel2)}
+.inspector p code,.inspector .lead code{font:.9em var(--mono);background:var(--panel2);padding:1px 5px;border-radius:4px;overflow-wrap:anywhere}
+
+/* light mode: a handle tab in a header row looks like the same tab on the chart (pale, with a darker name), not near-black */
+:root[data-theme=light] .hchip:not(.term):not(.more){background:color-mix(in srgb,var(--chl,var(--line2)) 20%,#fff);color:color-mix(in srgb,var(--chl,var(--line2)) 38%,#000)}

@@ -1,0 +1,112 @@
+/* ================================================================ Where it can break (viewer/breaks.js) */
+.bk-top{margin:4px 0 18px}
+.bk-note{font-size:1.02rem;line-height:1.5;padding:12px 16px;border-radius:10px;background:color-mix(in srgb,var(--out) 9%,var(--panel2));border:1px solid color-mix(in srgb,var(--out) 40%,var(--line));margin:0 0 14px}
+.bk-chips{display:flex;flex-wrap:wrap;gap:8px;margin:14px 0 4px}
+.bk-chip{display:inline-flex;align-items:center;gap:7px;padding:5px 12px;border-radius:99px;border:1px solid var(--line2);background:var(--panel);font-size:.88rem;color:var(--ink)}
+.bk-chip b{font-size:.76rem;padding:0 7px;border-radius:99px;background:var(--panel2);border:1px solid var(--line);color:var(--muted)}
+.bk-chip:hover{border-color:var(--accent)}
+.bk-chip.on{background:var(--accent-bg);border-color:var(--accent);color:var(--accent);font-weight:700}
+.bk-empty{margin:8px 0 0;color:var(--muted)}
+.bk-grp{margin:14px 0 4px}
+.bk-gh{display:flex;align-items:center;gap:8px;font-size:.78rem;letter-spacing:.1em;text-transform:uppercase;font-weight:780;color:hsl(var(--sh,200) var(--ss) var(--sl));margin:0 0 6px;padding-bottom:5px;border-bottom:1px solid var(--line)}
+.bk-gh i,.bk-st i{width:9px;height:9px;border-radius:50%;background:hsl(var(--sh,200) var(--ss) var(--sl));flex:none}
+.bk-gn{margin-left:2px;font-size:.76rem;color:var(--muted);letter-spacing:0;font-weight:650}
+.bk-row{padding:11px 14px 12px;margin:0 0 8px;border:1px solid var(--line);border-left:4px solid var(--out);border-radius:10px;background:var(--panel)}
+.bk-row[data-state=suspect]{border-left-color:var(--sel)}
+.bk-row[data-state=wait],.bk-row[data-state=loop]{border-left-color:var(--out)}
+.bk-row[data-state=lead],.bk-row[data-state=dismissed]{border-left-color:var(--line2);background:var(--panel2)}
+.bk-row.bk-off,.bk-grp.bk-off{display:none}
+.bk-q{font-weight:650;font-size:1.02rem;line-height:1.4;overflow-wrap:anywhere}
+.bk-q code{font:600 .9em var(--mono);background:var(--panel2);border:1px solid var(--line);border-radius:5px;padding:0 5px}
+/* A box's name inside a sentence (a question, a reason, a line of evidence): a soft neutral tint behind the words, in the sentence's own font and colour. It is not a link (no teal, no underline) and not code
+   (no code font, no outline), and it adds no characters, so a copy of the sentence is the plain words. The tint keeps its shape across a line break. In Print the tint is kept (print-color-adjust) and a little stronger. */
+.bk-nm{color:inherit;background:color-mix(in srgb,var(--ink) 12%,transparent);border-radius:.34em;padding:.04em .2em;-webkit-box-decoration-break:clone;box-decoration-break:clone;print-color-adjust:exact;-webkit-print-color-adjust:exact}
+@media print{.bk-nm{background:#e4eaec}}
+.bk-meta{display:flex;flex-wrap:wrap;gap:6px 10px;align-items:center;margin-top:5px}
+.bk-kind{font-size:.72rem;letter-spacing:.07em;text-transform:uppercase;font-weight:780;color:var(--out)}
+.bk-lv{font-size:.72rem;font-weight:750;padding:1px 8px;border-radius:99px;border:1px solid var(--line2);color:var(--ink)}
+.bk-lv.proved{border-color:var(--ev-seen,var(--accent));color:var(--accent)}
+.bk-where{display:flex;flex-wrap:wrap;gap:6px 8px;align-items:center;margin-top:7px}
+.bk-st{display:inline-flex;align-items:center;gap:6px;font-size:.78rem;font-weight:650;color:hsl(var(--sh,200) var(--ss) var(--sl));border:1px solid hsl(var(--sh,200) var(--ss) var(--sl) / .55);border-radius:99px;padding:1px 9px}
+.bk-why{margin:7px 0 0;font-size:.92rem;color:var(--muted);line-height:1.45}
+.bk-dis{margin:7px 0 0;font-size:.92rem;line-height:1.45}
+.bk-kept{color:var(--ink)}
+.bk-ev{margin-top:6px}
+.bk-ev summary{cursor:pointer;font-size:.84rem;color:var(--muted);font-weight:650}
+.bk-ev p{margin:6px 0 0;font-size:.86rem;line-height:1.5;color:var(--muted);overflow-wrap:anywhere}
+.nav-break .ni-chip{color:var(--ink);font-weight:800}      /* a picture in the slim rail, in the ink colour: the orange count is the warning, the picture is a name */
+.nav-break .ni-count{color:var(--out);font-weight:700}
+.en-row{padding:6px 10px;margin:0 0 4px;border-radius:8px;background:var(--panel2);border:1px solid var(--line)}
+.en-row.bk-off,.en-out.bk-off{display:none}
+.en-chips{margin:10px 0 8px}
+.gd-sub-row td{padding-top:0!important;border-top:0!important}
+.gd-sub-row summary{cursor:pointer;color:var(--muted);font-size:.84rem}
+.bk-chip .bk-cn{font-size:.72rem;color:var(--faint);margin-left:-2px}
+.bk-stuck{margin:0 0 12px;font-size:.98rem;line-height:1.5}
+
+.bk-row.bk-by-off,.bk-grp.bk-by-off{display:none}
+.bk-sum{margin:10px 0;font-size:.98rem;line-height:1.5}.bk-sum.quiet{color:var(--muted);font-size:.92rem}
+.bk-row[data-state=silent]{border-left-color:var(--out)}
+.en-chips-l{font-size:.74rem;letter-spacing:.08em;text-transform:uppercase;font-weight:760;color:var(--muted);align-self:center;margin-right:2px}
+.gd-numbers td{vertical-align:top}.gd-numc{white-space:nowrap}.gd-numc b{font-variant-numeric:tabular-nums}
+
+/* what can hold up the main path */
+.bk-hold{border-left:3px solid var(--line2)}
+.bk-hold[data-hold=wait]{border-left-color:#e2af69}.bk-hold[data-hold=gate]{border-left-color:#8aa6dd}.bk-hold[data-hold=loop]{border-left-color:#7ab7d9}
+.bk-hs{font-size:.72rem;font-weight:700;border-radius:99px;padding:1px 9px;border:1px solid var(--line2);color:var(--muted);white-space:nowrap}
+.bk-hs-kept{border-color:#e2af69;color:#e2af69}.bk-hs-open{border-color:#ef6a6a;color:#ef6a6a}.bk-hs-held{border-color:#9aa9b9;color:#9aa9b9}.bk-hs-dismissed{border-color:#b598e8;color:#b598e8}.bk-hs-none{color:var(--faint)}
+
+/* How it fails */
+.fl-lead{margin:10px 0 4px;font-size:1.02rem;line-height:1.7;text-wrap:balance}       /* a lead never ends in one word on a line of its own */
+.fl-n{background:var(--panel2);border:1px solid var(--line2);border-radius:99px;padding:2px 11px;margin:2px 3px;color:var(--ink);font-size:.92rem;cursor:pointer}
+.fl-n:hover{border-color:var(--accent)}.fl-n b{font-variant-numeric:tabular-nums}
+.fl-sep{display:none}
+.fl-none{margin:4px 0 8px;padding:8px 12px;border-left:4px solid var(--accent);background:var(--panel2);border-radius:8px}
+.fl-row2{display:flex;flex-wrap:wrap;gap:8px 18px;align-items:center}
+.fl-stage{display:inline-flex;align-items:center;gap:8px}
+/* the stage filter is drawn like the chips beside it */
+.fl-stage select{-webkit-appearance:none;appearance:none;background-color:var(--panel);background-image:linear-gradient(45deg,transparent 50%,var(--muted) 50%),linear-gradient(135deg,var(--muted) 50%,transparent 50%);background-position:calc(100% - 15px) 52%,calc(100% - 10px) 52%;background-size:5px 5px,5px 5px;background-repeat:no-repeat;color:var(--ink);border:1px solid var(--line2);border-radius:99px;padding:5px 28px 5px 12px;font:inherit;font-size:.88rem;line-height:1.2;max-width:min(420px,70vw);cursor:pointer}
+.fl-stage select:hover{border-color:var(--accent)}
+/* every description starts at the left edge of its card, whatever the chips before it */
+.fl-head{display:flex;flex-wrap:wrap;align-items:center;gap:4px 8px}
+.fl-gist{margin:3px 0 0;font-size:.88rem;line-height:1.45;color:var(--muted)}
+.fl-row.fl-off,.gd-sec.fl-off{display:none}
+.fl-who{display:flex;gap:8px;align-items:baseline;margin-top:6px}
+.fl-more{display:block;margin-top:4px}.fl-more summary{cursor:pointer;color:var(--accent);font-size:.88rem;font-weight:650;width:max-content}.fl-more[open] summary{margin-bottom:4px}
+.fl-chips{margin:8px 0 0}
+.grp-list{list-style:none;margin:6px 0 0;padding:0;display:grid;gap:4px}.grp-list li{display:flex;flex-wrap:wrap;gap:4px 8px;align-items:center}
+.term-lines{list-style:none;margin:4px 0 0;padding:0;display:grid;gap:6px}.term-lines li{font-size:.9rem;line-height:1.4}.term-lines .hlink{font-weight:700}
+.rpc-t{display:block;margin-top:4px;font-size:.82rem;color:var(--muted);line-height:1.35}.rpc-t b{color:var(--ink)}
+.gl-gh{margin-top:14px}
+.fl-inl{display:inline-block;margin-left:6px;vertical-align:top}.fl-inl[open]{display:block;margin:6px 0 0}
+
+/* Where it can break opens on the questions */
+.bk-note{padding:9px 14px;margin:0 0 8px;font-size:.98rem}
+.bk-sum{margin:6px 0 4px}
+.bk-chips{margin:8px 0 4px}
+.bk-stuck{margin:8px 0 0;font-size:.9rem;color:var(--muted)}
+.bk-zerod{display:inline-block}
+.bk-zerod summary{cursor:pointer;display:inline-flex;align-items:center;padding:5px 12px;border-radius:99px;border:1px dashed var(--line2);color:var(--muted);font-size:.84rem;list-style:none}
+.bk-zerod summary::-webkit-details-marker{display:none}
+.bk-zerod[open]{display:block;width:100%}
+.bk-zerod[open] summary{margin-bottom:8px}
+.bk-zerow{display:flex;flex-wrap:wrap;gap:8px}
+.bk-chip.bk-zero{opacity:.72}
+/* one text width and one link style on the page */
+.reading .gd .bk-note,.reading .gd .bk-sum,.reading .gd .bk-stuck,.reading .gd .bk-why,.reading .gd .bk-dis,.reading .gd .bk-q,.reading .gd .bk-ev p,.reading .gd .fl-lead,.reading .gd .fl-gist{max-width:52rem}
+.gd a.hlink,.gd button.hlink{display:inline;padding:0 1px;margin:0;background:none;border:0;border-bottom:1px solid color-mix(in srgb,var(--accent) 55%,transparent);border-radius:0;color:var(--accent);font:inherit;font-weight:650;cursor:pointer;line-height:inherit;text-decoration:none}
+.gd a.hlink:hover,.gd button.hlink:hover{background:var(--accent-bg)}
+.bk-chip{padding:3px 11px;font-size:.84rem;gap:6px}
+.bk-chips{gap:6px}
+.bk-chip .bk-cn{display:none}
+.bk-top .bk-chip.on .bk-cn{display:inline}
+.bk-zn{display:inline-block;padding:2px 10px;border:1px dashed var(--line2);border-radius:99px;font-size:.8rem;color:var(--muted)}
+.gd-tldr:empty{display:none}
+/* on a window under 940 px tall the first screen is the question and its evidence: the pointer to the sections (also in the contents list) and the air round the numbers give way */
+@media (max-height:940px){
+  .bk-stuck{display:none}
+  .bk-chip{padding:2px 9px;font-size:.8rem}
+  .bk-chips{margin:6px 0 2px;gap:5px}
+  .bk-note{padding:6px 12px;margin-bottom:4px}
+  .bk-sum{margin:4px 0 2px}
+}

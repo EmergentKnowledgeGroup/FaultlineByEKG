@@ -1,0 +1,13 @@
+{
+  "schema": "faultline.model/1",
+  "heardBy": {
+    "intake.refused": {
+      "by": "caller",
+      "how": "cmd_submit returns ok false with the code and message"
+    },
+    "trouble.failed": {
+      "by": "log",
+      "how": "kept as failed; shows only if someone runs report"
+    }
+  }
+}

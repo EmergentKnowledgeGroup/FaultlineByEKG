@@ -1,0 +1,13 @@
+# The "files" list in package.json is the real whitelist. This file is a second lock on the same door.
+/test/
+/node_modules/
+/.gitignore
+/.npmignore
+__pycache__/
+*.pyc
+*.tgz
+*.log
+.env
+.env.*
+.DS_Store
+Thumbs.db

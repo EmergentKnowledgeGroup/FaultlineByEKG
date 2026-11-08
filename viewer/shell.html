@@ -1,0 +1,166 @@
+<!doctype html>
+<html lang="en" data-theme="dark">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="color-scheme" content="dark light">
+<title>Faultline atlas</title>
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='7' fill='%230d1a21'/%3E%3Cpath d='M17 4 12 14l8 4-6 10' fill='none' stroke='%23b6f04a' stroke-width='3' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E">
+<script>try{var __t=null;try{__t=localStorage.getItem('faultline-atlas-theme')}catch(e){}if(__t!=='light'&&__t!=='dark')__t=(window.matchMedia&&matchMedia('(prefers-color-scheme: light)').matches)?'light':'dark';document.documentElement.setAttribute('data-theme',__t)}catch(e){}</script>
+<style>
+/*__CSS__*/
+</style>
+</head>
+<body>
+<a class="skip" href="#canvas">Skip to the diagram</a>
+
+<header class="top" id="top">
+  <button id="navToggle" class="icon-btn" type="button" aria-controls="nav" aria-expanded="true" aria-label="Collapse the chart list" title="Collapse the chart list">
+    <svg viewBox="0 0 20 20" width="18" height="18" aria-hidden="true"><path d="M3 5h14M3 10h14M3 15h14" stroke="currentColor" stroke-width="2" stroke-linecap="round" fill="none"/></svg>
+  </button>
+  <div class="cstep" id="chartStep" role="group" aria-label="Previous and next chart, in reading order" title="The chart before and after this one, in reading order. These are neighbours in the list, not roads. To move between the parts of one stage, use the stage bar above the chart.">
+    <button id="csPrev" class="fb-rdb cs-b" type="button" data-rd="" aria-label="Previous chart" disabled>&lsaquo;<span class="cs-w"> Previous chart</span></button>
+    <span id="csPos" class="fb-rdn cs-n" aria-live="polite"></span>
+    <button id="csNext" class="fb-rdb cs-b" type="button" data-rd="" aria-label="Next chart" disabled><span class="cs-w">Next chart </span>&rsaquo;</button>
+  </div>
+  <div class="brand">
+    <h1 id="siteTitle">Faultline · interactive atlas</h1>
+    <p class="howto" id="howto"><span class="hw-long">Hover a box or an arrow to light up its roads, click to pin it. Drag to move, scroll to zoom, Esc clears.</span><span class="hw-short">Hover to light a box's roads, click to pin, Esc clears.</span><span class="hw-min">Hover to light roads, click to pin.</span><span class="hw-pages" id="hwPages"></span></p>
+  </div>
+  <div class="top-actions">
+    <button id="walkBtn" class="btn" type="button" aria-pressed="false" aria-controls="walkBar" title="Step along the declared main path, one box at a time. The next step opens on its own chart when it lives on another one ([ and ] keys)" hidden>Walk the main path</button>
+    <button id="followBtn" class="btn" type="button" aria-pressed="false" aria-controls="flowBar" title="Tour the charts in their reading order, one after the other (also [ and ] keys). The main path has its own walk." hidden>Tour the charts</button>
+    <button id="legendBtn" class="btn" type="button" aria-expanded="false" aria-controls="legend">Legend</button>
+    <a id="extraLink" class="btn" href="#" target="_blank" rel="noopener" hidden></a>
+    <button id="themeBtn" class="btn" type="button" aria-label="Switch to light theme">Light mode</button>
+  </div>
+</header>
+
+<div class="app" id="app" data-nav="open" data-insp="open" data-mode="chart">
+  <nav id="nav" class="nav" aria-label="Charts and guides"></nav>
+  <div class="nav-select-wrap"><label for="navSelect" class="sr-only">Choose a chart or guide</label><select id="navSelect" class="nav-select"></select></div>
+
+  <main class="work" id="work">
+    <section id="chartView" class="chart-view" aria-label="Flowchart">
+      <div class="toolbar" role="toolbar" aria-label="Diagram tools">
+        <div class="tb-title">
+          <div class="tb-head"><nav id="chartCrumb" class="crumb" aria-label="Where this chart sits in its stage" hidden></nav><h2 id="chartTitle"></h2></div>
+          <div id="chartCodes" class="codes" role="group" aria-label="Official handles in this chart" hidden></div>
+          <p id="chartSub" class="tb-sub" hidden></p>
+          <p id="chartSummary" class="tb-summary" title="Click to expand or collapse" tabindex="0" role="button" aria-expanded="false"></p>
+          <p id="chartMade" class="tb-made" hidden></p>
+        </div>
+        <div class="tb-tools">
+          <div class="search" id="searchBox">
+            <div class="sfield"><input id="q" type="search" autocomplete="off" spellcheck="false" placeholder="Find a step (/)" aria-label="Search steps in this chart" aria-controls="qResults"><span id="qCount" class="qcount" aria-live="polite"></span></div>
+            <button id="qAll" class="chip-btn" type="button" aria-pressed="false" title="Search every chart instead of just this one">All charts</button>
+            <div id="qResults" class="qresults" role="listbox" aria-label="Search results" hidden></div>
+          </div>
+
+          <div class="tb-toggles">
+            <button id="traceBtn" class="chip-btn" type="button" aria-expanded="false" aria-pressed="false" aria-controls="tracePanel" title="Trace a road from one box to another. Both ends are searched on every chart; if they are not on this chart the answer opens on the whole map">Trace path</button>
+            <button id="handlesBtn" class="chip-btn" type="button" aria-expanded="false" aria-pressed="false" aria-controls="handlePanel" title="Every official name the system uses, and where it appears">Handles</button>
+            <button id="mmToggle" class="chip-btn" type="button" aria-pressed="true" title="Show or hide the overview map" hidden>Map</button>
+            <a id="svgLink" class="chip-btn linkbtn" href="#" title="Open the stand-alone SVG of this chart" target="_blank" rel="noopener">SVG</a>
+            <button id="inspToggle" class="chip-btn" type="button" aria-pressed="true" aria-controls="inspector" title="Show or hide the details panel">Details</button>
+          </div>
+        </div>
+      </div>
+
+      <div class="draftbar" id="draftBar" hidden role="status"></div>
+
+      <div class="flowbar" id="flowBar" hidden role="navigation" aria-label="Where this chart sits in the whole system">
+        <div class="fb-row">
+          <div class="fb-side fb-prev" id="fbPrev"></div>
+          <div class="fb-here" id="fbHere"></div>
+          <div class="fb-side fb-next" id="fbNext"></div>
+        </div>
+        <div class="fb-journey" id="fbJourney" hidden>
+          <button id="fjPrev" class="fj-btn" type="button">‹ Previous section</button>
+          <div class="fj-pos" id="fjPos" aria-live="polite"></div>
+          <button id="fjNext" class="fj-btn" type="button">Next section ›</button>
+        </div>
+        <div class="fb-strip" id="fbStrip" role="group" aria-label="The journey through the sections, in order"></div>
+        <div class="fb-more" id="fbMore" hidden></div>
+      </div>
+
+      <div class="canvas-wrap" id="canvasWrap">
+        <div id="canvas" class="canvas" tabindex="0" role="application" aria-roledescription="flowchart"
+             aria-label="Flowchart. Press Enter to select the first step. Arrow keys follow roads once a step is selected. Plus and minus zoom, 0 fits, Escape clears.">
+        </div>
+
+        <div class="rdock" id="regionDock" hidden>
+          <div class="rd-bar" role="toolbar" aria-label="Regions of this chart">
+            <button id="rdRegions" class="chip-btn" type="button" aria-expanded="false" aria-controls="regionPanel" title="Highlight a stage, a loop or a path">Regions <span class="rd-n" id="rdN"></span></button>
+            <button id="rdHalos" class="chip-btn" type="button" aria-pressed="true" title="Soft coloured blobs behind each region, visible when zoomed out">Halos</button>
+            <button id="rdLabels" class="chip-btn" type="button" aria-pressed="true" title="Small region names above each block; switch off for a bare map">Labels</button>
+            <button id="rdSpine" class="chip-btn" type="button" aria-pressed="false" title="Draw the main (happy) path through the chart" hidden>Main path</button>
+            <button id="rdLong" class="chip-btn" type="button" aria-pressed="false" title="The long roads that run between stages (this chip says which state it is in)" hidden>Long roads: off</button>
+            <button id="rdOff" class="chip-btn" type="button" aria-pressed="false" title="Tint the boxes that are off by default, or that only a test reaches, so you can see where they sit" hidden>Off by default</button>
+          </div>
+          <aside id="regionPanel" class="rpanel" hidden aria-label="Regions"></aside>
+        </div>
+
+        <div class="bdock" id="bdock">
+          <div class="zoom-group" id="zoomGroup" role="group" aria-label="Zoom">
+            <button id="zOut" class="icon-btn sm" type="button" aria-label="Zoom out (-)" title="Zoom out (-)">−</button>
+            <span id="zVal" class="zval" aria-live="off">100%</span>
+            <button id="zIn" class="icon-btn sm" type="button" aria-label="Zoom in (+)" title="Zoom in (+)">+</button>
+            <button id="zFit" class="chip-btn" type="button" title="Fit the chart at a size where every name reads (0)">Fit</button>
+            <button id="zAll" class="chip-btn" type="button" title="Show the whole chart at once, small. Fit brings the words back.">All at once</button>
+            <button id="z100" class="chip-btn" type="button" title="Actual size">100%</button>
+          </div>
+          <div class="bd-mid" id="bdMid">
+          <span id="zNote" class="znote" hidden>Smaller view: names and conditions are drawn small</span>
+          <div id="ovNote" class="ov-note" hidden role="note"></div>
+          <div id="walkBar" class="walkbar" hidden role="region" aria-label="Walking a path step by step">
+            <button id="wkPrev" class="wk-b" type="button" aria-label="Previous step" title="Previous step ([)">&lsaquo;</button>
+            <div class="wk-body" id="wkBody" aria-live="polite"></div>
+            <button id="wkNext" class="wk-b" type="button" aria-label="Next step" title="Next step (])">&rsaquo;</button>
+            <button id="wkStage" class="wk-s" type="button" title="Skip to the first step that is in another stage">Next stage &raquo;</button>
+            <button id="wkEnd" class="wk-x" type="button" aria-label="Stop walking" title="Stop walking (Esc)">&times;</button>
+            <div class="wk-prog" aria-hidden="true"><i id="wkFill"></i></div>
+          </div>
+          </div>
+        </div>
+        <div id="pickBanner" class="pick-banner" hidden role="status"></div>
+        <div id="nameNote" class="ov-note name-note" hidden role="note"></div>
+        <div id="unplacedNote" class="unplaced-note" hidden role="status"></div>
+
+        <aside id="tracePanel" class="tracepanel" hidden aria-label="Trace a path from one box to another"></aside>
+        <aside id="legend" class="legend" hidden aria-label="Legend"></aside>
+        <aside id="handlePanel" class="hpanel" hidden aria-label="Official handles"></aside>
+        <aside id="dockPanel" class="hpanel dockp" hidden aria-label="Details panel"></aside>
+
+
+        <div id="mini" class="mini" hidden aria-hidden="true"><canvas id="miniCanvas"></canvas><div id="miniView" class="mini-view"></div></div>
+      </div>
+      <aside id="onboard" class="onboard" hidden aria-label="How to read this chart">
+        <h3>How to read this</h3>
+        <ol>
+          <li><b>Boxes are steps, arrows are roads.</b></li>
+          <li><b>Hover to preview, click to pin.</b> <span class="k-in">Cool roads arrive</span>, <span class="k-out">warm roads leave</span>.</li>
+          <li>Drag to move, scroll to zoom, <kbd>0</kbd> fits, <kbd>Esc</kbd> clears.</li>
+        </ol>
+        <button id="onboardOk" class="btn-solid" type="button">Got it</button>
+      </aside>
+    </section>
+
+    <section id="readingView" class="reading" hidden tabindex="-1" aria-label="Guide"></section>
+  </main>
+
+  <aside id="inspector" class="inspector" aria-label="Details" aria-live="polite"></aside>
+</div>
+
+<div id="tip" class="tip" role="tooltip" hidden></div>
+<div id="sr" class="sr-only" role="status" aria-live="polite"></div>
+
+<script type="application/json" id="atlas-data">/*__DATA__*/</script>
+<script>
+/*__RENDER__*/
+</script>
+<script>
+/*__JS__*/
+</script>
+</body>
+</html>

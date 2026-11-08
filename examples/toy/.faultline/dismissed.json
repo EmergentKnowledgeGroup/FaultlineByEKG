@@ -1,0 +1,6 @@
+{
+  "declared-never-produced:report.returned": { "suspect": true, "why": "Outcome.RETURNED is declared and printed in every report as zero, but no code path assigns it; kept as a suspect for the owner to decide" },
+  "can-only-go-back:trouble.hold_address": { "suspect": true, "why": "a ZZ postcode is parked and the release command answers 'still on hold' every time; confirmed by the address-hold walk" },
+  "no-limit-loop:l_report_write": { "suspect": true, "why": "write_report retries on OSError with while True and no count; only a success ends it" },
+  "ending-no-test:work.lease_lost": { "suspect": true, "why": "no test and no run reaches the lease-lost ending; coverage shows worker.py line 32 never ran" }
+}

@@ -1,0 +1,12 @@
+# Not ours to ship, and never to commit
+node_modules/
+
+# Generated while working or testing
+__pycache__/
+*.pyc
+*.tgz
+*.log
+.env
+.env.*
+.DS_Store
+Thumbs.db

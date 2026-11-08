@@ -1,0 +1,161 @@
+/* Faultline atlas viewer: the evidence layer (viewer/evidence.js). Inlined AFTER svg.css, viewer.css and flow.css (the assembler must add it to that list).
+   Off by default: with the switch off none of these rules match anything. Outline says how we know, colour says what we found:
+     drawn      the normal box, slightly muted            no colour
+     suspected  dashed amber outline, a "?"               a candidate: something worth a question
+     seen       solid outline, a count; routes thicken    it ran, or was reached, in what was checked
+     proved     double outline, a lock                    a replayable or proved-in-model run
+   Red outline colour: seen or proved to end stuck or in an error. Nothing unproven is ever green. The outline shape carries the meaning too, so it reads without colour. */
+:root{
+  --ev-sus:#f2a93b;--ev-sus-ink:#2b1800;
+  --ev-seen:#86adff;--ev-seen-ink:#0a1a3d;
+  --ev-brk:#ff8089;--ev-brk-ink:#3a0710;
+  --ev-stale:#9fb3bc;
+  --ev-walk:#f1f6ff;
+}
+:root[data-theme=light]{
+  --ev-sus:#a85d00;--ev-sus-ink:#ffffff;
+  --ev-seen:#2750c4;--ev-seen-ink:#ffffff;
+  --ev-brk:#c01f30;--ev-brk-ink:#ffffff;
+  --ev-stale:#5e7882;
+  --ev-walk:#0b2350;
+}
+/* while the layer is on the main-path glow is a neutral light line, never green (green would read as "checked") */
+.atlas-svg.ev-on{--spine:#c9d6dc}
+:root[data-theme=light] .atlas-svg.ev-on{--spine:#3f5c68}
+
+/* ---- toolbar switch (sits with Regions, Halos, Labels) -------------------------------------------------------------- */
+.rd-bar #rdEvidence[aria-pressed=true]{background:color-mix(in srgb,var(--ev-sus) 18%,var(--panel));border-color:var(--ev-sus);color:var(--ink)}
+.rd-bar #rdEvidence .ev-sw{display:inline-block;width:9px;height:9px;border-radius:3px;margin-right:7px;border:2px dashed var(--muted);vertical-align:-1px}
+.rd-bar #rdEvidence[aria-pressed=true] .ev-sw{border-style:solid;border-color:var(--ev-sus)}
+
+/* ---- on the map ------------------------------------------------------------------------------------------------------ */
+.atlas-svg .ev-m,.atlas-svg .ev-wg{pointer-events:none}
+.atlas-svg .ev-ring,.atlas-svg .ev-ring2,.atlas-svg .ev-glow{fill:none;vector-effect:non-scaling-stroke;stroke-linejoin:round}
+.atlas-svg .ev-glow{stroke-width:7px;stroke-opacity:.2}
+.atlas-svg .ev-ring{stroke-width:2px}
+.atlas-svg .ev-ring2{display:none}
+/* drawn: slightly muted, so everything with evidence stands out without anything being coloured in */
+.atlas-svg.ev-on .node:not([data-ev]) .node-box,.atlas-svg.ev-on .node:not([data-ev]) .node-text,.atlas-svg.ev-on .node:not([data-ev]) .node-tab{opacity:.8}
+.atlas-svg.ev-on .edge:not([data-ev]):not(.rel):not(.inferred) .edge-line{stroke-opacity:.72}
+/* suspected */
+.atlas-svg [data-ev=sus] .ev-ring{stroke:var(--ev-sus);stroke-dasharray:6 4}
+.atlas-svg [data-ev=sus] .ev-glow{stroke:var(--ev-sus)}
+/* seen */
+.atlas-svg [data-ev=seen] .ev-ring{stroke:var(--ev-seen)}
+.atlas-svg [data-ev=seen] .ev-glow{stroke:var(--ev-seen)}
+.atlas-svg [data-ev=seen][data-anchor] .ev-ring{stroke-width:1.4px;stroke-opacity:.85}
+/* proved: a second outline inside the first */
+.atlas-svg [data-ev=proved] .ev-ring,.atlas-svg [data-ev=proved] .ev-ring2{stroke:var(--ev-seen);stroke-width:1.8px}
+.atlas-svg [data-ev=proved] .ev-glow{stroke:var(--ev-seen);stroke-opacity:.26}
+.atlas-svg [data-ev=proved] .ev-ring2{display:inline}
+/* seen or proved to end stuck or in an error: the same outline in the break colour */
+.atlas-svg [data-brk] .ev-ring,.atlas-svg [data-brk] .ev-ring2,.atlas-svg [data-brk] .ev-glow{stroke:var(--ev-brk)}
+/* older than the code: a faint dotted outline, no colour, no level */
+.atlas-svg [data-ev=stale] .ev-ring{stroke:var(--ev-stale);stroke-width:1.4px;stroke-dasharray:1.5 4;stroke-linecap:round}
+.atlas-svg [data-ev=stale] .ev-glow{display:none}
+
+/* routes: a band under the line, as wide as the count says (set per route; the width does not scale with the zoom) */
+.atlas-svg .ev-band{fill:none;vector-effect:non-scaling-stroke;stroke-width:calc(var(--bw,4px)*var(--ev-bk,1));stroke-linecap:round;stroke-linejoin:round;pointer-events:none}
+.atlas-svg [data-ev=seen] .ev-band,.atlas-svg [data-ev=proved] .ev-band{stroke:var(--ev-seen);stroke-opacity:.5}
+.atlas-svg [data-ev=sus] .ev-band{stroke:var(--ev-sus);stroke-opacity:.55;stroke-dasharray:7 5;stroke-linecap:butt}
+.atlas-svg [data-ev=stale] .ev-band{display:none}
+.atlas-svg [data-brk] .ev-band{stroke:var(--ev-brk)}
+
+/* badges (a "?", a count, a lock): they keep a steady size on screen as the chart shrinks, and lose their glyph when too small to read */
+.atlas-svg .ev-b{pointer-events:all;cursor:pointer}
+.atlas-svg .ev-bs{transform-box:fill-box;transform-origin:50% 50%;transform:scale(var(--ev-s,1))}
+.atlas-svg .ev-bd{stroke:var(--a-bg);stroke-width:1.6}
+.atlas-svg [data-ev=sus] .ev-bd{fill:var(--ev-sus)}
+.atlas-svg [data-ev=seen] .ev-bd,.atlas-svg [data-ev=proved] .ev-bd{fill:var(--ev-seen)}
+.atlas-svg [data-brk] .ev-bd{fill:var(--ev-brk)}
+.atlas-svg [data-ev=stale] .ev-bd{fill:var(--ev-stale)}
+.atlas-svg .ev-bt{font-family:ui-monospace,SFMono-Regular,Consolas,Menlo,monospace;font-size:11.5px;font-weight:800;text-anchor:middle;pointer-events:none;fill:var(--ev-seen-ink)}
+.atlas-svg [data-ev=sus] .ev-bt{fill:var(--ev-sus-ink)}
+.atlas-svg [data-brk] .ev-bt{fill:var(--ev-brk-ink)}
+.atlas-svg [data-ev=stale] .ev-bt{fill:#10232b}
+.atlas-svg .ev-lock{fill:none;stroke:var(--ev-seen-ink);stroke-width:1.9;stroke-linecap:round;stroke-linejoin:round;pointer-events:none}
+.atlas-svg .ev-lock .ev-lk{fill:var(--ev-seen-ink);stroke:none}
+.atlas-svg [data-brk] .ev-lock{stroke:var(--ev-brk-ink)}
+.atlas-svg [data-brk] .ev-lock .ev-lk{fill:var(--ev-brk-ink)}
+.atlas-svg .ev-q2 .ev-bd{fill:var(--ev-sus)}
+.atlas-svg .ev-q2 .ev-bt{fill:var(--ev-sus-ink)}
+.atlas-svg.ev-nogl .ev-bt,.atlas-svg.ev-nogl .ev-lock{display:none}
+.atlas-svg.ev-norb .ev-b[data-ev-open^=route]{display:none}
+.atlas-svg .ev-b:hover .ev-bd{stroke:var(--a-ink);stroke-width:2.4}
+
+/* a walk lit across the map: the routes it took, a ring on each box it touched, the rest of the map stepping back */
+.atlas-svg .ev-wp{fill:none;vector-effect:non-scaling-stroke;stroke-linecap:round;stroke-linejoin:round}
+.atlas-svg .ev-wp-g{stroke:var(--ev-seen);stroke-width:9px;stroke-opacity:.3}
+.atlas-svg .ev-wp-l{stroke:var(--ev-walk);stroke-width:3px;stroke-dasharray:11 7;animation:evmarch .9s linear infinite}
+.atlas-svg .ev-wring{fill:none;vector-effect:non-scaling-stroke;stroke:var(--ev-walk);stroke-width:2.6px;stroke-linejoin:round}
+.atlas-svg .ev-wglow{fill:none;vector-effect:non-scaling-stroke;stroke:var(--ev-seen);stroke-width:8px;stroke-opacity:.34;stroke-linejoin:round}
+.atlas-svg .ev-wgap{fill:none;vector-effect:non-scaling-stroke;stroke:var(--ev-sus);stroke-width:2px;stroke-dasharray:2 4;stroke-linecap:round}
+.atlas-svg.ev-walking:not(.has-sel) .node:not(.ev-w),.atlas-svg.ev-walking:not(.has-sel) .edge:not(.ev-w),.atlas-svg.ev-walking:not(.has-sel) .elabel:not(.ev-w){opacity:.32}
+.atlas-svg.ev-walking .node.ev-w,.atlas-svg.ev-walking .edge.ev-w,.atlas-svg.ev-walking .elabel.ev-w{opacity:1}
+@keyframes evmarch{to{stroke-dashoffset:-18}}
+@media (prefers-reduced-motion:reduce){.atlas-svg .ev-wp-l{animation:none}}
+
+/* ---- the docked panel ------------------------------------------------------------------------------------------------ */
+.ev-panel{display:flex;flex-direction:column;gap:2px}
+.ev-lead{margin:0 0 8px;font-size:.86rem;line-height:1.4;color:var(--muted)}
+.ev-key{display:grid;grid-template-columns:1fr 1fr;gap:6px 10px;margin:2px 0 8px}
+.ev-key-row{display:grid;grid-template-columns:42px minmax(0,1fr);gap:7px;align-items:center;font-size:.8rem;line-height:1.25}
+.ev-key-row b{display:block;font-weight:700;font-size:.84rem}
+.ev-key-row span{color:var(--muted)}
+.ev-key svg{width:42px;height:22px;display:block}
+.ev-key .ev-k-ring{fill:none;stroke-width:2}
+.ev-tally{display:flex;flex-wrap:wrap;gap:6px 12px;font-size:.84rem;margin:4px 0 2px}
+.ev-tally b{font-variant-numeric:tabular-nums}
+.ev-h{margin:14px 0 4px;font-size:.78rem;letter-spacing:.08em;text-transform:uppercase;color:var(--accent);display:flex;align-items:baseline;gap:6px}
+.ev-h .hp-cnt{margin-left:0}
+.ev-grp{margin:8px 0 2px;font-size:.76rem;letter-spacing:.05em;text-transform:uppercase;color:var(--muted);font-weight:700}
+.ev-card{display:block;width:100%;text-align:left;background:var(--panel2);border:1px solid var(--line);border-left:4px solid var(--ev-sus);border-radius:9px;padding:7px 9px 8px;margin:0 0 6px;color:var(--ink)}
+.ev-card:hover{border-color:var(--line2);border-left-color:var(--ev-sus);background:color-mix(in srgb,var(--panel2) 80%,var(--ev-sus) 6%)}
+.ev-card[data-lv=seen],.ev-card[data-lv=proved]{border-left-color:var(--ev-seen)}
+.ev-card[data-brk]{border-left-color:var(--ev-brk)}
+.ev-card .ev-open{display:block;width:100%;text-align:left;background:transparent;border:0;padding:0;margin:0;color:inherit;cursor:pointer}
+.ev-card .ev-q{display:block;font-size:.9rem;line-height:1.35;font-weight:600}
+.ev-card .ev-shape{display:block;margin-top:3px;font-size:.76rem;letter-spacing:.03em;color:var(--muted)}
+.ev-more{font-size:.82rem;color:var(--muted);margin:2px 0 0}
+.ev-chips{display:flex;flex-wrap:wrap;gap:5px;margin:5px 0 0}
+.ev-chip{font:600 .76rem/1.2 var(--mono);background:var(--bg);color:var(--ink);border:1px solid var(--line2);border-radius:99px;padding:2px 8px;max-width:100%;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.ev-chip:hover{border-color:var(--accent);background:var(--accent-bg)}
+.ev-walk{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:2px 8px;align-items:baseline;width:100%;text-align:left;background:transparent;border:1px solid transparent;border-radius:8px;padding:6px 8px;color:var(--ink)}
+.ev-walk:hover{background:var(--panel2)}
+.ev-walk[aria-pressed=true]{background:color-mix(in srgb,var(--ev-seen) 14%,var(--panel));border-color:var(--ev-seen)}
+.ev-walk b{font-size:.88rem;line-height:1.25}
+.ev-walk small{grid-column:1 / -1;font-size:.78rem;color:var(--muted);line-height:1.3}
+.ev-walk .ev-wn{font-size:.8rem;color:var(--muted);font-variant-numeric:tabular-nums}
+.ev-walk[disabled]{opacity:.55;cursor:default}
+.ev-list{margin:4px 0 0;padding:0;list-style:none;display:flex;flex-direction:column;gap:5px;font-size:.84rem;line-height:1.35}
+.ev-list code{font:12.5px var(--mono);overflow-wrap:anywhere}
+.ev-list small{display:block;color:var(--muted)}
+.ev-checked{font-size:.84rem;line-height:1.4;margin:4px 0 0}
+.ev-checked p{margin:0 0 6px}
+.ev-panel details{margin:4px 0 0}
+.ev-panel summary{cursor:pointer;color:var(--accent);font-size:.84rem;font-weight:650}
+.ev-back{align-self:flex-start;background:transparent;border:0;color:var(--accent);font-weight:650;font-size:.86rem;padding:2px 0;margin:0 0 4px}
+.ev-back:hover{text-decoration:underline}
+.ev-lv{display:inline-flex;align-items:center;gap:7px;font-size:.82rem;font-weight:700;margin:0 0 6px}
+.ev-lv svg{width:34px;height:18px}
+.ev-d-t{margin:0;font-size:1.02rem;line-height:1.3;font-weight:700}
+.ev-d-h{margin:12px 0 3px;font-size:.76rem;letter-spacing:.08em;text-transform:uppercase;color:var(--accent)}
+.ev-d p{margin:0;font-size:.9rem;line-height:1.45}
+.ev-d ul{margin:0;padding-left:18px;font-size:.88rem;line-height:1.4}
+.ev-d li{margin:2px 0}
+.ev-acts{display:flex;flex-wrap:wrap;gap:6px;margin:12px 0 0}
+.ev-acts button{background:var(--panel2);border:1px solid var(--line2);border-radius:8px;padding:5px 11px;font-size:.84rem;font-weight:650;color:var(--ink)}
+.ev-acts button:hover{border-color:var(--accent);background:var(--accent-bg)}
+
+/* Windows high contrast and forced colours: the outline shapes already carry the meaning; use the system colours for the rest */
+@media (forced-colors:active){
+  .atlas-svg .ev-ring,.atlas-svg .ev-ring2,.atlas-svg .ev-glow,.atlas-svg .ev-band{stroke:CanvasText!important}
+  .atlas-svg .ev-bd{fill:Canvas!important;stroke:CanvasText!important}
+  .atlas-svg .ev-bt,.atlas-svg .ev-lock{fill:CanvasText!important;stroke:CanvasText!important}
+  .atlas-svg .ev-wp-l,.atlas-svg .ev-wring{stroke:Highlight!important}
+  .ev-card{border:2px solid CanvasText}
+}
+
+/* code inside the evidence panel is drawn in the code font (ticked text in a question or an evidence line), and a box named in a line is a name, not a link */
+.dock-body code,.ev-card code,.ev-d code{font:600 .88em var(--mono);background:var(--panel2);border:1px solid var(--line);border-radius:5px;padding:0 4px;overflow-wrap:anywhere}
+.dock-body .bk-nm,.ev-card .bk-nm,.ev-d .bk-nm{color:inherit}

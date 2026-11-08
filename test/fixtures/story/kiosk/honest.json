@@ -1,0 +1,28 @@
+{
+  "schema": "faultline.model/1",
+  "system": { "name": "kiosk", "tagline": "a ferry ticket kiosk" },
+  "stages": [{ "id": "sell", "title": "Selling a ticket", "blurb": "From a request to a printed ticket.", "order": 1 }],
+  "boxes": [
+    { "id": "look", "stage": "sell", "kind": "step", "title": "Look up the fare", "plain": "Finds the price for the route and the rider class.", "status": "live", "handle": "", "refs": [{ "path": "kiosk/sales.py", "symbol": "kiosk/sales.py::sell_ticket", "line": 36 }] },
+    { "id": "hasfare", "stage": "sell", "kind": "decision", "title": "Is there a fare?", "plain": "Tests whether the route has a price.", "status": "live", "handle": "", "refs": [{ "path": "kiosk/sales.py", "symbol": "kiosk/sales.py::sell_ticket", "line": 37 }] },
+    { "id": "norefuse", "stage": "sell", "kind": "end", "title": "Refuse the sale", "plain": "Raises SaleRefused for a route with no price.", "status": "live", "handle": "", "outcome": "failure", "refs": [{ "path": "kiosk/sales.py", "symbol": "kiosk/sales.py::sell_ticket", "line": 38 }] },
+    { "id": "seats", "stage": "sell", "kind": "decision", "title": "Any seats left?", "plain": "Tests the seat count on the request.", "status": "live", "handle": "", "refs": [{ "path": "kiosk/sales.py", "symbol": "kiosk/sales.py::sell_ticket", "line": 39 }] },
+    { "id": "full", "stage": "sell", "kind": "end", "title": "Turn away: full", "plain": "Hands the sale to refuse_full and returns.", "status": "live", "handle": "", "outcome": "failure", "refs": [{ "path": "kiosk/sales.py", "symbol": "kiosk/sales.py::sell_ticket", "line": 40 }] },
+    { "id": "pay", "stage": "sell", "kind": "step", "title": "Take the payment", "plain": "Asks take_payment to charge the amount.", "status": "live", "handle": "", "refs": [{ "path": "kiosk/sales.py", "symbol": "kiosk/sales.py::sell_ticket", "line": 42 }] },
+    { "id": "charge", "stage": "sell", "kind": "external", "title": "Run the card tool", "plain": "Starts the card tool as a separate process.", "status": "live", "handle": "", "refs": [{ "path": "kiosk/sales.py", "symbol": "kiosk/sales.py::gateway_charge", "line": 31 }] },
+    { "id": "paid", "stage": "sell", "kind": "decision", "title": "Did the payment go through?", "plain": "Tests the result of the payment.", "status": "live", "handle": "", "refs": [{ "path": "kiosk/sales.py", "symbol": "kiosk/sales.py::sell_ticket", "line": 43 }] },
+    { "id": "book", "stage": "sell", "kind": "store", "title": "Write the ledger entry", "plain": "Appends the sale to the ledger file.", "status": "live", "handle": "", "refs": [{ "path": "kiosk/ledger.py", "symbol": "kiosk/ledger.py::append_entry", "line": 7 }] },
+    { "id": "paper", "stage": "sell", "kind": "wait", "title": "Wait for paper", "plain": "Sleeps until the tray has paper.", "status": "live", "handle": "", "refs": [{ "path": "kiosk/sales.py", "symbol": "kiosk/sales.py::wait_for_paper", "line": 62 }] },
+    { "id": "sold", "stage": "sell", "kind": "end", "title": "Ticket sold", "plain": "Returns the amount charged.", "status": "live", "handle": "", "outcome": "success", "refs": [{ "path": "kiosk/sales.py", "symbol": "kiosk/sales.py::sell_ticket", "line": 52 }] }
+  ],
+  "routes": [
+    { "id": "r1", "from": "look", "to": "hasfare", "type": "forward", "when": "", "why": "", "refs": [{ "path": "kiosk/sales.py", "symbol": "kiosk/sales.py::sell_ticket", "line": 36 }], "inferred": false },
+    { "id": "r2", "from": "hasfare", "to": "norefuse", "type": "forward", "when": "fare is None", "why": "", "refs": [{ "path": "kiosk/sales.py", "symbol": "kiosk/sales.py::sell_ticket", "line": 37 }], "inferred": false },
+    { "id": "r3", "from": "hasfare", "to": "seats", "type": "forward", "when": "else", "why": "", "refs": [{ "path": "kiosk/sales.py", "symbol": "kiosk/sales.py::sell_ticket", "line": 37 }], "inferred": false },
+    { "id": "r4", "from": "seats", "to": "full", "type": "forward", "when": "seats_left <= 0", "why": "", "refs": [{ "path": "kiosk/sales.py", "symbol": "kiosk/sales.py::sell_ticket", "line": 39 }], "inferred": false },
+    { "id": "r5", "from": "seats", "to": "pay", "type": "forward", "when": "", "why": "", "refs": [{ "path": "kiosk/sales.py", "symbol": "kiosk/sales.py::sell_ticket", "line": 42 }], "inferred": false },
+    { "id": "r6", "from": "pay", "to": "charge", "type": "forward", "when": "", "why": "", "refs": [{ "path": "kiosk/sales.py", "symbol": "kiosk/sales.py::sell_ticket", "line": 42 }], "inferred": false },
+    { "id": "r7", "from": "paid", "to": "sold", "type": "forward", "when": "else", "why": "", "refs": [{ "path": "kiosk/sales.py", "symbol": "kiosk/sales.py::sell_ticket", "line": 43 }], "inferred": false }
+  ],
+  "paths": [{ "id": "main", "title": "Main path", "boxes": ["look", "hasfare", "seats", "pay", "paid", "sold"], "blurb": "" }]
+}

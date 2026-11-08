@@ -1,0 +1,1425 @@
+{
+ "boxes": [
+  {
+   "detail": "does store",
+   "handle": "append_entry",
+   "id": "kiosk.ledger.append_entry.s0",
+   "kind": "store",
+   "plain": "",
+   "prov": {
+    "effects": [
+     "store"
+    ],
+    "fn": "kiosk/ledger.py::append_entry",
+    "folded_lines": [
+     7,
+     9
+    ],
+    "line": 7,
+    "nodes": [
+     3,
+     4,
+     5,
+     6
+    ],
+    "rule": "step",
+    "src": "det",
+    "syn": "0"
+   },
+   "refs": [
+    {
+     "line": 7,
+     "path": "kiosk/ledger.py",
+     "symbol": "kiosk/ledger.py::append_entry"
+    }
+   ],
+   "stage": "s_all",
+   "status": "live",
+   "title": "does store"
+  },
+  {
+   "detail": "level < 3",
+   "handle": "print_ticket",
+   "id": "kiosk.printer.print_ticket.d1",
+   "kind": "decision",
+   "plain": "",
+   "prov": {
+    "arms": 2,
+    "chain": [
+     7
+    ],
+    "fn": "kiosk/printer.py::print_ticket",
+    "line": 7,
+    "rule": "decision",
+    "src": "det",
+    "syn": "1",
+    "why": "E"
+   },
+   "refs": [
+    {
+     "line": 7,
+     "path": "kiosk/printer.py",
+     "symbol": "kiosk/printer.py::print_ticket"
+    }
+   ],
+   "stage": "s_all",
+   "status": "live",
+   "title": "level < 3"
+  },
+  {
+   "detail": "raises RuntimeError: paper is low (no known catcher: 3 open ends)",
+   "handle": "print_ticket",
+   "id": "kiosk.printer.print_ticket.e1-b0",
+   "kind": "end",
+   "outcome": "failure",
+   "plain": "",
+   "prov": {
+    "class": "raise-open:RuntimeError",
+    "fn": "kiosk/printer.py::print_ticket",
+    "line": 8,
+    "nobody_catches": {
+     "open_ends": 3,
+     "paths": 2,
+     "paths_uncaught": 2,
+     "value": "unknown",
+     "why": [
+      [
+       "no-type-checker",
+       ""
+      ],
+      [
+       "unresolved-call-same-name",
+       1
+      ],
+      [
+       "no-caller",
+       ""
+      ]
+     ]
+    },
+    "rule": "end",
+    "sites": [
+     8
+    ],
+    "src": "det",
+    "syn": "1/b0"
+   },
+   "refs": [
+    {
+     "line": 8,
+     "path": "kiosk/printer.py",
+     "symbol": "kiosk/printer.py::print_ticket"
+    }
+   ],
+   "stage": "s_all",
+   "status": "live",
+   "title": "raises RuntimeError: paper is low (no..."
+  },
+  {
+   "detail": "does print",
+   "handle": "print_ticket",
+   "id": "kiosk.printer.print_ticket.s2",
+   "kind": "step",
+   "plain": "",
+   "prov": {
+    "effects": [
+     "print"
+    ],
+    "fn": "kiosk/printer.py::print_ticket",
+    "folded_lines": [
+     9,
+     10
+    ],
+    "line": 9,
+    "nodes": [
+     6,
+     7
+    ],
+    "rule": "step",
+    "src": "det",
+    "syn": "2"
+   },
+   "refs": [
+    {
+     "line": 9,
+     "path": "kiosk/printer.py",
+     "symbol": "kiosk/printer.py::print_ticket"
+    }
+   ],
+   "stage": "s_all",
+   "status": "live",
+   "title": "does print"
+  },
+  {
+   "detail": "request.coupon",
+   "handle": "apply_discount",
+   "id": "kiosk.sales.apply_discount.d0",
+   "kind": "decision",
+   "plain": "",
+   "prov": {
+    "arms": 2,
+    "chain": [
+     67
+    ],
+    "fn": "kiosk/sales.py::apply_discount",
+    "folded_exits": [
+     {
+      "class": "RV",
+      "line": 71,
+      "when": "request.coupon"
+     },
+     {
+      "class": "RV",
+      "line": 71,
+      "when": "else"
+     }
+    ],
+    "line": 67,
+    "rule": "decision",
+    "src": "det",
+    "syn": "0",
+    "why": "W"
+   },
+   "refs": [
+    {
+     "line": 67,
+     "path": "kiosk/sales.py",
+     "symbol": "kiosk/sales.py::apply_discount"
+    }
+   ],
+   "stage": "s_all",
+   "status": "live",
+   "title": "request.coupon"
+  },
+  {
+   "detail": "runs fast_lane",
+   "handle": "fast_lane",
+   "id": "kiosk.sales.fast_lane.s0",
+   "kind": "step",
+   "plain": "",
+   "prov": {
+    "effects": [],
+    "fn": "kiosk/sales.py::fast_lane",
+    "folded_lines": [
+     91,
+     91
+    ],
+    "landing": true,
+    "line": 91,
+    "nodes": [
+     3
+    ],
+    "rule": "step",
+    "src": "det",
+    "syn": "0"
+   },
+   "refs": [
+    {
+     "line": 91,
+     "path": "kiosk/sales.py",
+     "symbol": "kiosk/sales.py::fast_lane"
+    }
+   ],
+   "stage": "s_all",
+   "status": "live",
+   "title": "runs fast_lane"
+  },
+  {
+   "detail": "does process",
+   "handle": "gateway_charge",
+   "id": "kiosk.sales.gateway_charge.s0",
+   "kind": "external",
+   "plain": "",
+   "prov": {
+    "effects": [
+     "ext:process"
+    ],
+    "fn": "kiosk/sales.py::gateway_charge",
+    "folded_lines": [
+     30,
+     32
+    ],
+    "line": 31,
+    "nodes": [
+     3,
+     4
+    ],
+    "rule": "step",
+    "src": "det",
+    "syn": "0"
+   },
+   "refs": [
+    {
+     "line": 31,
+     "path": "kiosk/sales.py",
+     "symbol": "kiosk/sales.py::gateway_charge"
+    }
+   ],
+   "stage": "s_all",
+   "status": "live",
+   "title": "does process"
+  },
+  {
+   "detail": "runs lookup_fare",
+   "handle": "lookup_fare",
+   "id": "kiosk.sales.lookup_fare.s0",
+   "kind": "step",
+   "plain": "",
+   "prov": {
+    "effects": [],
+    "fn": "kiosk/sales.py::lookup_fare",
+    "folded_lines": [
+     15,
+     20
+    ],
+    "landing": true,
+    "line": 15,
+    "nodes": [
+     3,
+     4,
+     5,
+     6,
+     7,
+     8
+    ],
+    "rule": "step",
+    "src": "det",
+    "syn": "0"
+   },
+   "refs": [
+    {
+     "line": 15,
+     "path": "kiosk/sales.py",
+     "symbol": "kiosk/sales.py::lookup_fare"
+    }
+   ],
+   "stage": "s_all",
+   "status": "live",
+   "title": "runs lookup_fare"
+  },
+  {
+   "detail": "does print",
+   "handle": "note_full_price",
+   "id": "kiosk.sales.note_full_price.s0",
+   "kind": "step",
+   "plain": "",
+   "prov": {
+    "effects": [
+     "print"
+    ],
+    "fn": "kiosk/sales.py::note_full_price",
+    "folded_lines": [
+     80,
+     81
+    ],
+    "line": 80,
+    "nodes": [
+     3,
+     4
+    ],
+    "rule": "step",
+    "src": "det",
+    "syn": "0"
+   },
+   "refs": [
+    {
+     "line": 80,
+     "path": "kiosk/sales.py",
+     "symbol": "kiosk/sales.py::note_full_price"
+    }
+   ],
+   "stage": "s_all",
+   "status": "live",
+   "title": "does print"
+  },
+  {
+   "detail": "request.priority",
+   "handle": "pick_lane",
+   "id": "kiosk.sales.pick_lane.d0",
+   "kind": "decision",
+   "plain": "",
+   "prov": {
+    "arms": 2,
+    "chain": [
+     85
+    ],
+    "fn": "kiosk/sales.py::pick_lane",
+    "line": 85,
+    "rule": "decision",
+    "src": "det",
+    "syn": "0",
+    "why": "E"
+   },
+   "refs": [
+    {
+     "line": 85,
+     "path": "kiosk/sales.py",
+     "symbol": "kiosk/sales.py::pick_lane"
+    }
+   ],
+   "stage": "s_all",
+   "status": "live",
+   "title": "request.priority"
+  },
+  {
+   "detail": "returns the result of fast_lane() to its caller (entry)",
+   "handle": "pick_lane",
+   "id": "kiosk.sales.pick_lane.e0-b0",
+   "kind": "end",
+   "outcome": "success",
+   "plain": "",
+   "prov": {
+    "class": "RB:call:fast_lane",
+    "fn": "kiosk/sales.py::pick_lane",
+    "line": 86,
+    "rule": "end",
+    "sites": [
+     86
+    ],
+    "src": "det",
+    "syn": "0/b0"
+   },
+   "refs": [
+    {
+     "line": 86,
+     "path": "kiosk/sales.py",
+     "symbol": "kiosk/sales.py::pick_lane"
+    }
+   ],
+   "stage": "s_all",
+   "status": "live",
+   "title": "returns the result of fast_lane() to ..."
+  },
+  {
+   "detail": "returns the result of slow_lane() to its caller (entry)",
+   "handle": "pick_lane",
+   "id": "kiosk.sales.pick_lane.e1",
+   "kind": "end",
+   "outcome": "success",
+   "plain": "",
+   "prov": {
+    "class": "RB:call:slow_lane",
+    "fn": "kiosk/sales.py::pick_lane",
+    "line": 87,
+    "rule": "end",
+    "sites": [
+     87
+    ],
+    "src": "det",
+    "syn": "1"
+   },
+   "refs": [
+    {
+     "line": 87,
+     "path": "kiosk/sales.py",
+     "symbol": "kiosk/sales.py::pick_lane"
+    }
+   ],
+   "stage": "s_all",
+   "status": "live",
+   "title": "returns the result of slow_lane() to ..."
+  },
+  {
+   "detail": "runs redeem_coupon",
+   "handle": "redeem_coupon",
+   "id": "kiosk.sales.redeem_coupon.s0",
+   "kind": "step",
+   "plain": "",
+   "prov": {
+    "effects": [],
+    "fn": "kiosk/sales.py::redeem_coupon",
+    "folded_lines": [
+     75,
+     76
+    ],
+    "landing": true,
+    "line": 75,
+    "nodes": [
+     3,
+     4
+    ],
+    "rule": "step",
+    "src": "det",
+    "syn": "0"
+   },
+   "refs": [
+    {
+     "line": 75,
+     "path": "kiosk/sales.py",
+     "symbol": "kiosk/sales.py::redeem_coupon"
+    }
+   ],
+   "stage": "s_all",
+   "status": "live",
+   "title": "runs redeem_coupon"
+  },
+  {
+   "detail": "runs refuse_full",
+   "handle": "refuse_full",
+   "id": "kiosk.sales.refuse_full.s0",
+   "kind": "step",
+   "plain": "",
+   "prov": {
+    "effects": [],
+    "fn": "kiosk/sales.py::refuse_full",
+    "folded_lines": [
+     56,
+     57
+    ],
+    "landing": true,
+    "line": 56,
+    "nodes": [
+     3,
+     4
+    ],
+    "rule": "step",
+    "src": "det",
+    "syn": "0"
+   },
+   "refs": [
+    {
+     "line": 56,
+     "path": "kiosk/sales.py",
+     "symbol": "kiosk/sales.py::refuse_full"
+    }
+   ],
+   "stage": "s_all",
+   "status": "live",
+   "title": "runs refuse_full"
+  },
+  {
+   "detail": "fare is None",
+   "handle": "sell_ticket",
+   "id": "kiosk.sales.sell_ticket.d1",
+   "kind": "decision",
+   "plain": "",
+   "prov": {
+    "arms": 2,
+    "chain": [
+     37
+    ],
+    "fn": "kiosk/sales.py::sell_ticket",
+    "line": 37,
+    "rule": "decision",
+    "src": "det",
+    "syn": "1",
+    "why": "E"
+   },
+   "refs": [
+    {
+     "line": 37,
+     "path": "kiosk/sales.py",
+     "symbol": "kiosk/sales.py::sell_ticket"
+    }
+   ],
+   "stage": "s_all",
+   "status": "live",
+   "title": "fare is None"
+  },
+  {
+   "detail": "request.seats_left <= 0",
+   "handle": "sell_ticket",
+   "id": "kiosk.sales.sell_ticket.d2",
+   "kind": "decision",
+   "plain": "",
+   "prov": {
+    "arms": 2,
+    "chain": [
+     39
+    ],
+    "fn": "kiosk/sales.py::sell_ticket",
+    "line": 39,
+    "rule": "decision",
+    "src": "det",
+    "syn": "2",
+    "why": "E"
+   },
+   "refs": [
+    {
+     "line": 39,
+     "path": "kiosk/sales.py",
+     "symbol": "kiosk/sales.py::sell_ticket"
+    }
+   ],
+   "stage": "s_all",
+   "status": "live",
+   "title": "request.seats_left <= 0"
+  },
+  {
+   "detail": "not paid",
+   "handle": "sell_ticket",
+   "id": "kiosk.sales.sell_ticket.d5",
+   "kind": "decision",
+   "plain": "",
+   "prov": {
+    "arms": 2,
+    "chain": [
+     43
+    ],
+    "fn": "kiosk/sales.py::sell_ticket",
+    "folded_exits": [
+     {
+      "class": "R0",
+      "line": 44,
+      "when": "not paid"
+     }
+    ],
+    "line": 43,
+    "rule": "decision",
+    "src": "det",
+    "syn": "5",
+    "why": "E"
+   },
+   "refs": [
+    {
+     "line": 43,
+     "path": "kiosk/sales.py",
+     "symbol": "kiosk/sales.py::sell_ticket"
+    }
+   ],
+   "stage": "s_all",
+   "status": "live",
+   "title": "not paid"
+  },
+  {
+   "detail": "raises SaleRefused: no such route",
+   "handle": "sell_ticket",
+   "id": "kiosk.sales.sell_ticket.e1-b0",
+   "kind": "end",
+   "outcome": "failure",
+   "plain": "",
+   "prov": {
+    "class": "raise:SaleRefused",
+    "fn": "kiosk/sales.py::sell_ticket",
+    "line": 38,
+    "rule": "end",
+    "sites": [
+     38
+    ],
+    "src": "det",
+    "syn": "1/b0"
+   },
+   "refs": [
+    {
+     "line": 38,
+     "path": "kiosk/sales.py",
+     "symbol": "kiosk/sales.py::sell_ticket"
+    }
+   ],
+   "stage": "s_all",
+   "status": "live",
+   "title": "raises SaleRefused: no such route"
+  },
+  {
+   "detail": "returns the result of refuse_full() to its caller (entry)",
+   "handle": "sell_ticket",
+   "id": "kiosk.sales.sell_ticket.e2-b0",
+   "kind": "end",
+   "outcome": "success",
+   "plain": "",
+   "prov": {
+    "class": "RB:call:refuse_full",
+    "fn": "kiosk/sales.py::sell_ticket",
+    "line": 40,
+    "rule": "end",
+    "sites": [
+     40
+    ],
+    "src": "det",
+    "syn": "2/b0"
+   },
+   "refs": [
+    {
+     "line": 40,
+     "path": "kiosk/sales.py",
+     "symbol": "kiosk/sales.py::sell_ticket"
+    }
+   ],
+   "stage": "s_all",
+   "status": "live",
+   "title": "returns the result of refuse_full() t..."
+  },
+  {
+   "detail": "returns a value to its caller (entry)",
+   "handle": "sell_ticket",
+   "id": "kiosk.sales.sell_ticket.e8",
+   "kind": "end",
+   "outcome": "success",
+   "plain": "",
+   "prov": {
+    "class": "RB",
+    "fn": "kiosk/sales.py::sell_ticket",
+    "line": 52,
+    "rule": "end",
+    "sites": [
+     52
+    ],
+    "src": "det",
+    "syn": "8"
+   },
+   "refs": [
+    {
+     "line": 52,
+     "path": "kiosk/sales.py",
+     "symbol": "kiosk/sales.py::sell_ticket"
+    }
+   ],
+   "stage": "s_all",
+   "status": "live",
+   "title": "returns a value to its caller (entry)"
+  },
+  {
+   "detail": "on RuntimeError: print",
+   "handle": "sell_ticket",
+   "id": "kiosk.sales.sell_ticket.h7-h0",
+   "kind": "step",
+   "plain": "",
+   "prov": {
+    "disposition": "print",
+    "fn": "kiosk/sales.py::sell_ticket",
+    "labels": [
+     "maybe",
+     "maybe:call",
+     "print",
+     "return_none"
+    ],
+    "line": 48,
+    "rule": "handler",
+    "src": "det",
+    "syn": "7/h0"
+   },
+   "refs": [
+    {
+     "line": 48,
+     "path": "kiosk/sales.py",
+     "symbol": "kiosk/sales.py::sell_ticket"
+    }
+   ],
+   "stage": "s_all",
+   "status": "live",
+   "title": "on RuntimeError: print"
+  },
+  {
+   "detail": "runs sell_ticket ; calls lookup_fare",
+   "handle": "sell_ticket",
+   "id": "kiosk.sales.sell_ticket.s0",
+   "kind": "step",
+   "plain": "",
+   "prov": {
+    "effects": [],
+    "fn": "kiosk/sales.py::sell_ticket",
+    "folded_lines": [
+     36,
+     36
+    ],
+    "line": 36,
+    "nodes": [
+     3
+    ],
+    "rule": "step",
+    "src": "det",
+    "syn": "0"
+   },
+   "refs": [
+    {
+     "line": 36,
+     "path": "kiosk/sales.py",
+     "symbol": "kiosk/sales.py::sell_ticket"
+    }
+   ],
+   "stage": "s_all",
+   "status": "live",
+   "title": "runs sell_ticket ; calls lookup_fare"
+  },
+  {
+   "detail": "does print",
+   "handle": "sell_ticket",
+   "id": "kiosk.sales.sell_ticket.s7-h0-b0",
+   "kind": "step",
+   "plain": "",
+   "prov": {
+    "effects": [
+     "print"
+    ],
+    "fn": "kiosk/sales.py::sell_ticket",
+    "folded_lines": [
+     49,
+     51
+    ],
+    "line": 49,
+    "nodes": [
+     15,
+     16
+    ],
+    "rule": "step",
+    "src": "det",
+    "syn": "7/h0/b0"
+   },
+   "refs": [
+    {
+     "line": 49,
+     "path": "kiosk/sales.py",
+     "symbol": "kiosk/sales.py::sell_ticket"
+    }
+   ],
+   "stage": "s_all",
+   "status": "live",
+   "title": "does print"
+  },
+  {
+   "detail": "runs slow_lane",
+   "handle": "slow_lane",
+   "id": "kiosk.sales.slow_lane.s0",
+   "kind": "step",
+   "plain": "",
+   "prov": {
+    "effects": [],
+    "fn": "kiosk/sales.py::slow_lane",
+    "folded_lines": [
+     95,
+     95
+    ],
+    "landing": true,
+    "line": 95,
+    "nodes": [
+     3
+    ],
+    "rule": "step",
+    "src": "det",
+    "syn": "0"
+   },
+   "refs": [
+    {
+     "line": 95,
+     "path": "kiosk/sales.py",
+     "symbol": "kiosk/sales.py::slow_lane"
+    }
+   ],
+   "stage": "s_all",
+   "status": "live",
+   "title": "runs slow_lane"
+  },
+  {
+   "detail": "request.card is None",
+   "handle": "take_payment",
+   "id": "kiosk.sales.take_payment.d0",
+   "kind": "decision",
+   "plain": "",
+   "prov": {
+    "arms": 2,
+    "chain": [
+     24
+    ],
+    "fn": "kiosk/sales.py::take_payment",
+    "folded_exits": [
+     {
+      "class": "R0",
+      "line": 25,
+      "when": "request.card is None"
+     },
+     {
+      "class": "RV",
+      "line": 26,
+      "when": "else"
+     }
+    ],
+    "line": 24,
+    "rule": "decision",
+    "src": "det",
+    "syn": "0",
+    "why": "D"
+   },
+   "refs": [
+    {
+     "line": 24,
+     "path": "kiosk/sales.py",
+     "symbol": "kiosk/sales.py::take_payment"
+    }
+   ],
+   "stage": "s_all",
+   "status": "live",
+   "title": "request.card is None"
+  },
+  {
+   "detail": "loop: tray.empty()",
+   "handle": "wait_for_paper",
+   "id": "kiosk.sales.wait_for_paper.l0",
+   "kind": "decision",
+   "plain": "",
+   "prov": {
+    "arms": 2,
+    "bound": "test",
+    "fn": "kiosk/sales.py::wait_for_paper",
+    "folded_exits": [
+     {
+      "class": "RV",
+      "line": 63,
+      "when": "loop over"
+     }
+    ],
+    "line": 61,
+    "rule": "loop",
+    "src": "det",
+    "syn": "0"
+   },
+   "refs": [
+    {
+     "line": 61,
+     "path": "kiosk/sales.py",
+     "symbol": "kiosk/sales.py::wait_for_paper"
+    }
+   ],
+   "stage": "s_all",
+   "status": "live",
+   "title": "loop: tray.empty()"
+  },
+  {
+   "detail": "waits: time.sleep",
+   "handle": "wait_for_paper",
+   "id": "kiosk.sales.wait_for_paper.w0-b0",
+   "kind": "wait",
+   "plain": "",
+   "prov": {
+    "calls": [
+     "time.sleep"
+    ],
+    "fn": "kiosk/sales.py::wait_for_paper",
+    "folded_lines": [
+     62,
+     62
+    ],
+    "line": 62,
+    "on": "time",
+    "rule": "wait",
+    "src": "det",
+    "syn": "0/b0"
+   },
+   "refs": [
+    {
+     "line": 62,
+     "path": "kiosk/sales.py",
+     "symbol": "kiosk/sales.py::wait_for_paper"
+    }
+   ],
+   "stage": "s_all",
+   "status": "live",
+   "title": "waits: time.sleep"
+  }
+ ],
+ "charts": [],
+ "loops": [
+  {
+   "blurb": "",
+   "boxes": [
+    "kiosk.sales.wait_for_paper.l0"
+   ],
+   "id": "l_kiosk.sales.wait_for_paper.l0",
+   "limit": "tray.empty()",
+   "title": "loop: tray.empty()"
+  }
+ ],
+ "paths": [],
+ "routes": [
+  {
+   "from": "kiosk.printer.print_ticket.d1",
+   "id": "kiosk.printer.print_ticket.d1->kiosk.printer.print_ticket.e1-b0:level < 3",
+   "inferred": false,
+   "prov": {
+    "basis": "control-flow",
+    "fn": "kiosk/printer.py::print_ticket",
+    "line": 7,
+    "rule": "cfg-edge",
+    "src": "det",
+    "tier": "proven"
+   },
+   "refs": [],
+   "to": "kiosk.printer.print_ticket.e1-b0",
+   "type": "forward",
+   "when": "level < 3",
+   "why": "kiosk/printer.py::print_ticket:7 edge"
+  },
+  {
+   "from": "kiosk.printer.print_ticket.d1",
+   "id": "kiosk.printer.print_ticket.d1->kiosk.printer.print_ticket.s2:else",
+   "inferred": false,
+   "prov": {
+    "basis": "control-flow",
+    "fn": "kiosk/printer.py::print_ticket",
+    "line": 7,
+    "rule": "cfg-edge",
+    "src": "det",
+    "tier": "proven"
+   },
+   "refs": [],
+   "to": "kiosk.printer.print_ticket.s2",
+   "type": "forward",
+   "when": "else",
+   "why": "kiosk/printer.py::print_ticket:7 edge"
+  },
+  {
+   "from": "kiosk.sales.apply_discount.d0",
+   "id": "kiosk.sales.apply_discount.d0->kiosk.sales.note_full_price.s0:calls note_full_price",
+   "inferred": false,
+   "prov": {
+    "anchor": "after",
+    "basis": "lexical",
+    "fn": "kiosk/sales.py::apply_discount",
+    "how": "exact",
+    "line": 70,
+    "lines": [
+     70
+    ],
+    "role": "target",
+    "rule": "call",
+    "src": "det",
+    "tier": "proven"
+   },
+   "refs": [],
+   "to": "kiosk.sales.note_full_price.s0",
+   "type": "forward",
+   "when": "calls note_full_price",
+   "why": "kiosk/sales.py::apply_discount:70 calls kiosk/sales.py::note_full_price"
+  },
+  {
+   "from": "kiosk.sales.apply_discount.d0",
+   "id": "kiosk.sales.apply_discount.d0->kiosk.sales.redeem_coupon.s0:calls redeem_coupon",
+   "inferred": false,
+   "prov": {
+    "anchor": "after",
+    "basis": "lexical",
+    "fn": "kiosk/sales.py::apply_discount",
+    "how": "exact",
+    "line": 68,
+    "lines": [
+     68
+    ],
+    "role": "target",
+    "rule": "call",
+    "src": "det",
+    "tier": "proven"
+   },
+   "refs": [],
+   "to": "kiosk.sales.redeem_coupon.s0",
+   "type": "forward",
+   "when": "calls redeem_coupon",
+   "why": "kiosk/sales.py::apply_discount:68 calls kiosk/sales.py::redeem_coupon"
+  },
+  {
+   "from": "kiosk.sales.pick_lane.d0",
+   "id": "kiosk.sales.pick_lane.d0->kiosk.sales.pick_lane.e0-b0:request.priority",
+   "inferred": false,
+   "prov": {
+    "basis": "control-flow",
+    "fn": "kiosk/sales.py::pick_lane",
+    "line": 85,
+    "rule": "cfg-edge",
+    "src": "det",
+    "tier": "proven"
+   },
+   "refs": [],
+   "to": "kiosk.sales.pick_lane.e0-b0",
+   "type": "forward",
+   "when": "request.priority",
+   "why": "kiosk/sales.py::pick_lane:85 edge"
+  },
+  {
+   "from": "kiosk.sales.pick_lane.d0",
+   "id": "kiosk.sales.pick_lane.d0->kiosk.sales.pick_lane.e1:else",
+   "inferred": false,
+   "prov": {
+    "basis": "control-flow",
+    "fn": "kiosk/sales.py::pick_lane",
+    "line": 85,
+    "rule": "cfg-edge",
+    "src": "det",
+    "tier": "proven"
+   },
+   "refs": [],
+   "to": "kiosk.sales.pick_lane.e1",
+   "type": "forward",
+   "when": "else",
+   "why": "kiosk/sales.py::pick_lane:85 edge"
+  },
+  {
+   "from": "kiosk.sales.pick_lane.e0-b0",
+   "id": "kiosk.sales.pick_lane.e0-b0->kiosk.sales.fast_lane.s0:calls fast_lane",
+   "inferred": false,
+   "prov": {
+    "anchor": "in",
+    "basis": "lexical",
+    "fn": "kiosk/sales.py::pick_lane",
+    "how": "exact",
+    "line": 86,
+    "lines": [
+     86
+    ],
+    "role": "target",
+    "rule": "call",
+    "src": "det",
+    "tier": "proven"
+   },
+   "refs": [],
+   "to": "kiosk.sales.fast_lane.s0",
+   "type": "forward",
+   "when": "calls fast_lane",
+   "why": "kiosk/sales.py::pick_lane:86 calls kiosk/sales.py::fast_lane"
+  },
+  {
+   "from": "kiosk.sales.pick_lane.e1",
+   "id": "kiosk.sales.pick_lane.e1->kiosk.sales.slow_lane.s0:calls slow_lane",
+   "inferred": false,
+   "prov": {
+    "anchor": "in",
+    "basis": "lexical",
+    "fn": "kiosk/sales.py::pick_lane",
+    "how": "exact",
+    "line": 87,
+    "lines": [
+     87
+    ],
+    "role": "target",
+    "rule": "call",
+    "src": "det",
+    "tier": "proven"
+   },
+   "refs": [],
+   "to": "kiosk.sales.slow_lane.s0",
+   "type": "forward",
+   "when": "calls slow_lane",
+   "why": "kiosk/sales.py::pick_lane:87 calls kiosk/sales.py::slow_lane"
+  },
+  {
+   "from": "kiosk.sales.sell_ticket.d1",
+   "id": "kiosk.sales.sell_ticket.d1->kiosk.sales.sell_ticket.d2:else",
+   "inferred": false,
+   "prov": {
+    "basis": "control-flow",
+    "fn": "kiosk/sales.py::sell_ticket",
+    "line": 37,
+    "rule": "cfg-edge",
+    "src": "det",
+    "tier": "proven"
+   },
+   "refs": [],
+   "to": "kiosk.sales.sell_ticket.d2",
+   "type": "forward",
+   "when": "else",
+   "why": "kiosk/sales.py::sell_ticket:37 edge"
+  },
+  {
+   "from": "kiosk.sales.sell_ticket.d1",
+   "id": "kiosk.sales.sell_ticket.d1->kiosk.sales.sell_ticket.e1-b0:fare is None",
+   "inferred": false,
+   "prov": {
+    "basis": "control-flow",
+    "fn": "kiosk/sales.py::sell_ticket",
+    "line": 37,
+    "rule": "cfg-edge",
+    "src": "det",
+    "tier": "proven"
+   },
+   "refs": [],
+   "to": "kiosk.sales.sell_ticket.e1-b0",
+   "type": "forward",
+   "when": "fare is None",
+   "why": "kiosk/sales.py::sell_ticket:37 edge"
+  },
+  {
+   "from": "kiosk.sales.sell_ticket.d2",
+   "id": "kiosk.sales.sell_ticket.d2->kiosk.sales.sell_ticket.d5:else",
+   "inferred": false,
+   "prov": {
+    "basis": "control-flow",
+    "fn": "kiosk/sales.py::sell_ticket",
+    "line": 39,
+    "rule": "cfg-edge",
+    "src": "det",
+    "tier": "proven"
+   },
+   "refs": [],
+   "to": "kiosk.sales.sell_ticket.d5",
+   "type": "forward",
+   "when": "else",
+   "why": "kiosk/sales.py::sell_ticket:39 edge"
+  },
+  {
+   "from": "kiosk.sales.sell_ticket.d2",
+   "id": "kiosk.sales.sell_ticket.d2->kiosk.sales.sell_ticket.e2-b0:request.seats_left <= 0",
+   "inferred": false,
+   "prov": {
+    "basis": "control-flow",
+    "fn": "kiosk/sales.py::sell_ticket",
+    "line": 39,
+    "rule": "cfg-edge",
+    "src": "det",
+    "tier": "proven"
+   },
+   "refs": [],
+   "to": "kiosk.sales.sell_ticket.e2-b0",
+   "type": "forward",
+   "when": "request.seats_left <= 0",
+   "why": "kiosk/sales.py::sell_ticket:39 edge"
+  },
+  {
+   "from": "kiosk.sales.sell_ticket.d2",
+   "id": "kiosk.sales.sell_ticket.d2->kiosk.sales.take_payment.d0:calls take_payment",
+   "inferred": false,
+   "prov": {
+    "anchor": "after",
+    "basis": "lexical",
+    "fn": "kiosk/sales.py::sell_ticket",
+    "how": "exact",
+    "line": 42,
+    "lines": [
+     42
+    ],
+    "role": "target",
+    "rule": "call",
+    "src": "det",
+    "tier": "proven"
+   },
+   "refs": [],
+   "to": "kiosk.sales.take_payment.d0",
+   "type": "forward",
+   "when": "calls take_payment",
+   "why": "kiosk/sales.py::sell_ticket:42 calls kiosk/sales.py::take_payment"
+  },
+  {
+   "from": "kiosk.sales.sell_ticket.d5",
+   "id": "kiosk.sales.sell_ticket.d5->kiosk.sales.sell_ticket.e8:else",
+   "inferred": false,
+   "prov": {
+    "basis": "control-flow",
+    "fn": "kiosk/sales.py::sell_ticket",
+    "line": 43,
+    "rule": "cfg-edge",
+    "src": "det",
+    "tier": "proven"
+   },
+   "refs": [],
+   "to": "kiosk.sales.sell_ticket.e8",
+   "type": "forward",
+   "when": "else",
+   "why": "kiosk/sales.py::sell_ticket:43 edge"
+  },
+  {
+   "from": "kiosk.sales.sell_ticket.d5",
+   "id": "kiosk.sales.sell_ticket.d5->kiosk.sales.sell_ticket.h7-h0:if it fails",
+   "inferred": false,
+   "prov": {
+    "anchor": "after",
+    "fn": "kiosk/sales.py::sell_ticket",
+    "handler_line": 48,
+    "line": 47,
+    "rule": "exc-edge",
+    "src": "det",
+    "tier": "may",
+    "untyped_call_lines": [
+     47
+    ]
+   },
+   "refs": [],
+   "to": "kiosk.sales.sell_ticket.h7-h0",
+   "type": "forward",
+   "when": "if it fails",
+   "why": "kiosk/sales.py::sell_ticket:47 calls something that may raise; the handler at line 48 takes it"
+  },
+  {
+   "from": "kiosk.sales.sell_ticket.e2-b0",
+   "id": "kiosk.sales.sell_ticket.e2-b0->kiosk.sales.refuse_full.s0:calls refuse_full",
+   "inferred": false,
+   "prov": {
+    "anchor": "in",
+    "basis": "lexical",
+    "fn": "kiosk/sales.py::sell_ticket",
+    "how": "exact",
+    "line": 40,
+    "lines": [
+     40
+    ],
+    "role": "target",
+    "rule": "call",
+    "src": "det",
+    "tier": "proven"
+   },
+   "refs": [],
+   "to": "kiosk.sales.refuse_full.s0",
+   "type": "forward",
+   "when": "calls refuse_full",
+   "why": "kiosk/sales.py::sell_ticket:40 calls kiosk/sales.py::refuse_full"
+  },
+  {
+   "from": "kiosk.sales.sell_ticket.h7-h0",
+   "id": "kiosk.sales.sell_ticket.h7-h0->kiosk.sales.sell_ticket.s7-h0-b0:then",
+   "inferred": false,
+   "prov": {
+    "basis": "control-flow",
+    "fn": "kiosk/sales.py::sell_ticket",
+    "line": 48,
+    "rule": "cfg-edge",
+    "src": "det",
+    "tier": "proven"
+   },
+   "refs": [],
+   "to": "kiosk.sales.sell_ticket.s7-h0-b0",
+   "type": "forward",
+   "when": "then",
+   "why": "kiosk/sales.py::sell_ticket:48 edge"
+  },
+  {
+   "from": "kiosk.sales.sell_ticket.s0",
+   "id": "kiosk.sales.sell_ticket.s0->kiosk.sales.lookup_fare.s0:calls lookup_fare",
+   "inferred": false,
+   "prov": {
+    "anchor": "in",
+    "basis": "lexical",
+    "fn": "kiosk/sales.py::sell_ticket",
+    "how": "exact",
+    "line": 36,
+    "lines": [
+     36
+    ],
+    "role": "target",
+    "rule": "call",
+    "src": "det",
+    "tier": "proven"
+   },
+   "refs": [],
+   "to": "kiosk.sales.lookup_fare.s0",
+   "type": "forward",
+   "when": "calls lookup_fare",
+   "why": "kiosk/sales.py::sell_ticket:36 calls kiosk/sales.py::lookup_fare"
+  },
+  {
+   "from": "kiosk.sales.sell_ticket.s0",
+   "id": "kiosk.sales.sell_ticket.s0->kiosk.sales.sell_ticket.d1:then",
+   "inferred": false,
+   "prov": {
+    "basis": "control-flow",
+    "fn": "kiosk/sales.py::sell_ticket",
+    "line": 36,
+    "rule": "cfg-edge",
+    "src": "det",
+    "tier": "proven"
+   },
+   "refs": [],
+   "to": "kiosk.sales.sell_ticket.d1",
+   "type": "forward",
+   "when": "then",
+   "why": "kiosk/sales.py::sell_ticket:36 edge"
+  },
+  {
+   "from": "kiosk.sales.take_payment.d0",
+   "id": "kiosk.sales.take_payment.d0->kiosk.sales.apply_discount.d0:calls apply_discount",
+   "inferred": false,
+   "prov": {
+    "anchor": "after",
+    "basis": "lexical",
+    "fn": "kiosk/sales.py::take_payment",
+    "how": "exact",
+    "line": 26,
+    "lines": [
+     26
+    ],
+    "role": "target",
+    "rule": "call",
+    "src": "det",
+    "tier": "proven"
+   },
+   "refs": [],
+   "to": "kiosk.sales.apply_discount.d0",
+   "type": "forward",
+   "when": "calls apply_discount",
+   "why": "kiosk/sales.py::take_payment:26 calls kiosk/sales.py::apply_discount"
+  },
+  {
+   "from": "kiosk.sales.take_payment.d0",
+   "id": "kiosk.sales.take_payment.d0->kiosk.sales.gateway_charge.s0:calls gateway_charge",
+   "inferred": false,
+   "prov": {
+    "anchor": "after",
+    "basis": "lexical",
+    "fn": "kiosk/sales.py::take_payment",
+    "how": "exact",
+    "line": 26,
+    "lines": [
+     26
+    ],
+    "role": "target",
+    "rule": "call",
+    "src": "det",
+    "tier": "proven"
+   },
+   "refs": [],
+   "to": "kiosk.sales.gateway_charge.s0",
+   "type": "forward",
+   "when": "calls gateway_charge",
+   "why": "kiosk/sales.py::take_payment:26 calls kiosk/sales.py::gateway_charge"
+  },
+  {
+   "from": "kiosk.sales.wait_for_paper.l0",
+   "id": "kiosk.sales.wait_for_paper.l0->kiosk.sales.wait_for_paper.w0-b0:each item",
+   "inferred": false,
+   "prov": {
+    "basis": "control-flow",
+    "fn": "kiosk/sales.py::wait_for_paper",
+    "line": 61,
+    "rule": "cfg-edge",
+    "src": "det",
+    "tier": "proven"
+   },
+   "refs": [],
+   "to": "kiosk.sales.wait_for_paper.w0-b0",
+   "type": "forward",
+   "when": "each item",
+   "why": "kiosk/sales.py::wait_for_paper:61 edge"
+  },
+  {
+   "from": "kiosk.sales.wait_for_paper.w0-b0",
+   "id": "kiosk.sales.wait_for_paper.w0-b0->kiosk.sales.wait_for_paper.l0:then",
+   "inferred": false,
+   "prov": {
+    "basis": "control-flow",
+    "fn": "kiosk/sales.py::wait_for_paper",
+    "line": 62,
+    "rule": "cfg-edge",
+    "src": "det",
+    "tier": "proven"
+   },
+   "refs": [],
+   "to": "kiosk.sales.wait_for_paper.l0",
+   "type": "return",
+   "when": "then",
+   "why": "kiosk/sales.py::wait_for_paper:62 edge"
+  }
+ ],
+ "schema": "faultline.model/1",
+ "stages": [
+  {
+   "blurb": "27 boxes (grouped by directory, file, class)",
+   "id": "s_all",
+   "order": 1,
+   "title": "all"
+  }
+ ],
+ "system": {
+  "environment": {},
+  "name": "src",
+  "purpose": "",
+  "resolvers": {
+   "Python": "none"
+  },
+  "says": [
+   "No type checker (ty) ran for Python: negative claims about Python code (nobody catches it, nobody reads it, nobody calls it, nobody hears it) are off and stay `unknown`; what a call does (store, delete, emit ...) is marked `maybe:` unless the imports alone prove it; only `exact` call roads are proven, the rest are drawn thin. Run `setup` to install ty."
+  ],
+  "summary": "",
+  "tagline": "deterministic reading, no agent words",
+  "undecided": {
+   "ending/raise-open": 1,
+   "road/may": 1
+  },
+  "unread": []
+ },
+ "terms": [],
+ "tool": "fldet-0.1"
+}

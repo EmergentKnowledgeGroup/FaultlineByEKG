@@ -1,0 +1,188 @@
+/* Faultline atlas viewer: the whole map at scale (viewer/whole.js), the overview poster (viewer/overview.js), stage breadcrumb, minimap. Inlined last. */
+
+/* ---- districts: every stage's halo (its cluster) carries the stage's hue; --sh is set per stage by viewer.js, --ss / --sl / --tint-* per theme (viewer.css) ---- */
+.atlas-svg.is-whole{--dim:.09}
+:root[data-theme=light] .atlas-svg.is-whole{--dim:.16}
+.atlas-svg.is-whole .cluster .cluster-title{display:none}
+.atlas-svg.is-whole .cluster-box{fill:hsl(var(--sh,200) var(--ss) var(--sl) / var(--tint-fill));stroke:hsl(var(--sh,200) var(--ss) var(--sl) / var(--tint-line));stroke-width:2px;vector-effect:non-scaling-stroke;transition:fill .2s ease}
+.atlas-svg.is-whole .cluster.rg-hov .cluster-box,.atlas-svg.is-whole .cluster.rg-sel .cluster-box{fill:hsl(var(--sh,200) var(--ss) var(--sl) / calc(var(--tint-fill) * 2.1));stroke:hsl(var(--sh,200) var(--ss) var(--sl));stroke-width:3px}
+.atlas-svg.is-whole.rg-focus .cluster:not(.rg-hov):not(.rg-sel) .cluster-box{fill:hsl(var(--sh,200) var(--ss) var(--sl) / .04);stroke:hsl(var(--sh,200) var(--ss) var(--sl) / .25)}
+.atlas-svg .cl-band{display:none;fill:hsl(var(--sh,200) var(--ss) var(--sl));font-weight:720;letter-spacing:.005em;pointer-events:none}
+.atlas-svg .cl-band .cb-no{fill:hsl(var(--sh,200) var(--ss) var(--sl));font-weight:800;opacity:.75}
+.atlas-svg.st-bands .cl-band{display:inline}
+.atlas-svg.is-whole .htitle.stg{display:none!important}
+
+/* ---- stage pills: screen-space, 13 px, pinned at the top-left of the halo ---- */
+.atlas-svg .stpills{display:none}
+.atlas-svg.st-pills .stpills{display:inline}
+.atlas-svg .stpill{cursor:pointer}
+.atlas-svg .stp-bg{fill:hsl(var(--sh) var(--pill-sl));stroke:hsl(var(--sh) var(--ss) var(--sl));stroke-width:1.5px}
+.atlas-svg .stp-dot{fill:hsl(var(--sh) var(--ss) var(--sl))}
+.atlas-svg .stp-no{fill:#0e1d25;font:800 12px system-ui,"Segoe UI",Helvetica,Arial,sans-serif;pointer-events:none}
+:root[data-theme=light] .atlas-svg .stp-no{fill:#fff}
+.atlas-svg .stp-t{fill:var(--pill-ink);font:650 13px system-ui,"Segoe UI",Helvetica,Arial,sans-serif;pointer-events:none}
+.atlas-svg .stpill:hover .stp-bg,.atlas-svg .stpill.hov .stp-bg,.atlas-svg .stpill.sel .stp-bg{stroke-width:2.6px;fill:hsl(var(--sh) 52% 33%)}
+:root[data-theme=light] .atlas-svg .stpill:hover .stp-bg,:root[data-theme=light] .atlas-svg .stpill.hov .stp-bg,:root[data-theme=light] .atlas-svg .stpill.sel .stp-bg{fill:hsl(var(--sh) 80% 85%)}
+
+/* ---- far level: the roads as two merged paths, the per-road elements out. The pan or zoom paints a handful of elements. ---- */
+.atlas-svg .farl,.atlas-svg .spine-w{display:none;pointer-events:none}
+.atlas-svg .farl path{fill:none;vector-effect:non-scaling-stroke;stroke-linejoin:round}
+.atlas-svg .fl-int{stroke:var(--a-forward);stroke-opacity:.5;stroke-width:1px}
+.atlas-svg .fl-x{stroke:var(--ribbon);stroke-opacity:.17;stroke-width:1px}
+/* at Fit ("faint") a great many long roads run in the same few gutters, so their union is a pale band, the heaviest thing on the map. At the far level the ribbon is drawn much fainter than the stage outlines; it strengthens as you zoom in and the roads come apart */
+.atlas-svg.is-whole.lod-far .fl-x{stroke-opacity:.07}
+.atlas-svg.is-whole.lod-far .farl,.atlas-svg.is-whole.lod-mid .farl{display:inline}
+.atlas-svg.is-whole.lod-mid .farl .fl-int,.atlas-svg.is-whole.lod-near .farl .fl-int{display:none}
+.atlas-svg.is-whole.lod-near .farl{display:inline}
+.atlas-svg.is-whole.lod-near.lr-on .farl{display:none}
+.atlas-svg.is-whole.lod-near .fl-x{stroke-opacity:.34;stroke-width:1.5px}
+.atlas-svg.is-whole.lod-mid .fl-x{stroke-opacity:.16}
+.atlas-svg.is-whole.lr-on .fl-x{stroke-opacity:.6;stroke-width:1.4px}
+.atlas-svg.is-whole.lr-off .farl .fl-x{display:none}
+.atlas-svg.is-whole.has-sel .farl,.atlas-svg.is-whole.rg-focus .farl,.atlas-svg.is-whole.searching .farl,.atlas-svg.is-whole.hfocus .farl{opacity:.2}
+.atlas-svg.is-whole.lod-far .edges .edge:not(.rel):not(.rg-int):not(.rg-bnd){display:none}
+.atlas-svg.is-whole.lod-mid .edges .edge[data-cross]:not(.rel):not(.rg-int):not(.rg-bnd){display:none}
+.atlas-svg.is-whole.lr-off .edges .edge[data-cross]:not(.rel):not(.rg-bnd){display:none}
+.atlas-svg.is-whole:not(.lod-near) .chip,.atlas-svg.is-whole:not(.lod-near) .pbadge{display:none}
+.atlas-svg.is-whole.lr-faint .edges .edge[data-cross]:not(.rel):not(.rg-bnd){display:none}      /* faint: the long roads are ONE merged ribbon at every zoom (one blended stroke, not hundreds); the lit ones are real */
+.atlas-svg.is-whole .edge[data-cross]:not(.rel):not(.rg-bnd) .edge-hit{stroke-width:var(--hit,14px)}
+
+/* ---- lit roads and roads in and out of a lit district: a constant screen width, so one can be followed across the whole map ---- */
+.atlas-svg.is-whole:not(.lod-near) .edge.rel .edge-line,.atlas-svg.is-whole:not(.lod-near) .edge.rg-int .edge-line,.atlas-svg.is-whole:not(.lod-near) .edge.rg-bnd .edge-line{vector-effect:non-scaling-stroke;stroke-width:2.6px;stroke-dasharray:none;animation:none;marker-end:none}
+.atlas-svg.is-whole:not(.lod-near) .edge.rg-bnd:not(.rel) .edge-line{stroke-width:1.1px;stroke-opacity:.55}      /* a stage has hundreds of these sharing a street: drawn thick they merge into a solid bar */
+.atlas-svg.is-whole:not(.lod-near) .edge.hi-sel .edge-line{stroke-width:3.4px}
+.atlas-svg.is-whole .edge.rg-ar .edge-line{stroke:var(--in)}
+.atlas-svg.is-whole .edge.rg-lv .edge-line{stroke:var(--out)}
+.atlas-svg.is-whole.rg-focus .edge.rg-bnd{opacity:1}
+.atlas-svg.is-whole.rg-focus .edge.rg-int:not(.rg-bnd) .edge-line{stroke-opacity:.7}
+.atlas-svg.is-whole.lod-far .node.rel .node-box,.atlas-svg.is-whole.lod-mid .node.rel .node-box{vector-effect:non-scaling-stroke;stroke-width:2.4px}
+.atlas-svg.is-whole.lod-far .node.sel .node-box,.atlas-svg.is-whole.lod-mid .node.sel .node-box{stroke-width:3.4px;filter:none}
+.atlas-svg .focus-labels .elabel{cursor:pointer}
+.atlas-svg .focus-labels .elabel-text{font-size:13px}
+
+/* ---- main path: one merged line, constant screen width, soft glow (off until the dock's button turns it on) ---- */
+.atlas-svg.is-whole.show-spine .spine-w{display:inline}
+.atlas-svg .sw-glow,.atlas-svg .sw-line{fill:none;vector-effect:non-scaling-stroke;stroke:var(--spine);stroke-linejoin:round;stroke-linecap:round}
+.atlas-svg .sw-glow{stroke-opacity:.2;stroke-width:9px}
+.atlas-svg .sw-line{stroke-opacity:.95;stroke-width:2.2px}
+.atlas-svg.is-whole.has-sel .spine-w,.atlas-svg.is-whole.rg-focus .spine-w{opacity:.3}
+.atlas-svg.is-whole.show-spine .edge.spine:not(.rel) .edge-line{stroke:var(--spine);stroke-width:2.2px;vector-effect:non-scaling-stroke;marker-end:none}
+.atlas-svg.is-whole.show-spine.lod-far .edge.spine:not(.rel) .edge-line{animation:none;stroke-dasharray:none}
+/* loop and slice highlights on the whole map: constant width too (the base rules scale with the zoom and draw fat slugs when zoomed out) */
+.atlas-svg.is-whole:not(.lod-near).rg-focus .edge.rg-int .edge-line{stroke-width:2.6px}
+.atlas-svg.is-whole:not(.lod-near) .halo.on,.atlas-svg.is-whole:not(.lod-near) .halo.hov{opacity:.2}
+.atlas-svg.is-whole .halo .hl-o{opacity:.35}
+
+/* ---- the dock stays slim ---- */
+.rdock .rd-bar{display:flex;gap:6px;flex-wrap:wrap;align-items:center;padding:4px;background:color-mix(in srgb,var(--panel) 88%,transparent);border:1px solid var(--line);border-radius:11px;box-shadow:0 4px 18px rgba(0,0,0,.28)}
+.rdock .chip-btn{height:28px;font-size:.82rem}
+
+/* ---- minimap: dark like the page, small, collapsible; it only shows once the map is zoomed in past fit ---- */
+.mini{right:12px;bottom:12px;background:color-mix(in srgb,var(--bg) 90%,transparent);border:1px solid var(--line);border-radius:9px;box-shadow:0 4px 18px rgba(0,0,0,.32);opacity:.96;transition:opacity .15s ease}
+.mini:hover{opacity:1}
+.mini-x{position:absolute;right:3px;top:3px;width:18px;height:18px;border:0;border-radius:5px;background:color-mix(in srgb,var(--panel) 85%,transparent);color:var(--muted);font-size:13px;line-height:1;padding:0;display:grid;place-items:center;cursor:pointer;z-index:2}
+.mini-x:hover{color:var(--ink);background:var(--panel2)}
+.mini-view{border-color:var(--accent);background:color-mix(in srgb,var(--accent) 14%,transparent)}
+
+/* ---- stage breadcrumb on a part chart ---- */
+.crumb{display:flex;align-items:center;gap:8px;flex-wrap:wrap;font-size:.84rem;color:var(--muted);margin:0 0 3px;min-width:0}
+.crumb .cr-st{display:inline-flex;align-items:center;gap:7px;background:transparent;border:0;padding:0;color:var(--ink);font-weight:700;cursor:pointer;font-size:.84rem}
+.crumb .cr-st:hover{text-decoration:underline}
+.crumb .cr-no{display:inline-grid;place-items:center;min-width:20px;height:20px;border-radius:99px;padding:0 5px;background:hsl(var(--sh) var(--ss) var(--sl));color:#0e1d25;font:800 11.5px var(--mono)}
+:root[data-theme=light] .crumb .cr-no{color:#fff}
+.crumb .cr-sep{color:var(--faint)}
+.crumb .cr-part{color:var(--ink);font-weight:600;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;max-width:46ch}
+.crumb .cr-pos{font-variant-numeric:tabular-nums;color:var(--muted)}
+.crumb .cr-nav{display:inline-flex;gap:4px;margin-left:2px}
+.crumb .cr-b{height:22px;padding:0 9px;border-radius:7px;border:1px solid var(--line2);background:var(--panel2);font-size:.8rem;color:var(--ink)}
+.crumb .cr-b:hover:not(:disabled){border-color:hsl(var(--sh) var(--ss) var(--sl))}
+.crumb .cr-b:disabled{opacity:.4;cursor:default}
+.app[data-insp=open] .tb-summary{display:none}                  /* the same sentence opens the details panel: never twice on screen */
+
+/* ---- overview poster: boxes carry their stage's colour and number ---- */
+.atlas-svg.is-overview .node.st-box .node-box{fill:hsl(var(--sh) 36% 18%);stroke:hsl(var(--sh) var(--ss) var(--sl));stroke-width:2.2px}
+:root[data-theme=light] .atlas-svg.is-overview .node.st-box .node-box{fill:hsl(var(--sh) 70% 94%)}
+.atlas-svg.is-overview .node.st-box .node-tab{fill:hsl(var(--sh) var(--ss) var(--sl))}
+.atlas-svg.is-overview .node.st-box .node-text{font-weight:650}
+.atlas-svg.is-overview .node.st-box.sel .node-box{stroke:var(--sel)}
+.atlas-svg.is-overview .node.st-box.n-in .node-box,.atlas-svg.is-overview .node.st-box.n-out .node-box{stroke:hsl(var(--sh) var(--ss) var(--sl))}
+.atlas-svg .stn circle{fill:hsl(var(--sh) var(--ss) var(--sl));stroke:var(--a-bg);stroke-width:2px}
+.atlas-svg .stn text{fill:#0e1d25;font:800 12px system-ui,"Segoe UI",Helvetica,Arial,sans-serif;pointer-events:none}
+:root[data-theme=light] .atlas-svg .stn text{fill:#fff}
+.atlas-svg.is-overview .node:not(.st-box) .node-box{fill:var(--a-node)}
+.ov-note{position:absolute;left:50%;bottom:14px;transform:translateX(-50%);z-index:12;max-width:min(720px,calc(100% - 340px));background:color-mix(in srgb,var(--panel) 92%,transparent);border:1px solid var(--line2);border-radius:99px;padding:6px 16px;font-size:.86rem;color:var(--muted);text-align:center;box-shadow:var(--shadow)}
+.ov-note b{color:var(--ink);font-variant-numeric:tabular-nums}
+.unplaced-note{position:absolute;left:50%;top:46%;transform:translate(-50%,-50%);z-index:12;text-align:center;max-width:420px;padding:22px 26px;background:var(--panel);border:1px dashed var(--line2);border-radius:14px;color:var(--muted)}
+.unplaced-note b{display:block;color:var(--ink);font-size:1.15rem;margin-bottom:6px}
+.btn-open{display:block;width:100%;text-align:left;background:hsl(var(--sh,170) var(--ss) var(--sl) / .16);border:1.5px solid hsl(var(--sh,170) var(--ss) var(--sl));border-radius:10px;padding:9px 12px;margin:8px 0 6px;font-weight:700;font-size:.98rem;color:var(--ink)}
+.btn-open:hover{background:hsl(var(--sh,170) var(--ss) var(--sl) / .28)}
+.btn-open small{display:block;font-weight:500;color:var(--muted);font-size:.82rem;margin-top:1px}
+.route.nd{border-style:dashed;--c:var(--faint)}
+.route.nd .r-tag{float:right;font-size:.72rem;letter-spacing:.06em;text-transform:uppercase;color:var(--faint);font-weight:700}
+.ov-sum{display:flex;gap:14px;flex-wrap:wrap;color:var(--muted);font-size:.9rem;margin:2px 0 6px}
+.ov-sum b{color:var(--ink)}
+@media (max-width:800px),(max-height:520px) and (max-width:1000px){.ov-note{max-width:calc(100% - 24px);bottom:56px;border-radius:12px}}
+
+/* ---- the whole map is a poster: only the slim toolbar above it ---- */
+.chart-view.slim .tb-sub,.chart-view.slim .tb-summary,.chart-view.slim .codes,.chart-view.slim #draftBar,.chart-view.slim #flowBar:not(.following){display:none!important}
+.chart-view.slim .toolbar{padding:6px 12px}
+.tb-title.crumb-title #chartTitle{position:absolute!important;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap}
+.tb-title.crumb-title .cr-part{font-size:1.05rem;font-weight:750;max-width:60ch}
+.tb-title.crumb-title .crumb{margin-bottom:1px}
+:root[data-theme=light] .atlas-svg.is-whole .fl-x{stroke-opacity:.12}
+:root[data-theme=light] .atlas-svg.is-whole.lod-far .fl-x{stroke-opacity:.055}
+:root[data-theme=light] .atlas-svg.is-whole.lod-mid .fl-x{stroke-opacity:.18}
+:root[data-theme=light] .atlas-svg.is-whole.lod-near .fl-x{stroke-opacity:.28}
+.inspector h3 .quiet{display:block;text-transform:none;letter-spacing:0;font-weight:500;font-size:.84rem;margin-top:1px}
+
+/* ---- a stage part gives its room to the chart ---- */
+.chart-view[data-kind=stage] #chartSummary{display:none}
+.chart-view[data-kind=stage] .draftbar:not(.is-draft),.chart-view[data-kind=detail] .draftbar:not(.is-draft){display:none}   /* a finished map says so once (overview, whole map, Evidence and scope), not on every chart; a draft says so everywhere */
+.crumb .cr-cnt{color:var(--faint);font-size:.8rem;margin-left:4px;white-space:nowrap}
+.crumb .cr-nav{margin-left:auto}
+.crumb{flex-wrap:nowrap}
+.crumb .cr-st{flex:none}
+.crumb .cr-pos,.crumb .cr-cnt,.crumb .cr-b{white-space:nowrap}
+.crumb .cr-part{max-width:32ch;flex:0 1 auto}
+.crumb .cr-nav{flex:none}
+
+/* ---- the "Off by default" overlay on the whole map ---- */
+.atlas-svg{--off-h:292}
+.atlas-svg.show-off .node:not(.st-off):not(.st-test-only){opacity:.35}
+.atlas-svg.show-off .node.st-off .node-box,.atlas-svg.show-off .node.st-test-only .node-box{fill:hsl(var(--off-h) 78% 58%)!important;fill-opacity:.95!important;stroke:hsl(var(--off-h) 85% 72%)!important;stroke-width:2.4px;opacity:1}
+.atlas-svg.show-off .node.st-off .node-text,.atlas-svg.show-off .node.st-test-only .node-text{opacity:1}
+:root[data-theme=light] .atlas-svg.show-off .node.st-off .node-box,:root[data-theme=light] .atlas-svg.show-off .node.st-test-only .node-box{fill:hsl(var(--off-h) 70% 52%)!important}
+.atlas-svg.show-off .halos,.atlas-svg.show-off .cluster-box{opacity:.5}
+#rdOff[aria-pressed=true]{background:hsl(var(--off-h,292) 70% 40%);border-color:hsl(var(--off-h,292) 85% 70%);color:#fff}
+
+.name-note{top:56px;bottom:auto;left:50%;transform:translateX(-50%);z-index:13;max-width:min(640px,calc(100% - 120px))}
+.name-note .nn-go{background:var(--accent);color:var(--on-accent);border:0;border-radius:99px;padding:3px 12px;font-weight:700;margin:0 6px}
+
+/* the overview marks where the main path starts and ends */
+.atlas-svg .stt rect{fill:var(--spine,#b6f04a);stroke:var(--a-bg);stroke-width:2px}
+.atlas-svg .stt text{fill:#10260a;font:800 10px system-ui,"Segoe UI",Helvetica,Arial,sans-serif;letter-spacing:.06em;pointer-events:none}
+
+/* a pinned or hovered loop reads as one connected ring at far zoom */
+.atlas-svg .halo .loop-ring{display:none;pointer-events:none}
+.atlas-svg.zt-calm .halo.sel .loop-ring,.atlas-svg.zt-calm .halo.hov .loop-ring{display:inline}
+.atlas-svg .loop-ring .lr-line{fill:none;stroke:var(--rc,#e2af69);stroke-width:3px;stroke-linejoin:round;stroke-dasharray:9 6;vector-effect:non-scaling-stroke;opacity:.95}
+.atlas-svg .loop-ring .lr-dots{fill:none;stroke:var(--rc,#e2af69);stroke-width:11px;stroke-linecap:round;vector-effect:non-scaling-stroke}
+
+/* the overview shows which stages the main path runs through */
+.atlas-svg.is-overview .node.on-main .node-box{stroke:var(--spine,#b6f04a);stroke-width:3.2}
+/* a stage off the main path is still a stage (full strength); an ending pill steps back so the stages lead the poster */
+.atlas-svg.is-overview:not(.has-sel) .node:not(.st-box){opacity:.8}
+.atlas-svg.is-overview.has-sel .node.st-box:not(.on-main):not(.rel){opacity:var(--dim)}
+
+/* a pinned loop (or slice) on the whole map. Its own roads are brighter than the roads around it (the roads that cross its edge are medium, everything else dim), and its label shows at every zoom, on the loop */
+.atlas-svg.is-whole.rg-loopsel.rg-focus .edge.rg-int:not(.rg-bnd) .edge-line{stroke-opacity:1}
+.atlas-svg.is-whole.rg-loopsel.rg-focus .edge.rg-bnd{opacity:.6}
+.atlas-svg.is-whole.lod-near .htitle.sel:not(.stg){display:inline;pointer-events:all}
+
+/* the poster draws no stage cushions (they ran into each other on a laptop, below 55% zoom, and 1920 had none); only the stage you point at or pin is lit */
+.atlas-svg.is-overview .halo.on:not(.sel):not(.hov){opacity:0}
+.atlas-svg.is-overview .halo.sel,.atlas-svg.is-overview .halo.hov{opacity:.14}
+
+/* light mode: START and END on the poster are white on a deep green, as strong as the lime pills are in dark mode */
+:root[data-theme=light] .atlas-svg .stt rect{fill:#2f6b00}
+:root[data-theme=light] .atlas-svg .stt text{fill:#fff}

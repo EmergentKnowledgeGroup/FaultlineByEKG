@@ -1,0 +1,42 @@
+/* Story overlay: quiet on purpose. Roads and boxes the tool map supports keep the page's own look. Only what needs a second look is marked, in one warm
+   hue, and told apart by pattern (dashed, dotted, a ring), not by a palette. */
+:root { --sc-mark: #d9a441; --sc-line: var(--line2, #42626f); --sc-bg: var(--panel, #14252d); --sc-ink: var(--ink, #e8f1f3); --sc-muted: var(--muted, #a9c0c9); }
+:root[data-theme=light] { --sc-mark: #9a6200; }
+
+#sc-bar { position: fixed; z-index: 40; left: calc(var(--nav-w, 280px) + 14px); bottom: 12px; max-width: calc(100vw - var(--nav-w, 280px) - 28px);
+  padding: 4px 6px 4px 12px; border: 1px solid var(--sc-line); border-radius: 999px; background: color-mix(in srgb, var(--sc-bg) 93%, transparent); color: var(--sc-muted);
+  font: 12px/1.45 var(--font, system-ui, sans-serif); box-shadow: 0 2px 10px rgba(0, 0, 0, .18); }
+#sc-bar.sc-open { border-radius: 12px; padding-bottom: 8px; }
+#sc-bar .sc-row { display: flex; flex-wrap: wrap; align-items: center; gap: 2px 12px; }
+#sc-bar .sc-title { color: var(--sc-ink); font-weight: 600; }
+#sc-bar .sc-n { white-space: nowrap; }
+#sc-bar .sc-n-mark { color: var(--sc-mark); }
+#sc-bar .sc-btn { font: inherit; color: var(--sc-muted); background: none; border: 1px solid transparent; border-radius: 999px; padding: 2px 9px; cursor: pointer; }
+#sc-bar .sc-btn:hover { border-color: var(--sc-line); color: var(--sc-ink); }
+#sc-bar .sc-btn:focus-visible { outline: 2px solid var(--focus, #ffd54a); outline-offset: 1px; }
+#sc-bar .sc-switch[aria-pressed=true] { color: var(--sc-ink); border-color: var(--sc-line); }
+#sc-bar .sc-about { margin-top: 6px; padding-right: 8px; max-height: 40vh; overflow: auto; }
+#sc-bar .sc-about p { margin: 0 0 6px; }
+#sc-bar[hidden], #sc-bar .sc-about[hidden] { display: none; }
+
+/* roads: a road the tool joins looks as the page drew it. Related is dashed, no link is dotted with a ring, a label that disagrees gets a small dot. */
+#canvas[data-sc="on"] g.edge[data-sc-j="related"] .edge-line { stroke-dasharray: 7 4; }
+#canvas[data-sc="on"] g.edge[data-sc-j="none"] .edge-line { stroke-dasharray: 1.5 5; }
+.sc-mk { display: none; pointer-events: none; }
+#canvas[data-sc="on"] .sc-mk { display: inline; }
+.sc-mk .ring { fill: var(--a-bg, var(--bg, #0d1a21)); stroke: var(--sc-mark); stroke-width: 1.4; }
+.sc-mk text { fill: var(--sc-mark); font: 700 10px var(--font, system-ui, sans-serif); }
+.sc-mk .dot { fill: var(--sc-mark); stroke: var(--a-bg, var(--bg, #0d1a21)); stroke-width: 1.2; }
+
+/* boxes: only a box the tool finds partly, or not at all, changes its outline */
+#canvas[data-sc="on"] g.node[data-sc-b="partial"] .node-box { stroke: var(--sc-mark) !important; stroke-dasharray: 5 3; }
+#canvas[data-sc="on"] g.node[data-sc-b="none"] .node-box { stroke: var(--sc-mark) !important; stroke-dasharray: 1.5 4; stroke-linecap: round; }
+
+#sc-tip { position: fixed; z-index: 60; max-width: 420px; padding: 8px 10px; border: 1px solid var(--sc-line); border-radius: 8px; background: var(--sc-bg); color: var(--sc-ink);
+  font: 12.5px/1.45 var(--font, system-ui, sans-serif); pointer-events: none; box-shadow: var(--shadow, 0 6px 22px rgba(0, 0, 0, .4)); }
+#sc-tip[hidden] { display: none; }
+#sc-tip .sc-head { font-weight: 600; margin-bottom: 3px; }
+#sc-tip .sc-line { color: var(--sc-muted); margin-top: 2px; }
+#sc-tip .sc-words { margin-top: 5px; color: var(--sc-ink); font-style: italic; }
+#sc-tip .sc-tool { margin-top: 5px; color: var(--sc-ink); font-family: var(--mono, ui-monospace, monospace); font-size: 11.5px; }
+#sc-tip .sc-flag { margin-top: 4px; color: var(--sc-mark); }

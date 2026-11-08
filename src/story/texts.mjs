@@ -1,0 +1,46 @@
+// Plain-language lines for every flag the story check can raise. One place, so the page and any other reader say the same thing.
+
+export const FLAG_TEXT = {
+  // boxes
+  'no-citation': 'The box cites no line.',
+  'cites-nothing': 'A cited line is blank, a comment, or not in the file.',
+  'cites-outside-root': 'A cited path leads outside the source folder. It was refused and its file was not opened.',
+  'no-decision-at-cite': 'The box says decision; the tool sees no test at the cited lines.',
+  'no-end-at-cite': 'The box says end; the tool sees no return or raise at the cited lines.',
+  'no-store-at-cite': 'The box says store; the tool sees no write to storage at the cited lines.',
+  'no-wait-at-cite': 'The box says wait; the tool sees no wait at the cited lines.',
+  'no-external-at-cite': 'The box says external; the tool sees no call that leaves the program at the cited lines.',
+  'store-unsure': 'The tool sees a possible write to storage here and is not sure.',
+  'wait-unsure': 'The tool sees a possible wait here and is not sure.',
+  'external-unsure': 'The tool sees a possible outside call here and is not sure.',
+  'raise-titled-success': 'The tool sees a raise at the cited lines; the box reads as a success.',
+  'symbol-differs': 'The function named in a citation is not the function that holds the cited line.',
+  'symbol-unknown': 'The function named in a citation is not one the tool read (the map may name it differently).',
+  'refs-apart': 'The box cites lines in different files that the tool map does not connect (a note: the map may simply not draw the link).',
+  'name-not-in-code': 'The text names something that is nowhere in the code the tool read.',
+  'names-elsewhere': 'The names in the text are not in the cited function or file, only elsewhere.',
+  // roads
+  'second-citation': 'It is joined only through a second citation of a box, which a box can use to borrow a road.',
+  'end-missing': 'A road end is not a box of the story.',
+  'stands-on-weak-road': 'It stands on a road the tool itself is not sure of.',
+  'arm-unpinned': 'The cited line is only near the decision, so which side the road leaves by is not pinned down.',
+  'cite-off': 'The cited line is not where the tool\'s route is.',
+  'cite-loose': 'The cited line is in a box or function at an end, but not on the tool\'s route.',
+  'end-box-flagged': 'A box it stands on is flagged.',
+  'says-return-tool-shows-raise': 'The label says "returned"; the tool sees a raise at the cited line.',
+  'deliver-not-seen': 'The road is typed deliver (hands something to a person or outside); the tool sees no print, reply or message at the cited lines.',
+  'record-not-seen': 'The road is typed record (writes something down); the tool sees no write, print or message at the cited lines.',
+  'else-label-on-test-arm': 'The label means "the other way", but the tool draws this road on the side where the test holds.',
+  'test-label-on-else-arm': 'The label is the test itself, but the tool draws this road on the "else" side.',
+  'negation-on-positive-arm': 'The label says "no" or "not", but the tool draws this road on the side where the test is true.',
+  'positive-on-negative-arm': 'The label reads as the thing being there, but the tool draws this road on the side where the test finds it absent.',
+  'labels-look-swapped': 'On this decision, the labels of the two sides look swapped.',
+  'success-words-on-error-road': 'The label talks only of success, but the tool draws this road as a failure path.',
+  'condition-on-step': 'A condition is written where the tool sees a step, not a test. The label is not compared with anything.',
+  'condition-on-call': 'A condition is written where the tool sees a call, not a test. The label is not compared with anything.',
+  'condition-on-exit': 'A condition is written where the tool sees an exit, not a test. The label is not compared with anything.',
+  'condition-nothing-to-compare': 'The tool sees nothing at the cited lines to compare the label with.',
+  'label-shares-nothing-with-test': 'The label shares no word with the tool\'s test text.',
+};
+
+export const flagText = (f) => FLAG_TEXT[f] ?? f.replace(/-/g, ' ');

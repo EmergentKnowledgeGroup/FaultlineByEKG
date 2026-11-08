@@ -1,0 +1,1573 @@
+{
+ "routes": [
+  {
+   "from": "report.saved",
+   "to": "report.returned",
+   "type": "forward",
+   "when": "",
+   "evidence": {
+    "chain": [
+     "parcelworks/report.py::publish",
+     "parcelworks/report.py::summarize"
+    ],
+    "hops": 1
+   },
+   "site": {
+    "at": "parcelworks/report.py:50",
+    "lineKnown": true,
+    "fn": "publish",
+    "calls": 1
+   },
+   "holder": {
+    "box": "report.saved",
+    "isFrom": true,
+    "also": 0
+   },
+   "conditionHints": [],
+   "reverse": false,
+   "fromStage": "s_report",
+   "toStage": "s_report",
+   "crossStage": false,
+   "intoNoWayIn": true,
+   "fromNoWayOut": false,
+   "fromIsland": false
+  },
+  {
+   "from": "intake.submit",
+   "to": "intake.dedupe",
+   "type": "forward",
+   "when": "",
+   "evidence": {
+    "chain": [
+     "parcelworks/cli.py::cmd_submit",
+     "parcelworks/intake.py::accept"
+    ],
+    "hops": 1
+   },
+   "site": {
+    "at": "parcelworks/cli.py:14",
+    "lineKnown": true,
+    "fn": "cmd_submit",
+    "calls": 1
+   },
+   "holder": {
+    "box": "intake.submit",
+    "isFrom": true,
+    "also": 0
+   },
+   "conditionHints": [
+    {
+     "at": "parcelworks/cli.py:13",
+     "text": "except Refusal"
+    },
+    {
+     "at": "parcelworks/cli.py:15",
+     "text": "except Refusal (swallowed)"
+    }
+   ],
+   "reverse": false,
+   "fromStage": "s_intake",
+   "toStage": "s_intake",
+   "crossStage": false,
+   "intoNoWayIn": false,
+   "fromNoWayOut": false,
+   "fromIsland": false
+  },
+  {
+   "from": "intake.submit",
+   "to": "intake.lane",
+   "type": "forward",
+   "when": "",
+   "evidence": {
+    "chain": [
+     "parcelworks/cli.py::cmd_submit",
+     "parcelworks/intake.py::accept"
+    ],
+    "hops": 1
+   },
+   "site": {
+    "at": "parcelworks/cli.py:14",
+    "lineKnown": true,
+    "fn": "cmd_submit",
+    "calls": 1
+   },
+   "holder": {
+    "box": "intake.submit",
+    "isFrom": true,
+    "also": 0
+   },
+   "conditionHints": [
+    {
+     "at": "parcelworks/cli.py:13",
+     "text": "except Refusal"
+    },
+    {
+     "at": "parcelworks/cli.py:15",
+     "text": "except Refusal (swallowed)"
+    }
+   ],
+   "reverse": false,
+   "fromStage": "s_intake",
+   "toStage": "s_intake",
+   "crossStage": false,
+   "intoNoWayIn": false,
+   "fromNoWayOut": false,
+   "fromIsland": false
+  },
+  {
+   "from": "intake.submit",
+   "to": "intake.fast_done",
+   "type": "forward",
+   "when": "",
+   "evidence": {
+    "chain": [
+     "parcelworks/cli.py::cmd_submit",
+     "parcelworks/intake.py::accept"
+    ],
+    "hops": 1
+   },
+   "site": {
+    "at": "parcelworks/cli.py:14",
+    "lineKnown": true,
+    "fn": "cmd_submit",
+    "calls": 1
+   },
+   "holder": {
+    "box": "intake.submit",
+    "isFrom": true,
+    "also": 0
+   },
+   "conditionHints": [
+    {
+     "at": "parcelworks/cli.py:13",
+     "text": "except Refusal"
+    },
+    {
+     "at": "parcelworks/cli.py:15",
+     "text": "except Refusal (swallowed)"
+    }
+   ],
+   "reverse": false,
+   "fromStage": "s_intake",
+   "toStage": "s_intake",
+   "crossStage": false,
+   "intoNoWayIn": false,
+   "fromNoWayOut": false,
+   "fromIsland": false
+  },
+  {
+   "from": "intake.submit",
+   "to": "intake.enqueue",
+   "type": "forward",
+   "when": "",
+   "evidence": {
+    "chain": [
+     "parcelworks/cli.py::cmd_submit",
+     "parcelworks/intake.py::accept"
+    ],
+    "hops": 1
+   },
+   "site": {
+    "at": "parcelworks/cli.py:14",
+    "lineKnown": true,
+    "fn": "cmd_submit",
+    "calls": 1
+   },
+   "holder": {
+    "box": "intake.submit",
+    "isFrom": true,
+    "also": 0
+   },
+   "conditionHints": [
+    {
+     "at": "parcelworks/cli.py:13",
+     "text": "except Refusal"
+    },
+    {
+     "at": "parcelworks/cli.py:15",
+     "text": "except Refusal (swallowed)"
+    }
+   ],
+   "reverse": false,
+   "fromStage": "s_intake",
+   "toStage": "s_intake",
+   "crossStage": false,
+   "intoNoWayIn": false,
+   "fromNoWayOut": false,
+   "fromIsland": false
+  },
+  {
+   "from": "intake.dedupe",
+   "to": "intake.required",
+   "type": "return",
+   "when": "",
+   "evidence": {
+    "chain": [
+     "parcelworks/intake.py::accept",
+     "parcelworks/intake.py::validate"
+    ],
+    "hops": 1
+   },
+   "site": {
+    "at": "parcelworks/intake.py:35",
+    "lineKnown": true,
+    "fn": "accept",
+    "calls": 1
+   },
+   "holder": null,
+   "conditionHints": [
+    {
+     "at": "parcelworks/intake.py:36",
+     "text": "queue.exists(parcel.id)"
+    },
+    {
+     "at": "parcelworks/intake.py:38",
+     "text": "config.fast_lane() and parcel.service == \"express\" and parcel.weight_g <= FAS..."
+    }
+   ],
+   "reverse": false,
+   "fromStage": "s_intake",
+   "toStage": "s_intake",
+   "crossStage": false,
+   "intoNoWayIn": false,
+   "fromNoWayOut": false,
+   "fromIsland": false
+  },
+  {
+   "from": "intake.dedupe",
+   "to": "intake.weight",
+   "type": "return",
+   "when": "",
+   "evidence": {
+    "chain": [
+     "parcelworks/intake.py::accept",
+     "parcelworks/intake.py::validate"
+    ],
+    "hops": 1
+   },
+   "site": {
+    "at": "parcelworks/intake.py:35",
+    "lineKnown": true,
+    "fn": "accept",
+    "calls": 1
+   },
+   "holder": null,
+   "conditionHints": [
+    {
+     "at": "parcelworks/intake.py:36",
+     "text": "queue.exists(parcel.id)"
+    },
+    {
+     "at": "parcelworks/intake.py:38",
+     "text": "config.fast_lane() and parcel.service == \"express\" and parcel.weight_g <= FAS..."
+    }
+   ],
+   "reverse": false,
+   "fromStage": "s_intake",
+   "toStage": "s_intake",
+   "crossStage": false,
+   "intoNoWayIn": false,
+   "fromNoWayOut": false,
+   "fromIsland": false
+  },
+  {
+   "from": "intake.dedupe",
+   "to": "intake.format",
+   "type": "return",
+   "when": "",
+   "evidence": {
+    "chain": [
+     "parcelworks/intake.py::accept",
+     "parcelworks/intake.py::validate"
+    ],
+    "hops": 1
+   },
+   "site": {
+    "at": "parcelworks/intake.py:35",
+    "lineKnown": true,
+    "fn": "accept",
+    "calls": 1
+   },
+   "holder": null,
+   "conditionHints": [
+    {
+     "at": "parcelworks/intake.py:36",
+     "text": "queue.exists(parcel.id)"
+    },
+    {
+     "at": "parcelworks/intake.py:38",
+     "text": "config.fast_lane() and parcel.service == \"express\" and parcel.weight_g <= FAS..."
+    }
+   ],
+   "reverse": true,
+   "fromStage": "s_intake",
+   "toStage": "s_intake",
+   "crossStage": false,
+   "intoNoWayIn": false,
+   "fromNoWayOut": false,
+   "fromIsland": false
+  },
+  {
+   "from": "intake.lane",
+   "to": "intake.required",
+   "type": "return",
+   "when": "",
+   "evidence": {
+    "chain": [
+     "parcelworks/intake.py::accept",
+     "parcelworks/intake.py::validate"
+    ],
+    "hops": 1
+   },
+   "site": {
+    "at": "parcelworks/intake.py:35",
+    "lineKnown": true,
+    "fn": "accept",
+    "calls": 1
+   },
+   "holder": null,
+   "conditionHints": [
+    {
+     "at": "parcelworks/intake.py:36",
+     "text": "queue.exists(parcel.id)"
+    },
+    {
+     "at": "parcelworks/intake.py:38",
+     "text": "config.fast_lane() and parcel.service == \"express\" and parcel.weight_g <= FAS..."
+    }
+   ],
+   "reverse": false,
+   "fromStage": "s_intake",
+   "toStage": "s_intake",
+   "crossStage": false,
+   "intoNoWayIn": false,
+   "fromNoWayOut": false,
+   "fromIsland": false
+  },
+  {
+   "from": "intake.lane",
+   "to": "intake.weight",
+   "type": "return",
+   "when": "",
+   "evidence": {
+    "chain": [
+     "parcelworks/intake.py::accept",
+     "parcelworks/intake.py::validate"
+    ],
+    "hops": 1
+   },
+   "site": {
+    "at": "parcelworks/intake.py:35",
+    "lineKnown": true,
+    "fn": "accept",
+    "calls": 1
+   },
+   "holder": null,
+   "conditionHints": [
+    {
+     "at": "parcelworks/intake.py:36",
+     "text": "queue.exists(parcel.id)"
+    },
+    {
+     "at": "parcelworks/intake.py:38",
+     "text": "config.fast_lane() and parcel.service == \"express\" and parcel.weight_g <= FAS..."
+    }
+   ],
+   "reverse": false,
+   "fromStage": "s_intake",
+   "toStage": "s_intake",
+   "crossStage": false,
+   "intoNoWayIn": false,
+   "fromNoWayOut": false,
+   "fromIsland": false
+  },
+  {
+   "from": "intake.lane",
+   "to": "intake.format",
+   "type": "return",
+   "when": "",
+   "evidence": {
+    "chain": [
+     "parcelworks/intake.py::accept",
+     "parcelworks/intake.py::validate"
+    ],
+    "hops": 1
+   },
+   "site": {
+    "at": "parcelworks/intake.py:35",
+    "lineKnown": true,
+    "fn": "accept",
+    "calls": 1
+   },
+   "holder": null,
+   "conditionHints": [
+    {
+     "at": "parcelworks/intake.py:36",
+     "text": "queue.exists(parcel.id)"
+    },
+    {
+     "at": "parcelworks/intake.py:38",
+     "text": "config.fast_lane() and parcel.service == \"express\" and parcel.weight_g <= FAS..."
+    }
+   ],
+   "reverse": false,
+   "fromStage": "s_intake",
+   "toStage": "s_intake",
+   "crossStage": false,
+   "intoNoWayIn": false,
+   "fromNoWayOut": false,
+   "fromIsland": false
+  },
+  {
+   "from": "intake.lane",
+   "to": "intake.refused",
+   "type": "forward",
+   "when": "",
+   "evidence": {
+    "chain": [
+     "parcelworks/intake.py::accept",
+     "parcelworks/intake.py::validate"
+    ],
+    "hops": 1
+   },
+   "site": {
+    "at": "parcelworks/intake.py:35",
+    "lineKnown": true,
+    "fn": "accept",
+    "calls": 1
+   },
+   "holder": null,
+   "conditionHints": [
+    {
+     "at": "parcelworks/intake.py:36",
+     "text": "queue.exists(parcel.id)"
+    },
+    {
+     "at": "parcelworks/intake.py:38",
+     "text": "config.fast_lane() and parcel.service == \"express\" and parcel.weight_g <= FAS..."
+    }
+   ],
+   "reverse": false,
+   "fromStage": "s_intake",
+   "toStage": "s_intake",
+   "crossStage": false,
+   "intoNoWayIn": false,
+   "fromNoWayOut": false,
+   "fromIsland": false
+  },
+  {
+   "from": "intake.fast_done",
+   "to": "intake.required",
+   "type": "return",
+   "when": "",
+   "evidence": {
+    "chain": [
+     "parcelworks/intake.py::accept",
+     "parcelworks/intake.py::validate"
+    ],
+    "hops": 1
+   },
+   "site": {
+    "at": "parcelworks/intake.py:35",
+    "lineKnown": true,
+    "fn": "accept",
+    "calls": 1
+   },
+   "holder": null,
+   "conditionHints": [
+    {
+     "at": "parcelworks/intake.py:36",
+     "text": "queue.exists(parcel.id)"
+    },
+    {
+     "at": "parcelworks/intake.py:38",
+     "text": "config.fast_lane() and parcel.service == \"express\" and parcel.weight_g <= FAS..."
+    }
+   ],
+   "reverse": false,
+   "fromStage": "s_intake",
+   "toStage": "s_intake",
+   "crossStage": false,
+   "intoNoWayIn": false,
+   "fromNoWayOut": false,
+   "fromIsland": false
+  },
+  {
+   "from": "intake.fast_done",
+   "to": "intake.weight",
+   "type": "return",
+   "when": "",
+   "evidence": {
+    "chain": [
+     "parcelworks/intake.py::accept",
+     "parcelworks/intake.py::validate"
+    ],
+    "hops": 1
+   },
+   "site": {
+    "at": "parcelworks/intake.py:35",
+    "lineKnown": true,
+    "fn": "accept",
+    "calls": 1
+   },
+   "holder": null,
+   "conditionHints": [
+    {
+     "at": "parcelworks/intake.py:36",
+     "text": "queue.exists(parcel.id)"
+    },
+    {
+     "at": "parcelworks/intake.py:38",
+     "text": "config.fast_lane() and parcel.service == \"express\" and parcel.weight_g <= FAS..."
+    }
+   ],
+   "reverse": false,
+   "fromStage": "s_intake",
+   "toStage": "s_intake",
+   "crossStage": false,
+   "intoNoWayIn": false,
+   "fromNoWayOut": false,
+   "fromIsland": false
+  },
+  {
+   "from": "intake.fast_done",
+   "to": "intake.format",
+   "type": "return",
+   "when": "",
+   "evidence": {
+    "chain": [
+     "parcelworks/intake.py::accept",
+     "parcelworks/intake.py::validate"
+    ],
+    "hops": 1
+   },
+   "site": {
+    "at": "parcelworks/intake.py:35",
+    "lineKnown": true,
+    "fn": "accept",
+    "calls": 1
+   },
+   "holder": null,
+   "conditionHints": [
+    {
+     "at": "parcelworks/intake.py:36",
+     "text": "queue.exists(parcel.id)"
+    },
+    {
+     "at": "parcelworks/intake.py:38",
+     "text": "config.fast_lane() and parcel.service == \"express\" and parcel.weight_g <= FAS..."
+    }
+   ],
+   "reverse": false,
+   "fromStage": "s_intake",
+   "toStage": "s_intake",
+   "crossStage": false,
+   "intoNoWayIn": false,
+   "fromNoWayOut": false,
+   "fromIsland": false
+  },
+  {
+   "from": "intake.fast_done",
+   "to": "intake.refused",
+   "type": "forward",
+   "when": "",
+   "evidence": {
+    "chain": [
+     "parcelworks/intake.py::accept",
+     "parcelworks/intake.py::validate"
+    ],
+    "hops": 1
+   },
+   "site": {
+    "at": "parcelworks/intake.py:35",
+    "lineKnown": true,
+    "fn": "accept",
+    "calls": 1
+   },
+   "holder": null,
+   "conditionHints": [
+    {
+     "at": "parcelworks/intake.py:36",
+     "text": "queue.exists(parcel.id)"
+    },
+    {
+     "at": "parcelworks/intake.py:38",
+     "text": "config.fast_lane() and parcel.service == \"express\" and parcel.weight_g <= FAS..."
+    }
+   ],
+   "reverse": false,
+   "fromStage": "s_intake",
+   "toStage": "s_intake",
+   "crossStage": false,
+   "intoNoWayIn": false,
+   "fromNoWayOut": false,
+   "fromIsland": false
+  },
+  {
+   "from": "intake.enqueue",
+   "to": "intake.required",
+   "type": "return",
+   "when": "",
+   "evidence": {
+    "chain": [
+     "parcelworks/intake.py::accept",
+     "parcelworks/intake.py::validate"
+    ],
+    "hops": 1
+   },
+   "site": {
+    "at": "parcelworks/intake.py:35",
+    "lineKnown": true,
+    "fn": "accept",
+    "calls": 1
+   },
+   "holder": null,
+   "conditionHints": [
+    {
+     "at": "parcelworks/intake.py:36",
+     "text": "queue.exists(parcel.id)"
+    },
+    {
+     "at": "parcelworks/intake.py:38",
+     "text": "config.fast_lane() and parcel.service == \"express\" and parcel.weight_g <= FAS..."
+    }
+   ],
+   "reverse": false,
+   "fromStage": "s_intake",
+   "toStage": "s_intake",
+   "crossStage": false,
+   "intoNoWayIn": false,
+   "fromNoWayOut": false,
+   "fromIsland": false
+  },
+  {
+   "from": "intake.enqueue",
+   "to": "intake.weight",
+   "type": "return",
+   "when": "",
+   "evidence": {
+    "chain": [
+     "parcelworks/intake.py::accept",
+     "parcelworks/intake.py::validate"
+    ],
+    "hops": 1
+   },
+   "site": {
+    "at": "parcelworks/intake.py:35",
+    "lineKnown": true,
+    "fn": "accept",
+    "calls": 1
+   },
+   "holder": null,
+   "conditionHints": [
+    {
+     "at": "parcelworks/intake.py:36",
+     "text": "queue.exists(parcel.id)"
+    },
+    {
+     "at": "parcelworks/intake.py:38",
+     "text": "config.fast_lane() and parcel.service == \"express\" and parcel.weight_g <= FAS..."
+    }
+   ],
+   "reverse": false,
+   "fromStage": "s_intake",
+   "toStage": "s_intake",
+   "crossStage": false,
+   "intoNoWayIn": false,
+   "fromNoWayOut": false,
+   "fromIsland": false
+  },
+  {
+   "from": "intake.enqueue",
+   "to": "intake.format",
+   "type": "return",
+   "when": "",
+   "evidence": {
+    "chain": [
+     "parcelworks/intake.py::accept",
+     "parcelworks/intake.py::validate"
+    ],
+    "hops": 1
+   },
+   "site": {
+    "at": "parcelworks/intake.py:35",
+    "lineKnown": true,
+    "fn": "accept",
+    "calls": 1
+   },
+   "holder": null,
+   "conditionHints": [
+    {
+     "at": "parcelworks/intake.py:36",
+     "text": "queue.exists(parcel.id)"
+    },
+    {
+     "at": "parcelworks/intake.py:38",
+     "text": "config.fast_lane() and parcel.service == \"express\" and parcel.weight_g <= FAS..."
+    }
+   ],
+   "reverse": false,
+   "fromStage": "s_intake",
+   "toStage": "s_intake",
+   "crossStage": false,
+   "intoNoWayIn": false,
+   "fromNoWayOut": false,
+   "fromIsland": false
+  },
+  {
+   "from": "intake.enqueue",
+   "to": "intake.refused",
+   "type": "forward",
+   "when": "",
+   "evidence": {
+    "chain": [
+     "parcelworks/intake.py::accept",
+     "parcelworks/intake.py::validate"
+    ],
+    "hops": 1
+   },
+   "site": {
+    "at": "parcelworks/intake.py:35",
+    "lineKnown": true,
+    "fn": "accept",
+    "calls": 1
+   },
+   "holder": null,
+   "conditionHints": [
+    {
+     "at": "parcelworks/intake.py:36",
+     "text": "queue.exists(parcel.id)"
+    },
+    {
+     "at": "parcelworks/intake.py:38",
+     "text": "config.fast_lane() and parcel.service == \"express\" and parcel.weight_g <= FAS..."
+    }
+   ],
+   "reverse": false,
+   "fromStage": "s_intake",
+   "toStage": "s_intake",
+   "crossStage": false,
+   "intoNoWayIn": false,
+   "fromNoWayOut": false,
+   "fromIsland": false
+  },
+  {
+   "from": "work.loop",
+   "to": "work.lease_lost",
+   "type": "forward",
+   "when": "",
+   "evidence": {
+    "chain": [
+     "parcelworks/worker.py::Worker.run",
+     "parcelworks/worker.py::Worker.process_one"
+    ],
+    "hops": 1
+   },
+   "site": {
+    "at": "parcelworks/worker.py:41",
+    "lineKnown": true,
+    "fn": "Worker.run",
+    "calls": 1
+   },
+   "holder": {
+    "box": "work.loop",
+    "isFrom": true,
+    "also": 0
+   },
+   "conditionHints": [
+    {
+     "at": "parcelworks/worker.py:42",
+     "text": "ending is None"
+    },
+    {
+     "at": "parcelworks/worker.py:43",
+     "text": "stop_when_idle"
+    }
+   ],
+   "reverse": false,
+   "fromStage": "s_work",
+   "toStage": "s_work",
+   "crossStage": false,
+   "intoNoWayIn": false,
+   "fromNoWayOut": false,
+   "fromIsland": false
+  },
+  {
+   "from": "work.loop",
+   "to": "trouble.fail",
+   "type": "return",
+   "when": "",
+   "evidence": {
+    "chain": [
+     "parcelworks/worker.py::Worker.run",
+     "parcelworks/worker.py::Worker.process_one"
+    ],
+    "hops": 1
+   },
+   "site": {
+    "at": "parcelworks/worker.py:41",
+    "lineKnown": true,
+    "fn": "Worker.run",
+    "calls": 1
+   },
+   "holder": {
+    "box": "work.loop",
+    "isFrom": true,
+    "also": 0
+   },
+   "conditionHints": [
+    {
+     "at": "parcelworks/worker.py:42",
+     "text": "ending is None"
+    },
+    {
+     "at": "parcelworks/worker.py:43",
+     "text": "stop_when_idle"
+    }
+   ],
+   "reverse": false,
+   "fromStage": "s_work",
+   "toStage": "s_trouble",
+   "crossStage": true,
+   "intoNoWayIn": false,
+   "fromNoWayOut": false,
+   "fromIsland": false
+  },
+  {
+   "from": "work.tick",
+   "to": "queue.pending",
+   "type": "return",
+   "when": "",
+   "evidence": {
+    "chain": [
+     "parcelworks/worker.py::Worker.process_one",
+     "parcelworks/jobqueue.py::Queue.claim"
+    ],
+    "hops": 1
+   },
+   "site": {
+    "at": "parcelworks/worker.py:19",
+    "lineKnown": true,
+    "fn": "Worker.process_one",
+    "calls": 1
+   },
+   "holder": {
+    "box": "work.tick",
+    "isFrom": true,
+    "also": 0
+   },
+   "conditionHints": [
+    {
+     "at": "parcelworks/worker.py:20",
+     "text": "job is None"
+    },
+    {
+     "at": "parcelworks/worker.py:22",
+     "text": "except TransientError"
+    },
+    {
+     "at": "parcelworks/worker.py:24",
+     "text": "except TransientError (swallowed)"
+    },
+    {
+     "at": "parcelworks/worker.py:27",
+     "text": "verdict.hold_reason"
+    }
+   ],
+   "reverse": false,
+   "fromStage": "s_work",
+   "toStage": "s_queue",
+   "crossStage": true,
+   "intoNoWayIn": false,
+   "fromNoWayOut": false,
+   "fromIsland": false
+  },
+  {
+   "from": "work.tick",
+   "to": "queue.claim",
+   "type": "return",
+   "when": "",
+   "evidence": {
+    "chain": [
+     "parcelworks/worker.py::Worker.process_one",
+     "parcelworks/jobqueue.py::Queue.claim"
+    ],
+    "hops": 1
+   },
+   "site": {
+    "at": "parcelworks/worker.py:19",
+    "lineKnown": true,
+    "fn": "Worker.process_one",
+    "calls": 1
+   },
+   "holder": {
+    "box": "work.tick",
+    "isFrom": true,
+    "also": 0
+   },
+   "conditionHints": [
+    {
+     "at": "parcelworks/worker.py:20",
+     "text": "job is None"
+    },
+    {
+     "at": "parcelworks/worker.py:22",
+     "text": "except TransientError"
+    },
+    {
+     "at": "parcelworks/worker.py:24",
+     "text": "except TransientError (swallowed)"
+    },
+    {
+     "at": "parcelworks/worker.py:27",
+     "text": "verdict.hold_reason"
+    }
+   ],
+   "reverse": false,
+   "fromStage": "s_work",
+   "toStage": "s_queue",
+   "crossStage": true,
+   "intoNoWayIn": false,
+   "fromNoWayOut": false,
+   "fromIsland": false
+  },
+  {
+   "from": "work.tick",
+   "to": "queue.leased",
+   "type": "return",
+   "when": "",
+   "evidence": {
+    "chain": [
+     "parcelworks/worker.py::Worker.process_one",
+     "parcelworks/jobqueue.py::Queue.claim"
+    ],
+    "hops": 1
+   },
+   "site": {
+    "at": "parcelworks/worker.py:19",
+    "lineKnown": true,
+    "fn": "Worker.process_one",
+    "calls": 1
+   },
+   "holder": {
+    "box": "work.tick",
+    "isFrom": true,
+    "also": 0
+   },
+   "conditionHints": [
+    {
+     "at": "parcelworks/worker.py:20",
+     "text": "job is None"
+    },
+    {
+     "at": "parcelworks/worker.py:22",
+     "text": "except TransientError"
+    },
+    {
+     "at": "parcelworks/worker.py:24",
+     "text": "except TransientError (swallowed)"
+    },
+    {
+     "at": "parcelworks/worker.py:27",
+     "text": "verdict.hold_reason"
+    }
+   ],
+   "reverse": false,
+   "fromStage": "s_work",
+   "toStage": "s_queue",
+   "crossStage": true,
+   "intoNoWayIn": false,
+   "fromNoWayOut": false,
+   "fromIsland": false
+  },
+  {
+   "from": "work.tick",
+   "to": "work.route",
+   "type": "return",
+   "when": "",
+   "evidence": {
+    "chain": [
+     "parcelworks/worker.py::Worker.process_one",
+     "parcelworks/handlers.py::route"
+    ],
+    "hops": 1
+   },
+   "site": {
+    "at": "parcelworks/worker.py:23",
+    "lineKnown": true,
+    "fn": "Worker.process_one",
+    "calls": 1
+   },
+   "holder": {
+    "box": "work.tick",
+    "isFrom": true,
+    "also": 0
+   },
+   "conditionHints": [
+    {
+     "at": "parcelworks/worker.py:22",
+     "text": "except TransientError"
+    },
+    {
+     "at": "parcelworks/worker.py:20",
+     "text": "job is None"
+    },
+    {
+     "at": "parcelworks/worker.py:24",
+     "text": "except TransientError (swallowed)"
+    },
+    {
+     "at": "parcelworks/worker.py:27",
+     "text": "verdict.hold_reason"
+    }
+   ],
+   "reverse": false,
+   "fromStage": "s_work",
+   "toStage": "s_work",
+   "crossStage": false,
+   "intoNoWayIn": false,
+   "fromNoWayOut": false,
+   "fromIsland": false
+  },
+  {
+   "from": "work.tick",
+   "to": "work.book",
+   "type": "return",
+   "when": "",
+   "evidence": {
+    "chain": [
+     "parcelworks/worker.py::Worker.process_one",
+     "parcelworks/handlers.py::route"
+    ],
+    "hops": 1
+   },
+   "site": {
+    "at": "parcelworks/worker.py:23",
+    "lineKnown": true,
+    "fn": "Worker.process_one",
+    "calls": 1
+   },
+   "holder": {
+    "box": "work.tick",
+    "isFrom": true,
+    "also": 0
+   },
+   "conditionHints": [
+    {
+     "at": "parcelworks/worker.py:22",
+     "text": "except TransientError"
+    },
+    {
+     "at": "parcelworks/worker.py:20",
+     "text": "job is None"
+    },
+    {
+     "at": "parcelworks/worker.py:24",
+     "text": "except TransientError (swallowed)"
+    },
+    {
+     "at": "parcelworks/worker.py:27",
+     "text": "verdict.hold_reason"
+    }
+   ],
+   "reverse": false,
+   "fromStage": "s_work",
+   "toStage": "s_work",
+   "crossStage": false,
+   "intoNoWayIn": false,
+   "fromNoWayOut": false,
+   "fromIsland": false
+  },
+  {
+   "from": "work.tick",
+   "to": "trouble.hold_customs",
+   "type": "return",
+   "when": "",
+   "evidence": {
+    "chain": [
+     "parcelworks/worker.py::Worker.process_one",
+     "parcelworks/handlers.py::route"
+    ],
+    "hops": 1
+   },
+   "site": {
+    "at": "parcelworks/worker.py:23",
+    "lineKnown": true,
+    "fn": "Worker.process_one",
+    "calls": 1
+   },
+   "holder": {
+    "box": "work.tick",
+    "isFrom": true,
+    "also": 0
+   },
+   "conditionHints": [
+    {
+     "at": "parcelworks/worker.py:22",
+     "text": "except TransientError"
+    },
+    {
+     "at": "parcelworks/worker.py:20",
+     "text": "job is None"
+    },
+    {
+     "at": "parcelworks/worker.py:24",
+     "text": "except TransientError (swallowed)"
+    },
+    {
+     "at": "parcelworks/worker.py:27",
+     "text": "verdict.hold_reason"
+    }
+   ],
+   "reverse": false,
+   "fromStage": "s_work",
+   "toStage": "s_trouble",
+   "crossStage": true,
+   "intoNoWayIn": false,
+   "fromNoWayOut": false,
+   "fromIsland": false
+  },
+  {
+   "from": "work.tick",
+   "to": "trouble.hold_address",
+   "type": "forward",
+   "when": "",
+   "evidence": {
+    "chain": [
+     "parcelworks/worker.py::Worker.process_one",
+     "parcelworks/handlers.py::route"
+    ],
+    "hops": 1
+   },
+   "site": {
+    "at": "parcelworks/worker.py:23",
+    "lineKnown": true,
+    "fn": "Worker.process_one",
+    "calls": 1
+   },
+   "holder": {
+    "box": "work.tick",
+    "isFrom": true,
+    "also": 0
+   },
+   "conditionHints": [
+    {
+     "at": "parcelworks/worker.py:22",
+     "text": "except TransientError"
+    },
+    {
+     "at": "parcelworks/worker.py:20",
+     "text": "job is None"
+    },
+    {
+     "at": "parcelworks/worker.py:24",
+     "text": "except TransientError (swallowed)"
+    },
+    {
+     "at": "parcelworks/worker.py:27",
+     "text": "verdict.hold_reason"
+    }
+   ],
+   "reverse": false,
+   "fromStage": "s_work",
+   "toStage": "s_trouble",
+   "crossStage": true,
+   "intoNoWayIn": false,
+   "fromNoWayOut": false,
+   "fromIsland": false
+  },
+  {
+   "from": "trouble.fail",
+   "to": "queue.complete",
+   "type": "return",
+   "when": "",
+   "evidence": {
+    "chain": [
+     "parcelworks/worker.py::Worker.process_one",
+     "parcelworks/jobqueue.py::Queue.complete"
+    ],
+    "hops": 1
+   },
+   "site": {
+    "at": "parcelworks/worker.py:30",
+    "lineKnown": true,
+    "fn": "Worker.process_one",
+    "calls": 1
+   },
+   "holder": {
+    "box": "trouble.fail",
+    "isFrom": true,
+    "also": 0
+   },
+   "conditionHints": [
+    {
+     "at": "parcelworks/worker.py:30",
+     "text": "self.queue.complete(job.id, job.token, verdict.label)"
+    },
+    {
+     "at": "parcelworks/worker.py:28",
+     "text": "self.queue.hold(job.id, job.token, verdict.hold_reason)"
+    },
+    {
+     "at": "parcelworks/worker.py:27",
+     "text": "verdict.hold_reason"
+    },
+    {
+     "at": "parcelworks/worker.py:24",
+     "text": "except TransientError (swallowed)"
+    }
+   ],
+   "reverse": false,
+   "fromStage": "s_trouble",
+   "toStage": "s_queue",
+   "crossStage": true,
+   "intoNoWayIn": false,
+   "fromNoWayOut": false,
+   "fromIsland": false
+  },
+  {
+   "from": "trouble.fail",
+   "to": "queue.done",
+   "type": "return",
+   "when": "",
+   "evidence": {
+    "chain": [
+     "parcelworks/worker.py::Worker.process_one",
+     "parcelworks/jobqueue.py::Queue.complete"
+    ],
+    "hops": 1
+   },
+   "site": {
+    "at": "parcelworks/worker.py:30",
+    "lineKnown": true,
+    "fn": "Worker.process_one",
+    "calls": 1
+   },
+   "holder": {
+    "box": "trouble.fail",
+    "isFrom": true,
+    "also": 0
+   },
+   "conditionHints": [
+    {
+     "at": "parcelworks/worker.py:30",
+     "text": "self.queue.complete(job.id, job.token, verdict.label)"
+    },
+    {
+     "at": "parcelworks/worker.py:28",
+     "text": "self.queue.hold(job.id, job.token, verdict.hold_reason)"
+    },
+    {
+     "at": "parcelworks/worker.py:27",
+     "text": "verdict.hold_reason"
+    },
+    {
+     "at": "parcelworks/worker.py:24",
+     "text": "except TransientError (swallowed)"
+    }
+   ],
+   "reverse": false,
+   "fromStage": "s_trouble",
+   "toStage": "s_queue",
+   "crossStage": true,
+   "intoNoWayIn": false,
+   "fromNoWayOut": false,
+   "fromIsland": false
+  },
+  {
+   "from": "report.saved",
+   "to": "report.summarize",
+   "type": "return",
+   "when": "",
+   "evidence": {
+    "chain": [
+     "parcelworks/report.py::publish",
+     "parcelworks/report.py::summarize"
+    ],
+    "hops": 1
+   },
+   "site": {
+    "at": "parcelworks/report.py:50",
+    "lineKnown": true,
+    "fn": "publish",
+    "calls": 1
+   },
+   "holder": {
+    "box": "report.saved",
+    "isFrom": true,
+    "also": 0
+   },
+   "conditionHints": [],
+   "reverse": false,
+   "fromStage": "s_report",
+   "toStage": "s_report",
+   "crossStage": false,
+   "intoNoWayIn": false,
+   "fromNoWayOut": false,
+   "fromIsland": false
+  },
+  {
+   "from": "report.saved",
+   "to": "report.render",
+   "type": "return",
+   "when": "",
+   "evidence": {
+    "chain": [
+     "parcelworks/report.py::publish",
+     "parcelworks/report.py::render"
+    ],
+    "hops": 1
+   },
+   "site": {
+    "at": "parcelworks/report.py:50",
+    "lineKnown": true,
+    "fn": "publish",
+    "calls": 1
+   },
+   "holder": {
+    "box": "report.saved",
+    "isFrom": true,
+    "also": 0
+   },
+   "conditionHints": [],
+   "reverse": false,
+   "fromStage": "s_report",
+   "toStage": "s_report",
+   "crossStage": false,
+   "intoNoWayIn": false,
+   "fromNoWayOut": false,
+   "fromIsland": false
+  },
+  {
+   "from": "report.saved",
+   "to": "report.write",
+   "type": "return",
+   "when": "",
+   "evidence": {
+    "chain": [
+     "parcelworks/report.py::publish",
+     "parcelworks/report.py::write_report"
+    ],
+    "hops": 1
+   },
+   "site": {
+    "at": "parcelworks/report.py:50",
+    "lineKnown": true,
+    "fn": "publish",
+    "calls": 1
+   },
+   "holder": {
+    "box": "report.saved",
+    "isFrom": true,
+    "also": 0
+   },
+   "conditionHints": [],
+   "reverse": true,
+   "fromStage": "s_report",
+   "toStage": "s_report",
+   "crossStage": false,
+   "intoNoWayIn": false,
+   "fromNoWayOut": false,
+   "fromIsland": false
+  },
+  {
+   "from": "report.saved",
+   "to": "report.busy",
+   "type": "return",
+   "when": "",
+   "evidence": {
+    "chain": [
+     "parcelworks/report.py::publish",
+     "parcelworks/report.py::write_report"
+    ],
+    "hops": 1
+   },
+   "site": {
+    "at": "parcelworks/report.py:50",
+    "lineKnown": true,
+    "fn": "publish",
+    "calls": 1
+   },
+   "holder": {
+    "box": "report.saved",
+    "isFrom": true,
+    "also": 0
+   },
+   "conditionHints": [],
+   "reverse": false,
+   "fromStage": "s_report",
+   "toStage": "s_report",
+   "crossStage": false,
+   "intoNoWayIn": false,
+   "fromNoWayOut": false,
+   "fromIsland": false
+  }
+ ],
+ "stages": [],
+ "unmappedModules": [],
+ "unaccounted": [],
+ "ledgerDraft": {},
+ "unsupportedRoutes": [
+  {
+   "route": "r_fast_done",
+   "from": "intake.fast_done",
+   "to": "queue.done",
+   "why": "no call path from parcelworks/intake.py::accept to parcelworks/jobqueue.py::Queue.complete within 5 calls"
+  },
+  {
+   "route": "r_reclaim_ok",
+   "from": "queue.reclaim",
+   "to": "queue.claim",
+   "why": "no call path from parcelworks/jobqueue.py::Queue.reclaim_expired to parcelworks/jobqueue.py::Queue.claim within 5 calls"
+  },
+  {
+   "route": "r_reclaim_requeue",
+   "from": "queue.reclaim",
+   "to": "queue.pending",
+   "why": "no call path from parcelworks/jobqueue.py::Queue.reclaim_expired to parcelworks/jobqueue.py::Queue.enqueue within 5 calls"
+  },
+  {
+   "route": "r_leased_route",
+   "from": "queue.leased",
+   "to": "work.route",
+   "why": "no call path from parcelworks/jobqueue.py::Queue.claim to parcelworks/handlers.py::route within 5 calls"
+  },
+  {
+   "route": "r_book_ok",
+   "from": "work.book",
+   "to": "queue.complete",
+   "why": "no call path from parcelworks/handlers.py::book_carrier to parcelworks/jobqueue.py::Queue.complete within 5 calls"
+  },
+  {
+   "route": "r_backoff_pending",
+   "from": "trouble.backoff",
+   "to": "queue.pending",
+   "why": "no call path from parcelworks/jobqueue.py::backoff_delay to parcelworks/jobqueue.py::Queue.enqueue within 5 calls"
+  },
+  {
+   "route": "r_release_ok",
+   "from": "trouble.release",
+   "to": "queue.pending",
+   "why": "no call path from parcelworks/cli.py::cmd_release to parcelworks/jobqueue.py::Queue.enqueue within 5 calls"
+  },
+  {
+   "route": "r_release_no_papers",
+   "from": "trouble.release",
+   "to": "trouble.hold_customs",
+   "why": "no call path from parcelworks/cli.py::cmd_release to parcelworks/jobqueue.py::Queue.hold within 5 calls"
+  },
+  {
+   "route": "r_release_other",
+   "from": "trouble.release_refused",
+   "to": "trouble.hold_address",
+   "why": "no call path from parcelworks/cli.py::cmd_release to parcelworks/jobqueue.py::Queue.hold within 5 calls"
+  },
+  {
+   "route": "r_sum_render",
+   "from": "report.summarize",
+   "to": "report.render",
+   "why": "no call path from parcelworks/report.py::summarize to parcelworks/report.py::render within 5 calls"
+  },
+  {
+   "route": "r_render_write",
+   "from": "report.render",
+   "to": "report.write",
+   "why": "no call path from parcelworks/report.py::render to parcelworks/report.py::write_report within 5 calls"
+  }
+ ],
+ "hotspots": [
+  {
+   "fn": "parcelworks/cli.py::main",
+   "signals": 1,
+   "why": "4 branches"
+  },
+  {
+   "fn": "web/client.ts::StatusClient.call",
+   "signals": 1,
+   "why": "1 raise"
+  },
+  {
+   "fn": "web/client.ts::StatusClient.getJob",
+   "signals": 1,
+   "why": "1 raise"
+  }
+ ],
+ "whereToLook": [
+  {
+   "kind": "route",
+   "at": "report.saved -> report.returned",
+   "ask": "The calls publish -> summarize connect report.saved to report.returned: what condition sends flow along it?"
+  },
+  {
+   "kind": "route",
+   "at": "intake.submit -> intake.dedupe",
+   "ask": "The calls cmd_submit -> accept connect intake.submit to intake.dedupe: what condition sends flow along it?"
+  },
+  {
+   "kind": "route",
+   "at": "intake.submit -> intake.lane",
+   "ask": "The calls cmd_submit -> accept connect intake.submit to intake.lane: what condition sends flow along it?"
+  },
+  {
+   "kind": "route",
+   "at": "intake.submit -> intake.fast_done",
+   "ask": "The calls cmd_submit -> accept connect intake.submit to intake.fast_done: what condition sends flow along it?"
+  },
+  {
+   "kind": "route",
+   "at": "intake.submit -> intake.enqueue",
+   "ask": "The calls cmd_submit -> accept connect intake.submit to intake.enqueue: what condition sends flow along it?"
+  },
+  {
+   "kind": "function",
+   "at": "parcelworks/cli.py::main",
+   "ask": "parcelworks/cli.py::main has 4 branches and no box cites it: is it part of a failure path the map should show?"
+  },
+  {
+   "kind": "function",
+   "at": "web/client.ts::StatusClient.call",
+   "ask": "web/client.ts::StatusClient.call has 1 raise and no box cites it: is it part of a failure path the map should show?"
+  },
+  {
+   "kind": "function",
+   "at": "web/client.ts::StatusClient.getJob",
+   "ask": "web/client.ts::StatusClient.getJob has 1 raise and no box cites it: is it part of a failure path the map should show?"
+  },
+  {
+   "kind": "unsupported-route",
+   "at": "r_fast_done",
+   "ask": "Route r_fast_done (intake.fast_done -> queue.done) has no call path behind it: mark it inferred if an event or queue joins them, or fix the cite."
+  },
+  {
+   "kind": "unsupported-route",
+   "at": "r_reclaim_ok",
+   "ask": "Route r_reclaim_ok (queue.reclaim -> queue.claim) has no call path behind it: mark it inferred if an event or queue joins them, or fix the cite."
+  },
+  {
+   "kind": "unsupported-route",
+   "at": "r_reclaim_requeue",
+   "ask": "Route r_reclaim_requeue (queue.reclaim -> queue.pending) has no call path behind it: mark it inferred if an event or queue joins them, or fix the cite."
+  }
+ ],
+ "noWayInNoHint": [
+  {
+   "box": "web.submit",
+   "kind": "external",
+   "stage": "s_intake",
+   "title": "Web client sends a parcel",
+   "entry": "export",
+   "callerCount": 0,
+   "callers": []
+  }
+ ],
+ "counts": {
+  "routes": 35,
+  "sameCallElsewhere": 45,
+  "noWayIn": 2,
+  "noWayInNoHint": 1,
+  "unmappedModules": 0,
+  "unaccounted": 0,
+  "unsupportedRoutes": 11,
+  "hotspots": 3
+ }
+}

@@ -1,0 +1,44 @@
+{
+  "_faultline": {
+    "tool": "place",
+    "key": "30a91e29fe4e364d",
+    "seed": 1,
+    "boxes": 9
+  },
+  "gapX": 150,
+  "gapY": 84,
+  "nodeMaxChars": 22,
+  "edgeMaxChars": 20,
+  "spine": [
+    "s_intake",
+    "s_queue",
+    "s_work",
+    "s_report",
+    "end_success"
+  ],
+  "route": {
+    "crossingPenalty": 200
+  },
+  "map": [
+    "end_refusal s_intake end_neutral",
+    ". s_queue s_work",
+    "s_report . s_trouble",
+    "end_success end_failure ."
+  ],
+  "ports": {
+    "o:s_trouble>end_failure": {
+      "from": "S",
+      "to": "E"
+    },
+    "o:s_queue>s_report": {
+      "from": "S",
+      "to": "E"
+    },
+    "o:s_trouble>end_neutral": {
+      "from": "E",
+      "to": "E"
+    }
+  },
+  "colGap": {},
+  "rowGap": {}
+}

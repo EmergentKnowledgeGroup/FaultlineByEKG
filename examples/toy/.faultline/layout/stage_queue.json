@@ -1,0 +1,31 @@
+{
+  "_faultline": {
+    "tool": "place",
+    "key": "250d013ce3fad5aa",
+    "seed": 1,
+    "boxes": 6
+  },
+  "gapX": 150,
+  "gapY": 84,
+  "nodeMaxChars": 22,
+  "edgeMaxChars": 20,
+  "spine": [
+    "queue.pending",
+    "queue.reclaim",
+    "queue.claim",
+    "queue.leased",
+    "queue.complete",
+    "queue.done"
+  ],
+  "route": {
+    "crossingPenalty": 200
+  },
+  "map": [
+    "queue.pending queue.reclaim .",
+    "queue.leased queue.claim .",
+    ". . queue.complete",
+    ". . queue.done"
+  ],
+  "colGap": {},
+  "rowGap": {}
+}

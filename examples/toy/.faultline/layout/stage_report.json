@@ -1,0 +1,28 @@
+{
+  "_faultline": {
+    "tool": "place",
+    "key": "07b052a31052596c",
+    "seed": 1,
+    "boxes": 6
+  },
+  "gapX": 150,
+  "gapY": 84,
+  "nodeMaxChars": 22,
+  "edgeMaxChars": 20,
+  "spine": [
+    "report.summarize",
+    "report.render",
+    "report.write",
+    "report.saved"
+  ],
+  "route": {
+    "crossingPenalty": 200
+  },
+  "map": [
+    "report.summarize report.render",
+    "report.busy report.write",
+    "report.returned report.saved"
+  ],
+  "colGap": {},
+  "rowGap": {}
+}

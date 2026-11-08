@@ -1,0 +1,62 @@
+{
+  "schema": "faultline.model/1",
+  "system": {
+    "name": "Parcelworks",
+    "tagline": "A small parcel job runner",
+    "summary": "Parcels come in through intake, wait in a durable SQLite queue, and are claimed by a worker under a time-limited lease. The worker routes each one: book a carrier, park it on hold, or fail the attempt and retry with backoff. A report counts what happened.",
+    "purpose": "A parcel is accepted once, gets a carrier label, and is counted as delivered in the report. Refusing, holding and failing for good are deliberate answers, not crashes.",
+    "source": { "root": ".", "pin": "" }
+  },
+  "stages": [
+    { "id": "s_intake", "title": "Intake", "blurb": "A parcel request is checked, then refused or put in line.", "order": 1, "color": null },
+    { "id": "s_queue", "title": "Queue", "blurb": "Durable jobs in SQLite, claimed under a lease.", "order": 2, "color": null },
+    { "id": "s_work", "title": "Work", "blurb": "The worker loop routes each claimed parcel.", "order": 3, "color": null },
+    { "id": "s_trouble", "title": "Retry and hold", "blurb": "Backoff retries, terminal failure, and parked parcels.", "order": 4, "color": null },
+    { "id": "s_report", "title": "Report", "blurb": "Counts outcomes and saves the report file.", "order": 5, "color": null }
+  ],
+  "paths": [
+    { "id": "main", "title": "Main path", "blurb": "One ordinary parcel from request to saved report.",
+      "boxes": ["web.submit", "intake.submit", "intake.required", "intake.weight", "intake.format", "intake.dedupe", "intake.lane", "intake.enqueue", "queue.pending", "work.loop", "work.tick", "queue.reclaim", "queue.claim", "queue.leased", "work.route", "work.book", "queue.complete", "queue.done", "report.summarize", "report.render", "report.write", "report.saved"] },
+    { "id": "retry_fail", "title": "Carrier outage to terminal failure", "blurb": "An outage-zone parcel goes round the retry loop, waiting longer each lap, until MAX_ATTEMPTS and then fails for good.",
+      "boxes": ["queue.pending", "work.loop", "work.tick", "queue.reclaim", "queue.claim", "queue.leased", "work.route", "work.book", "trouble.fail", "trouble.failed"] },
+    { "id": "customs", "title": "Customs hold and release", "blurb": "A high-value parcel is parked until an operator sends a release with paperwork.",
+      "boxes": ["queue.leased", "work.route", "trouble.hold_customs", "trouble.release", "queue.pending"] },
+    { "id": "address_stuck", "title": "Address hold", "blurb": "A ZZ postcode is parked. A release request gets the answer still on hold, every time.",
+      "boxes": ["queue.leased", "work.route", "trouble.hold_address", "trouble.release_refused"] },
+    { "id": "fast", "title": "Fast lane", "blurb": "With FAST_LANE on, a small express parcel is stored as done at intake.",
+      "boxes": ["web.submit", "intake.submit", "intake.required", "intake.weight", "intake.format", "intake.dedupe", "intake.lane", "intake.fast_done", "queue.done"] }
+  ],
+  "loops": [
+    { "id": "l_retry", "title": "Retry with backoff", "blurb": "A failed carrier call sends the job back to pending with a growing delay.",
+      "boxes": ["work.book", "trouble.fail", "trouble.backoff", "queue.pending", "work.loop", "work.tick", "queue.reclaim", "queue.claim", "queue.leased", "work.route"],
+      "limit": "MAX_ATTEMPTS tries per job (4 by default), then terminal failure" },
+    { "id": "l_worker", "title": "Worker loop", "blurb": "Tick, claim, route, settle, tick again.",
+      "boxes": ["work.loop", "work.tick", "queue.reclaim", "queue.claim", "queue.leased", "work.route", "work.book", "queue.complete", "queue.done"],
+      "limit": "max_ticks or stop_when_idle; a running service sets neither" },
+    { "id": "l_report_write", "title": "Report write retry", "blurb": "A busy destination makes the writer sleep and try the whole write again.",
+      "boxes": ["report.write", "report.busy"],
+      "limit": "" },
+    { "id": "l_hold_customs", "title": "Customs hold and release", "blurb": "A release request either frees the job or leaves it on hold.",
+      "boxes": ["trouble.hold_customs", "trouble.release"],
+      "limit": "Each lap needs a new operator request" },
+    { "id": "l_hold_address", "title": "Address hold and answer", "blurb": "A release request is answered and the job stays on hold.",
+      "boxes": ["trouble.hold_address", "trouble.release_refused"],
+      "limit": "Each lap needs a new operator request" }
+  ],
+  "terms": [
+    { "term": "lease", "meaning": "A worker's time-limited ownership of a claimed job (LEASE_SECONDS, 30 by default). Only the holder of the lease token can settle it.", "refs": [{ "path": "parcelworks/jobqueue.py", "symbol": "parcelworks/jobqueue.py::Queue.claim", "line": 86 }] },
+    { "term": "claim", "meaning": "Take the oldest ready pending job and lease it, in one transaction.", "refs": [{ "path": "parcelworks/jobqueue.py", "symbol": "parcelworks/jobqueue.py::Queue.claim", "line": 77 }] },
+    { "term": "backoff", "meaning": "The wait before a failed job may be claimed again: 2 s, doubling each try, capped at 300 s.", "refs": [{ "path": "parcelworks/jobqueue.py", "symbol": "parcelworks/jobqueue.py::backoff_delay", "line": 34 }] },
+    { "term": "hold", "meaning": "A job parked with a reason, customs or address, until an operator sends a release request.", "refs": [{ "path": "parcelworks/jobqueue.py", "symbol": "parcelworks/jobqueue.py::Queue.hold", "line": 130 }] },
+    { "term": "dead letter", "meaning": "The report's name for a job that was failed for good.", "refs": [{ "path": "parcelworks/report.py", "symbol": "parcelworks/report.py::summarize", "line": 17 }] },
+    { "term": "fast lane", "meaning": "FAST_LANE: small express parcels are stored as done at intake. Off by default.", "refs": [{ "path": "parcelworks/config.py", "symbol": "parcelworks/config.py::fast_lane", "line": 7 }] },
+    { "term": "outage zone", "meaning": "Postcodes starting 99, where the pretend carrier always fails.", "refs": [{ "path": "parcelworks/handlers.py", "symbol": "parcelworks/handlers.py::book_carrier", "line": 19 }] },
+    { "term": "tick", "meaning": "One pass of the worker loop: process_one.", "refs": [{ "path": "parcelworks/worker.py", "symbol": "parcelworks/worker.py::Worker.process_one", "line": 18 }] },
+    { "term": "stale", "meaning": "A settle attempt whose lease token no longer matches. The worker reports it as lease_lost.", "refs": [{ "path": "parcelworks/jobqueue.py", "symbol": "parcelworks/jobqueue.py::Queue.fail", "line": 120 }] },
+    { "term": "label", "meaning": "The carrier booking code, like LBL-pw-1, stored with a done job.", "refs": [{ "path": "parcelworks/handlers.py", "symbol": "parcelworks/handlers.py::route", "line": 30 }] }
+  ],
+  "modules": {
+    "parcelworks/__init__.py": { "excluded": "empty package marker" },
+    "web/status.ts": { "excluded": "type declarations only, no behaviour" }
+  }
+}
