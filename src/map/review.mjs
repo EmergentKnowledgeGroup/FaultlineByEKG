@@ -6,8 +6,7 @@
 //
 // `map` is the finished map as the review needs it: { boxes: Map id -> box (with `fn`), roads: Map id -> road, mods: [paths], fns: Map id -> {line, end, qual,
 // cls, calls}, classes: Map key -> {line, mod} }. reviewView() builds it from a model file and the index map.mjs writes beside it.
-import path from 'node:path';
-import { readText } from './lookup.mjs';
+import { RootedSource } from '../story/source.mjs';
 import { cmp, sorted, pyStrip, cpSlice, squash } from './pyrt.mjs';
 
 export const SCHEMA_Q = 'faultline.review-queue/1';
@@ -65,17 +64,23 @@ export function templateOf(c) {
   return null;
 }
 
-/** Source files of the mapped project, read on demand. */
+/** Source files of the mapped project, read on demand. Only a file the map lists (`mods`) is opened, and only through RootedSource: a path that leaves the
+ *  root, or a link that leads out of it, reads as missing. `mods` null opens any file under the root (a caller that holds no map). */
 export class Src {
-  constructor(root) {
+  constructor(root, mods = null) {
     this.root = root.replace(/\/+$/, '');
+    this.gate = new RootedSource(root);
+    this.mods = mods == null ? null : new Set(mods);
     this._t = new Map();
   }
 
+  /** Does the map list this path? Compared as written: the digest covers exactly the listed strings. */
+  has(rel) { return this.mods === null || this.mods.has(rel); }
+
   lines(rel) {
     if (!this._t.has(rel)) {
-      let l = null;
-      try { l = readText(path.join(this.root, rel)).split('\n'); } catch { l = null; }
+      const l = this.has(rel) ? this.gate.lines(rel) : null;
+      if (l && l.length && l[0].charCodeAt(0) === 0xfeff) l[0] = l[0].slice(1); // a byte order mark is not part of the line (the gate's copy is ours alone)
       this._t.set(rel, l);
     }
     return this._t.get(rel);
@@ -110,9 +115,10 @@ function windowLines(src, rel, line, before = 3, after = 3, lo = null, hi = null
 
 const textLine = (ls, i) => cpSlice(pyStrip(ls[i]), 0, 200);
 
-/** Groups the not-confident claims into questions and fills in the lines. -> list of items, unordered. */
-export function buildItems(map, claims, root, files = null) {
-  const src = new Src(root);
+/** Groups the not-confident claims into questions and fills in the lines. -> list of items, unordered.
+ *  A claim whose path the map does not list gets no question (the claim file may not be the one the map was made with); `stats.skipped` counts those. */
+export function buildItems(map, claims, root, files = null, stats = null) {
+  const src = new Src(root, map.mods);
   const fileList = files ?? sorted(map.mods);
   const items = [];
   const groups = new Map();
@@ -133,10 +139,11 @@ export function buildItems(map, claims, root, files = null) {
   for (const { key, cs } of groups.values()) {
     cs.sort((a, b) => cmp([a.id.startsWith('n:') ? 0 : 1, a.id], [b.id.startsWith('n:') ? 0 : 1, b.id]));
     const c = cs[0];
+    const rel = c.path;
+    if (!src.has(rel)) { if (stats) stats.skipped = (stats.skipped ?? 0) + 1; continue; }
     const t = key[0];
     const fid = c.fn;
     const fn = map.fns.get(fid) ?? null;
-    const rel = c.path;
     const line = c.line || (fn ? fn.line : 1);
     const ls = src.lines(rel) ?? [];
     const [lo, hi] = fn ? [fn.line, fn.end || ls.length] : [1, ls.length];

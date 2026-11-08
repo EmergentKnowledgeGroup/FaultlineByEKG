@@ -49,6 +49,8 @@ export function recomputeGate(base, merged) {
 export function applyWords(mapDir, overlay) {
   let base;
   try { base = JSON.parse(fs.readFileSync(path.join(mapDir, 'model.json'), 'utf8')); } catch { throw new MapError(`the tool map has no readable model.json in ${String(mapDir).replace(/\\/g, '/')}`); }
+  // the merged model is written out whole, so only a file that says it is a tool model is merged: model.json may be a link to some other JSON file
+  if (!base || base.schema !== 'faultline.model/1' || !Array.isArray(base.boxes)) throw new MapError(`model.json in ${String(mapDir).replace(/\\/g, '/')} is not a tool model`);
   const rep = { schema: APPLY_SCHEMA, by: '', wordsOffered: 0, wordsAccepted: 0, wordsRefused: 0, forbidden: 0, claimsOffered: 0, claimsRefused: 0, boxesWithWords: 0, lint: [], refusals: [], refusalsTotal: 0, structureChanged: 0, overlayRefused: false };
   const note = (m) => { rep.refusalsTotal++; if (rep.refusals.length < MAX_LISTED) rep.refusals.push(m); };
   const merged = { ...base, boxes: base.boxes.map((b) => ({ ...b })) };

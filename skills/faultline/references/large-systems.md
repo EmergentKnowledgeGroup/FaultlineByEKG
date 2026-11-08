@@ -11,7 +11,7 @@ faultline init --project <dir> --name <name>
 faultline extract --project <dir>
 ```
 
-Put the source folder and any include list in `<dir>/config.json`: `{"root":"../my-repo","include":["src/**"]}`. A relative `root` is read from the project folder, so the file holds no path from your machine. Keep the project folder outside the repo if the map is private.
+Put the source folder and any include list in `<dir>/config.json`: `{"root":"../my-repo","include":["src/**"]}`. A relative `root` is read from the project folder, so the file holds no path from your machine. Keep the project folder outside the repo if the map is private. A root that points outside the folder holding the project is not used on its own (a cloned project folder could point anywhere), so then pass `--source <repo>` to `extract`, `signals` and `build --excerpts`.
 
 Read the extract summary, `graph.json` clusters, the README and the architecture docs. Answer the seven questions in `references/story.md` (job B). Then write:
 

@@ -63,17 +63,20 @@ export function breaksText(data, o, c, T) {
   return { lines: L, link, more: `faultline breaks ${stage ? `--stage ${stage} ` : ''}--all --budget ${T * 2}` };
 }
 
-/** `faultline status` on a tool map: what was read, what is open, whether the page is current, what to do next. Under 200 tokens. */
+// a git pin is where HEAD was, not the bytes read: the files are read as they lie, uncommitted edits too, so agent text says so
+export const pinSaid = (pin) => (/^git /.test(pin || '') ? `${pin} (HEAD; the files read may hold uncommitted edits)` : pin || '');
+
+/** `faultline status` on a tool map: what was read, what is open, whether the page matches the stored map (the code is not looked at), what to do next. Under 200 tokens. */
 export function statusLines(data, page, refresh) {
   const t = data.toolMap, n = t.nums, notes = t.notes || [];
-  const L = [`STATUS TOOL MAP${data.pin ? `  pin ${data.pin}` : ''}  read from the code; no agent, nothing run`];
+  const L = [`STATUS TOOL MAP${data.pin ? `  pin ${pinSaid(data.pin)}` : ''}  read from the code; no agent, nothing run`];
   L.push(`read: ${plural(n.functions, 'function')} in ${plural(n.files, 'file')}${langs(n.languages) ? ` (${langs(n.languages)})` : ''}; ${n.boxes} boxes, ${n.roads} roads, ${plural(n.stages, 'stage')}; ${n.claims} claims, ${n.claimsNotConfident} not confident`);
   const nr = [n.noBoxes ? `${plural(n.noBoxes, 'function')} with no box` : '', n.unresolved ? `${plural(n.unresolved, 'call')} not followed` : '', n.severalTargets ? `${n.severalTargets} with several targets` : ''].filter(Boolean);
   L.push(`not read: ${nr.join(', ') || 'nothing the tool knows of'}${notes.length ? `; ${trunc(notes[0], 90)}` : ''}`);
   L.push(`open: ${plural(n.questions, 'question')} (${n.questionsSure} sure), ${plural(n.gaps, 'gap')} in the drawing, ${n.hearerUnknown}/${n.failing} failing endings with no known hearer`);
   const f = data.findings.filter((x) => x.shown).length;
   const fresh = !page || (page.built && page.current);
-  L.push(!page ? 'page: not checked' : !page.built ? 'page: NOT BUILT' : page.current ? 'page: built, matches the map' : page.recorded ? `page: OUT OF DATE (${page.changed})` : 'page: built by an older version, cannot tell if current');
+  L.push(!page ? 'page: not checked' : !page.built ? 'page: NOT BUILT' : page.current ? 'page: built, matches the map as stored (code not checked)' : page.recorded ? `page: OUT OF DATE (${page.changed})` : 'page: built by an older version, cannot tell if it matches the map');     // matches = the page's recorded inputs equal the project files now; no source file is opened
   const src = refresh || 'faultline map --source <the code folder>';       // refresh is the whole command that makes the map again
   L.push(!page || !page.built ? `next: ${src}` : !fresh ? 'next: faultline build   (rebuilds the page from the map, no source needed)' : f ? 'next: faultline breaks   (the questions, ranked)' : n.claimsNotConfident ? 'next: faultline review queue --source <the code folder>' : 'next: faultline brief');
   return L;

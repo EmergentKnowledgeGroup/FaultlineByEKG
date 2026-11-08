@@ -4,6 +4,7 @@ import fs from 'node:fs';
 import nodePath from 'node:path';
 import { langOf, squash } from './util.mjs';
 import { maskCode } from './mask.mjs';
+import { RootedSource } from '../story/source.mjs';
 
 const KEYWORDS_NOT_CALLS = new Set([
   'if', 'for', 'while', 'switch', 'catch', 'function', 'return', 'typeof', 'void', 'await', 'async', 'elif', 'with', 'def', 'class', 'lambda',
@@ -70,7 +71,18 @@ export class Source {
   /** @param {string|null} root directory of the mapped source tree (read only) */
   constructor(root) {
     this.root = root ? nodePath.resolve(root) : null;
+    this.gate = this.root ? new RootedSource(this.root) : null;       // the one gate: a file is opened only through the real path it gives back
     this.cache = new Map();
+  }
+
+  /** The real path of the plain file `rel` names inside the root, or null: missing, a folder, or a path or link that leads outside. Nothing is read. */
+  _real(rel) {
+    const real = this.gate ? this.gate.resolve(rel) : null;
+    try {
+      return real && fs.statSync(real).isFile() ? real : null;
+    } catch {
+      return null;
+    }
   }
 
   file(p) {
@@ -78,10 +90,8 @@ export class Source {
     if (this.cache.has(p)) return this.cache.get(p);
     let ft = null;
     try {
-      const full = nodePath.join(this.root, p);
-      if (full.startsWith(this.root) && fs.existsSync(full) && fs.statSync(full).isFile()) {
-        ft = new FileText(fs.readFileSync(full, 'utf8'), langOf(p));
-      }
+      const real = this._real(p);
+      if (real) ft = new FileText(fs.readFileSync(real, 'utf8'), langOf(p));
     } catch {
       ft = null;
     }
@@ -93,18 +103,18 @@ export class Source {
     return this.file(p) !== null;
   }
 
-  /** The raw text of a root-level file (README, package.json ...) or null. */
+  /** The raw text of a root-level file (README, package.json ...) or null. A link that leads outside the root gives null. */
   rootText(name) {
     if (!this.root) return null;
     try {
-      const full = nodePath.join(this.root, name);
-      return fs.existsSync(full) && fs.statSync(full).isFile() ? fs.readFileSync(full, 'utf8') : null;
+      const real = this._real(name);
+      return real ? fs.readFileSync(real, 'utf8') : null;
     } catch {
       return null;
     }
   }
 
-  /** Names of the files directly under the root, sorted. */
+  /** Names of the entries directly under the root, sorted. */
   rootNames() {
     if (!this.root) return [];
     try {
@@ -114,9 +124,18 @@ export class Source {
     }
   }
 
+  /** True when `rel` is itself a link (to a file or a folder, wherever it leads). Used to leave links unwalked. */
+  isLink(rel) {
+    try {
+      return fs.lstatSync(nodePath.join(this.root, rel)).isSymbolicLink();
+    } catch {
+      return false;
+    }
+  }
+
   /**
    * Documentation files, relative to the root and in a fixed order: the README files at the root first, then the text files under a
-   * docs folder in path order. At most `cap` are listed.
+   * docs folder in path order. At most `cap` are listed. A README may be a link that stays inside the root; the docs walk follows no link at all.
    */
   docFiles(cap) {
     if (!this.root) return [];
@@ -124,30 +143,28 @@ export class Source {
     const isDoc = (n) => /\.(?:md|markdown|rst|txt)$/i.test(n);
     for (const n of this.rootNames()) if (/^readme(?:\.[a-z]+)?$/i.test(n) && this._isFile(n)) out.push(n);
     const walk = (rel, depth) => {
-      let names = [];
+      let ents = [];
       try {
-        names = fs.readdirSync(nodePath.join(this.root, rel)).sort();
+        ents = fs.readdirSync(nodePath.join(this.root, rel), { withFileTypes: true }).sort((a, b) => (a.name < b.name ? -1 : a.name > b.name ? 1 : 0));
       } catch {
         return;
       }
-      for (const n of names) {
+      for (const e of ents) {
         if (out.length >= cap) return;
+        if (e.isSymbolicLink()) continue;                              // a link may lead out of the folder: never walked, never read
+        const n = e.name;
         const r = rel ? `${rel}/${n}` : n;
-        if (this._isFile(r)) {
-          if (isDoc(n)) out.push(r);
-        } else if (depth < 6 && !/^(?:node_modules|\.git|vendor|dist|build)$/.test(n)) walk(r, depth + 1);
+        if (e.isDirectory()) {
+          if (depth < 6 && !/^(?:node_modules|\.git|vendor|dist|build)$/.test(n)) walk(r, depth + 1);
+        } else if (isDoc(n) && this._isFile(r)) out.push(r);
       }
     };
-    for (const d of ['docs', 'doc', 'documentation']) if (this.rootNames().includes(d)) walk(d, 0);
+    for (const d of ['docs', 'doc', 'documentation']) if (this.rootNames().includes(d) && !this.isLink(d)) walk(d, 0);
     return out.slice(0, cap);
   }
 
   _isFile(rel) {
-    try {
-      return fs.statSync(nodePath.join(this.root, rel)).isFile();
-    } catch {
-      return false;
-    }
+    return this._real(rel) !== null;
   }
 
   line(p, n) {

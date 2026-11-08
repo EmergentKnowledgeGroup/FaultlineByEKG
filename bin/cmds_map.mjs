@@ -2,7 +2,9 @@
 //   map reads the code and writes a true map and a readable page with no agent. review and story work on what map wrote (<project>/map).
 import fs from 'node:fs';
 import path from 'node:path';
-import { resolveProject, projectKind, CliError } from '../src/build/project.mjs';
+import { resolveProject, projectKind, CliError, rootSetAsideNote } from '../src/build/project.mjs';
+import { RootedSource } from '../src/story/source.mjs';
+import { jsonWhere } from '../src/story/canon.mjs';
 import { parse } from './args.mjs';
 import { plural } from '../src/build/util.mjs';
 
@@ -10,7 +12,7 @@ const out = (s = '') => console.log(s);
 const rel = (p) => path.relative(process.cwd(), p).split(path.sep).join('/') || '.';
 const abs = (p) => path.resolve(p).replace(/\\/g, '/');
 const readJson = (file, what) => {
-  try { return JSON.parse(fs.readFileSync(file, 'utf8')); } catch (e) { throw new CliError(`cannot read ${what} (${file}): ${e.message}`, 1); }
+  try { return JSON.parse(fs.readFileSync(file, 'utf8')); } catch (e) { throw new CliError(`cannot read ${what} (${file}): ${e instanceof SyntaxError ? jsonWhere(e) : e.message}`, 1); }
 };
 // The page and the text commands name a box f58.0; map/model.json, the review questions and the story check name it parcelworks.jobqueue.Queue.fail.s0.
 // Both work in every command. Where a long id is printed, the short one is printed beside it.
@@ -140,8 +142,22 @@ function sourceRoot(o, p, dir) {
   const root = abs(o.source || o.root || p.root);
   let first = null;
   try { first = JSON.parse(fs.readFileSync(path.join(dir, 'review-index.json'), 'utf8')).mods?.[0] ?? null; } catch { /* no index: the commands say so themselves */ }
-  if (first && !fs.existsSync(path.join(root, first))) throw new CliError(`The code this map was made from is not under ${root}. Pass --source <the folder you gave to faultline map>.`, 2);
+  const gate = new RootedSource(root);
+  // a listed path that is not a plain relative one is not looked for here: review says so itself, and the story check will not open it
+  if (typeof first === 'string' && gate.ref(first).ok && !gate.resolve(first)) {
+    const note = rootSetAsideNote(p); // '' unless the project remembers a code folder elsewhere that was not used and no --source was given
+    throw new CliError(`The code this map was made from is not under ${root}. Pass --source <the folder you gave to faultline map>.${note ? ` ${note}` : ''}`, 2);
+  }
   return root;
+}
+
+/** A sentence for why the paths a review index lists cannot be opened, or ''. The digest hashes every listed path and the questions open them, and the index is a file in the map
+ *  folder: one someone else made can list a path that leaves the code folder (or a link that does), or list none and so pass the digest on nothing. A listed file that is only missing is the digest's to report. */
+function modsProblem(root, mods) {
+  if (!Array.isArray(mods) || !mods.length) return 'The review index lists no source files, so there is nothing to check the code against. Fix: run  faultline map  again.';
+  const gate = new RootedSource(root);
+  const bad = mods.filter((m) => { const r = typeof m === 'string' ? gate.ref(m) : { ok: false }; return !r.ok || r.rel !== m || (!gate.resolve(m) && gate.whyNot(m) === 'outside'); }).length;
+  return bad ? `${plural(bad, 'path')} in the review index ${bad === 1 ? 'is' : 'are'} not plain paths inside ${root}, so this map folder was not written for that code. Fix: run  faultline map --source <the code folder>  again.` : '';
 }
 
 // ---- review: the work-list for an agent, and the gate that re-checks its answers ----------------------------------------------------
@@ -164,6 +180,8 @@ export async function review(argv) {
   const model = readJson(path.join(dir, 'model.json'), 'the model');
   const claims = readJson(path.join(dir, 'claims.json'), 'the claims');
   const index = readJson(path.join(dir, 'review-index.json'), 'the review index');
+  const unsafe = modsProblem(root, index?.mods); // before the digest: hashing a listed path opens it
+  if (unsafe) throw new CliError(unsafe, 1);
   try {
     if (fileDigest(root, index.mods) !== index.source_digest) throw new StaleInput(`the sources under ${root} changed after this map was built; run  faultline map  again`);
   } catch (e) {
@@ -173,10 +191,13 @@ export async function review(argv) {
   const map = reviewView(model, index);
   const store = o.store ?? path.join(dir, 'review-checked.json');
   const system = model.system.name;
+  const stats = {};
+  const sayLeftOut = () => { if (stats.skipped) out(`${plural(stats.skipped, 'claim')} named a file the map does not list, so no question was made for ${stats.skipped === 1 ? 'it' : 'them'}.`); };
   if (command === 'queue') {
-    const items = order(buildItems(map, claims, root)).map((it) => ({ ...it, ...(shortsIn(it.item, ids).length ? { page: shortsIn(it.item, ids) } : {}) }));
+    const items = order(buildItems(map, claims, root, null, stats)).map((it) => ({ ...it, ...(shortsIn(it.item, ids).length ? { page: shortsIn(it.item, ids) } : {}) }));
     const nc = claims.filter((c) => c.conf === 'not-confident').length;
     out(`${system}: ${plural(claims.length, 'claim')}, ${nc} not confident, ${plural(items.length, 'question')} (${(100 * items.length / claims.length).toFixed(1)}% of all claims)`);
+    sayLeftOut();
     for (const it of items.slice(0, Number(o.limit ?? 20))) {
       out(`\n#${it.rank} [${it.tier}] ${it.item}${it.page ? `   (box ${it.page.join(', ')} on the page)` : ''}\n  Q: ${it.question}\n  answers: ${it.answers.join(' | ')}`);
       for (const l of it.lines.slice(0, 6)) out(`    ${l.path}:${l.line} | ${cpSlice(l.text, 0, 110)}`);
@@ -184,12 +205,13 @@ export async function review(argv) {
     if (o.out) write(o.out, reviewText({ schema: SCHEMA_Q, system, items }));
   } else if (command === 'check') {
     if (!o.answers) throw new CliError('review check needs --answers FILE', 2);
-    const items = new Map(buildItems(map, claims, root).map((i) => [i.item, i]));
+    const items = new Map(buildItems(map, claims, root, null, stats).map((i) => [i.item, i]));
     const byId = new Map(claims.map((c) => [c.id, c]));
-    const src = new Src(root);
+    const src = new Src(root, index.mods);
     const ans = readJson(o.answers, 'the answers');
     const results = ans.answers.map((x) => checkAnswer(items.get(x.item) ?? null, x, src, byId));
     write(store, reviewText({ schema: 'faultline.review-checked/1', system, results }));
+    sayLeftOut();
     const tally = {};
     for (const r of results) tally[r.status] = (tally[r.status] ?? 0) + 1;
     out(`${JSON.stringify(tally)} -> ${store}`);
@@ -236,7 +258,7 @@ export async function story(argv) {
     const { applyWords, APPLY_SCHEMA } = await import('../src/story/apply.mjs');
     const { MapError } = await import('../src/story/check.mjs');
     let words;
-    try { words = JSON.parse(fs.readFileSync(o.words, 'utf8')); } catch (e) { refuse([{ code: 'A-read', msg: `cannot read the words file: ${String(e.message).slice(0, 80)}`, at: '' }]); return 3; }
+    try { words = JSON.parse(fs.readFileSync(o.words, 'utf8')); } catch (e) { refuse([{ code: 'A-read', msg: `cannot read the words file: ${e instanceof SyntaxError ? jsonWhere(e) : String(e.message).slice(0, 80)}`, at: '' }]); return 3; }
     let res;
     try { res = applyWords(mapDir, words); } catch (e) {
       if (e instanceof MapError) { console.error(`REFUSE M-map: ${e.message}`); return 4; }

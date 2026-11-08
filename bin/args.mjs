@@ -59,7 +59,7 @@ Review: what the tool is not sure of, for an agent to look into
   review queue               the not-confident claims as questions, main path first   [--limit N] [--out FILE]
   review check --answers F   re-check an agent's answers against the source. An answer only annotates a claim: it cannot add or remove a box or a road
   review view                the claims as a reader sees them, with the checked answers beside them   [--without-agent] [--out FILE]
-                             all three take [--map DIR] [--source DIR]. A map whose code changed after it was written is refused.
+                             all three take [--map DIR] [--source DIR]. A map is refused when a file it read changed after it was written (a file added since is not noticed). They read only inside --source and skip links that leave it.
 
 Story: an agent's map in words, checked against the tool map
   story check --story F      each box and road of the story gets a verdict: joined by the tool at the cited line, joined by a route, related, or no link
@@ -72,7 +72,7 @@ The long way: an agent writes the map by hand (init, extract, propose, write mod
   refuse and name the command to use instead.
 Build the map
   init                       make .faultline/ with a starter model
-  extract                    read the code: facts, census, graph (and signals) [--include a,b] [--exclude c,d] [--no-defaults]
+  extract                    read the code: facts, census, graph (and signals) [--source DIR] [--include a,b] [--exclude c,d] [--no-defaults]
   signals                    read the code again for pairs (pause/resume), flags set but never cleared, messages handled but never sent, empty
                              handlers and swallowed errors; writes signals.json (extract writes it too)   [--out DIR]
   propose                    where to look: route hints from the call graph (each with its call site file:line and the box that holds it), gaps, hotspots
@@ -87,7 +87,7 @@ Build the map
                              that reaches it keeps its best layout so far and is reported as CAPPED. --stage places that stage's chart parts, and
                              works while another stage's fragment is refused (it then reads only that stage's fragments plus 00-*)
   build [--draft|--finished] write .faultline/dist/atlas.html, atlas.agent.json, BRIEF.md   [--no-place] [--excerpts] [--keep-messages] [--source-base URL]
-                             on a project that faultline map made, build rebuilds its page the same way map did (the Reader included), from the map already there; it reads no code
+                             on a project that faultline map made, build rebuilds its page the same way map did (the Reader included), from the map already there; it reads no code (except --excerpts, which copies lines only from --source/--root or the folder that holds the project)
                              and takes neither --draft nor --finished. To read the code again, run faultline map.
                              --draft or --no-place still builds when charts have no layout: they are listed as not drawn. --finished refuses
                              imported log text (an outcome's reason) stays out of the page and the agent file; --keep-messages puts it in. Paths are always repo-relative
@@ -134,7 +134,7 @@ For an agent (each answer is under a token budget and ends with a link to open)
                              (the first few are always shown after the candidates)
   path <a> <b>               the route between two boxes: along a declared path when both are on one (it says which), else a route the roads allow (each road 1, a change of stage 6, a main-path road far less)   [--shortest: fewest hops]
   impact <box|file>          what is downstream by forward roads: counts by hop, boxes within 2 hops, endings within 4; stops at shared funnels and says so
-  status                     on a tool map: what was read, what is open, whether the page matches the map (by content, not file time) and what to do next.
+  status                     on a tool map: what was read, what is open, whether the page matches the stored map (by content, not file time; the code is not checked) and what to do next.
                              On a map written by hand: draft or finished (FINISHED only when the gates pass and the page is built and current), gaps, charts not placed
   mcp                        serve the six above over MCP stdio (JSON-RPC, no dependency)
   Any of them takes --budget TOKENS to raise the cap.

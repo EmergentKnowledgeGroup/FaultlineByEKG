@@ -1,6 +1,6 @@
 // Commands for mapping a large system with several agents: plan worklist join parts.
 import path from 'node:path';
-import { readProject, CliError } from '../src/build/project.mjs';
+import { readProject, requireRoot, CliError } from '../src/build/project.mjs';
 import { loadModelReport } from '../src/model/index.mjs';
 import { chartsFromModel } from '../src/build/charts.mjs';
 import { partNameWarnings } from '../src/model/partnames.mjs';
@@ -129,10 +129,11 @@ export async function join(argv) {
 // `signals`: read the source again for the shapes the pair, flag, message, handler and swallowed-error checks look at. Writes signals.json
 // beside facts.json (or into --out DIR); facts.json and census.json are never touched. Without signals.json those checks simply do not run.
 export async function signals(argv) {
-  const { o } = parse(argv, { str: ['out', 'include', 'exclude'] });
+  const { o } = parse(argv, { str: ['out', 'include', 'exclude', 'source'] });
   const p = proj(o);
   needProject(p);
   handOnly(p, 'signals');
+  requireRoot(p);
   const data = readProject(p.dir);
   if (!data.facts) throw new CliError('No facts yet. Fix: run  faultline extract.', 2);
   const { writeProjectSignals, signalsSummary } = await import('../src/extract/signals.mjs');

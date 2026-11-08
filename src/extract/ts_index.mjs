@@ -1,7 +1,6 @@
 // Pass 1 of the TS/JS reader: definition index over every file plus the import/export resolver pass 2 uses.
 import fs from 'node:fs';
 import path from 'node:path';
-import { createRequire } from 'node:module';
 
 export const EXTS = ['.ts', '.tsx', '.mts', '.cts', '.js', '.jsx', '.mjs', '.cjs'];
 const TYPE_NOISE = new Set(['string', 'number', 'boolean', 'any', 'unknown', 'void', 'never', 'null', 'undefined', 'object', 'Record', 'Map', 'Set',
@@ -10,7 +9,7 @@ const WRAPPERS = new Set(['Promise', 'Array', 'Partial', 'Required', 'Readonly',
 
 export async function loadTs(rootDir) {
   try { return (await import('typescript')).default; } catch { /* fall through */ }
-  try { return createRequire(path.join(rootDir, 'package.json'))('typescript'); } catch { return null; }
+  return null; // never the mapped repo's own copy: loading it would run its code
 }
 
 export function scriptKindOf(ts, file) {

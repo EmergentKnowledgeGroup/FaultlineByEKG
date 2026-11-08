@@ -38,6 +38,7 @@ faultline map --source <folder with the code>    # reads, draws, builds the page
 - To read only part of the code, make `<project>/config.json` with `{"include": ["src/**"], "exclude": []}` before the run.
 - `--no-page` stops before the page is built. Run `map` again without it to finish.
 - Running `map` again after the code changed rebuilds the map. The same code gives the same files.
+- A repo you cloned may ship its own `.faultline` folder. That is someone else's input, not a map you can trust: run `faultline map` yourself before you read it, review it or build on it.
 
 If a run stops with a message:
 
@@ -54,7 +55,7 @@ If a run stops with a message:
 Use the map before you open files. Each answer is small and ends with a link a person can open.
 
 ```
-faultline status               # what exists, whether the page is current
+faultline status               # what exists, whether the page matches the stored map
 faultline brief                # the whole picture, about 1200 tokens
 faultline where <box | file:line | words from a title>
 faultline breaks               # candidates, one question each
@@ -64,7 +65,7 @@ faultline impact <box | file>  # what is downstream
 
 Take box ids (such as `f58.0`) from `brief` or `where`; the long ids that `review` and `story` print work as well, and so do a function id (`path/file.py::Class.method`), a bare function name and `file:line`. A `path` answer is a route the roads allow, not a promise that one request takes it. Details and what the words mean: `references/reading-a-map.md`.
 
-On a tool map `status` says what was read, what is open and what to do next, `brief` opens with the same three lines, and `breaks` lists the same ranked questions the page lists, with the same counts. Read `status` first: it also says if the page no longer matches the map.
+On a tool map `status` says what was read, what is open and what to do next, `brief` opens with the same three lines, and `breaks` lists the same ranked questions the page lists, with the same counts. Read `status` first: it also says if the page no longer matches the stored map. It never opens the code, so after the code changes run `map` again; a page that matches the stored map can still describe old code.
 
 ## Job 3: work the review queue
 
@@ -99,7 +100,7 @@ The tool gives each road "joined by the tool at this line", "joined by a route",
 
 ## Evidence, if someone has it
 
-A run, a test or a coverage report can be added as a walk (`faultline walk add run.walk.jsonl`), and `where` then shows a box as seen. After `walk add`, run `faultline build`: on a tool map it rebuilds the page with the Reader and the walk. It reads no code; run `faultline map` again to refresh a map whose code changed. See `references/evidence.md`.
+A run, a test or a coverage report can be added as a walk (`faultline walk add run.walk.jsonl`), and `where` then shows a box as seen. After `walk add`, run `faultline build`: on a tool map it rebuilds the page with the Reader and the walk. It reads no code (unless you pass `--excerpts`); run `faultline map` again to refresh a map whose code changed. See `references/evidence.md`.
 
 ## Handing it over
 

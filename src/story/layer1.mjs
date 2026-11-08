@@ -3,7 +3,8 @@
 import fs from 'node:fs';
 import path from 'node:path';
 import { createHash } from 'node:crypto';
-import { cmp, normSymbol } from './canon.mjs';
+import { cmp, normSymbol, jsonWhere } from './canon.mjs';
+import { RootedSource } from './source.mjs';
 
 /** A cited line counts as "near" a tool box when it is the rest of the statement that box starts (a wrapped call, an argument list), or the line that opens the block the box stands in.
  *  A statement spread over more lines than this is data, not a step. */
@@ -15,15 +16,19 @@ function readJson(dir, name) {
   const p = path.join(dir, name);
   let text;
   try { text = fs.readFileSync(p, 'utf8'); } catch { throw new MapError(`the tool map is missing ${name} in ${dir.replace(/\\/g, '/')}; run map first`); }
-  try { return JSON.parse(text); } catch (e) { throw new MapError(`${name} is not valid JSON: ${String(e.message).slice(0, 80)}`); }
+  try { return JSON.parse(text); } catch (e) { throw new MapError(`${name} is ${jsonWhere(e)}`); }
 }
 
-/** sha256 over the sorted relative paths, each followed by the sha256 of that file's bytes (the same sum `map` records as source_digest). */
+/** sha256 over the sorted relative paths, each followed by the sha256 of that file's bytes (the same sum `map` records as source_digest).
+ *  null when a listed path is not a plain one inside the root, or its file cannot be read: the list comes from a map folder that may be someone else's, so only the gate opens a path. */
 export function sourceDigest(root, rels) {
+  const src = new RootedSource(root);
   const h = createHash('sha256');
   for (const rel of [...rels].sort(cmp)) {
+    const real = src.ref(rel).rel === rel ? src.resolve(rel) : null; // the digest names the path as written, so it must be the clean form
     let b;
-    try { b = fs.readFileSync(path.join(root, rel)); } catch { return null; }
+    try { b = real && fs.readFileSync(real); } catch { b = null; }
+    if (!b) return null;
     h.update(rel + '\0' + createHash('sha256').update(b).digest('hex') + '\n');
   }
   return h.digest('hex');
@@ -149,9 +154,10 @@ export class Layer1 {
     return out;
   }
 
-  /** Is the map still the one the files under `root` make? true, false, or null when a mapped file cannot be read. */
+  /** Is the map still the one the files under `root` make? true, false, or null when that cannot be told: the map holds no digest or lists no file (a digest of nothing
+   *  matches anything), or a listed file cannot be read inside the root. The check treats null as not fresh. */
   isFresh(root) {
-    if (!this.digest) return null;
+    if (!this.digest || this.mods.size === 0) return null;
     const d = sourceDigest(root, this.mods);
     return d == null ? null : d === this.digest;
   }

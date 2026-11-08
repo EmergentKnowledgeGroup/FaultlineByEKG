@@ -103,7 +103,7 @@ export function levelOf(data, id) {
   if (b.level === 'proved') bits.push('proved' + (b.walkOutcomes ? ' ' + b.walkOutcomes.join('/') : ''));
   else if (b.level === 'seen') bits.push('seen' + (b.count ? ' x' + b.count : ''));
   else bits.push('drawn');
-  if (b.stale) bits.push('STALE (code changed since the walk)');
+  if (b.stale) bits.push('STALE (code changed since the walk, as of the last map)');       // judged by comparing two maps' function hashes, not by reading the code now
   if (b.untested) bits.push('untested (cited code never ran)');
   if (b.anchorOnly) bits.push('line ran, nobody arrives');
   if (cands.length) bits.push('candidate: ' + cands.map((f) => f.check).join(', '));

@@ -1,13 +1,16 @@
 // assemble(atlasData, outDir, {excerpts=false, root, viewerDir}) -> {html, svgs, bytes}
 // Writes <outDir>/atlas.html (ONE self-contained page: data, renderer, scripts and styles inlined, no network) and <outDir>/svg/<chartId>.svg
 // (stand-alone themed SVG per chart). Source excerpts are OFF by default: with {excerpts:true} each source ref carries a few lines of the file
-// it points at (read from `root`), which the inspector shows; the page then contains source text, so share it with the same care as the code.
+// it points at (read from `root`, only files inside it: a ref path that is absolute, climbs out with '..' or leads out through a link gets none),
+// which the inspector shows; the page then contains source text, so share it with the same care as the code.
 import fs from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import vm from 'node:vm';
 import { renderSVG } from '../engine/render.mjs';
 import { stripJs, stripCss } from './strip.mjs';
+import { RootedSource } from '../story/source.mjs';
+import { normPath } from '../model/refs.mjs';
 
 const here = path.dirname(fileURLToPath(import.meta.url));
 export const VIEWER_DIR = path.join(here, '..', '..', 'viewer');
@@ -29,12 +32,11 @@ function checkStripped(name, before, after) {
 }
 
 export function addExcerpts(data, root, { lines = 12, width = 160 } = {}) {
-  const cache = new Map();
-  const file = (p) => { if (!cache.has(p)) { try { cache.set(p, read(path.join(root, p)).split('\n')); } catch { cache.set(p, null); } } return cache.get(p); };
+  const src = new RootedSource(root);                                            // the model's ref paths are not ours: only a plain file inside the root is read, anything else gets no excerpt
   let n = 0;
   for (const c of Object.values(data.charts)) for (const node of Object.values(c.nodes)) for (const r of node.refs || []) {
     if (r.excerpt || !r.path || !r.line) continue;
-    const f = file(r.path); if (!f) continue;
+    const f = src.lines(normPath(r.path)); if (!f) continue;                     // normPath: a ref may say .\a.py or ./a.py, as the gates read it; '..' still shows and is refused
     r.excerpt = f.slice(Math.max(0, r.line - 1), r.line - 1 + lines).map((l) => (l.length > width ? l.slice(0, width - 1) + '…' : l)).join('\n'); n++;
   }
   return n;

@@ -27,7 +27,7 @@ Coverage lights a box only if a cited function's BODY ran, because a `def` line 
 {"outcome":"end:<box>|stuck:<box>|error|unknown","strength":"observed|replayable|proved-in-model|claimed","reason":"the tool's own words","witness":"replay file or null","count":1,"steps":[{"ref":"file:line","sym":"fnId","tag":"box alias or stage name"}]}
 ```
 
-Levels: **drawn** by default; **suspected** from a candidate; **seen** from an observed walk or body coverage; **proved** from a replayable or proved-in-model walk. Only `EXHAUSTIVE_WITHIN_MODEL` with `controls_passed: true` may say "no violation found". A changed function marks its own boxes stale, not the whole map.
+Levels: **drawn** by default; **suspected** from a candidate; **seen** from an observed walk or body coverage; **proved** from a replayable or proved-in-model walk. Only `EXHAUSTIVE_WITHIN_MODEL` with `controls_passed: true` may say "no violation found". A changed function marks its own boxes stale, not the whole map. Stale is judged between two maps: the function's hash in the map the walk was loaded against, and its hash in the latest `map` run. Code edited after the last `map` run is not seen, so run `faultline map` before `walk add` if the code has moved.
 
 ## A model checker's report (`import-statechart`)
 

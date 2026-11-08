@@ -8,6 +8,7 @@
 import fs from 'node:fs';
 import path from 'node:path';
 import { fileDigest, listDir } from './files.mjs';
+import { realInside } from '../story/source.mjs';
 import { cpLen, cpSlice } from './pyrt.mjs';
 
 export async function readLua({ grammar, root, prefix = '', only = null }) {
@@ -34,12 +35,17 @@ function walk(d, rel = '') {
   const res = [];
   for (const e of listDir(d)) {
     const r = rel ? rel + '/' + e.name : e.name;
-    if (e.isDir) { if (e.name !== 'node_modules' && e.name !== '.git') res.push(...walk(path.join(d, e.name), r)); } else if (e.name.endsWith('.lua')) res.push(r);
+    if (e.isDir) { if (e.name !== 'node_modules' && e.name !== '.git') res.push(...walk(path.join(d, e.name), r)); } else if (e.isFile && e.name.endsWith('.lua')) res.push(r);   // listDir leaves links out, so no file is read through one
   }
   return res;
 }
 const wanted = only ? new Set(only) : null;
-const rels = walk(path.join(root, prefix), prefix).filter((r) => !wanted || wanted.has(r));
+// the folder to start in must itself be inside the root: a prefix that is a link out, or climbs out with '..', would otherwise be read whole (listDir drops links below it, not the one we start from)
+const top = path.join(root, prefix);
+const realOf = (p) => { try { return fs.realpathSync(p).replace(/\\/g, '/'); } catch { return null; } };
+const realTop = realOf(top);                      // null: no such folder, and the walk below says so
+if (realTop != null && !realInside(realOf(root), realTop)) throw new Error(`the Lua folder ${JSON.stringify(prefix)} leads outside ${root}, so it was not read`);
+const rels = walk(top, prefix).filter((r) => !wanted || wanted.has(r));
 const short = (s, n = 90) => { s = (s || '').replace(/\s+/g, ' ').trim(); return cpLen(s) > n ? cpSlice(s, 0, n - 3) + '...' : s; };
 const strVal = (n) => {
   if (!n || n.type !== 'string') return null;

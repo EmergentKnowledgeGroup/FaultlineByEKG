@@ -3,6 +3,7 @@ import fs from 'node:fs';
 import path from 'node:path';
 import { createHash } from 'node:crypto';
 import { cmpCp } from './canon.mjs';
+import { RootedSource } from '../story/source.mjs';
 
 /** Folders no reader enters: dependencies, build output, caches, version control. */
 export const SKIP_DIRS = new Set(['node_modules', '.git', '__pycache__', 'venv', '.venv', 'dist', 'build', 'vendor', '.faultline']);
@@ -28,16 +29,13 @@ export function globRe(g) {
   return new RegExp('^' + out + '$', 's');
 }
 
-/** Directory entries sorted by name (code point), with links to folders left out and links to files kept as files. */
+/** Directory entries sorted by name (code point), with every link left out, to a file or to a folder: a link can lead outside the root, and the discovery
+ *  walk (extract/walk.mjs) drops them too. */
 export function listDir(dir) {
   const ents = [];
   for (const e of fs.readdirSync(dir, { withFileTypes: true })) {
-    let isDir = e.isDirectory(), isFile = e.isFile();
-    if (e.isSymbolicLink()) {
-      try { const st = fs.statSync(path.join(dir, e.name)); isFile = st.isFile(); } catch { isFile = false; }
-      isDir = false;
-    }
-    ents.push({ name: e.name, isDir, isFile });
+    if (e.isSymbolicLink()) continue;
+    ents.push({ name: e.name, isDir: e.isDirectory(), isFile: e.isFile() });
   }
   return ents.sort((a, b) => cmpCp(a.name, b.name));
 }
@@ -62,12 +60,18 @@ export function findFiles(root, include, exclude, exts) {
   return res.sort(cmpCp);
 }
 
-/** sha256 over the sorted relative paths, each followed by the sha256 of that file's bytes. Throws StaleInput when a listed file cannot be read. */
+/** sha256 over the sorted relative paths, each followed by the sha256 of that file's bytes. Throws StaleInput when a listed file cannot be read, or when its
+ *  path is not a plain one inside `root` (absolute, `..`, a link that leads out): such a file counts as changed and is never opened. The list may come from a
+ *  map folder somebody else made, so this must not read outside the source. It sees only the paths it is given: a file added after the map was built is not
+ *  noticed, and the digest compares files with the map's own record, it does not check the map. */
 export function fileDigest(root, rels) {
-  const h = createHash('sha256');
+  const h = createHash('sha256'), gate = new RootedSource(root);
   for (const rel of [...rels].sort(cmpCp)) {
-    let b;
-    try { b = fs.readFileSync(path.join(root, rel)); } catch { throw new StaleInput(`${rel} is listed by the input but cannot be read under ${root}`); }
+    const real = gate.resolve(rel);
+    if (!real && gate.whyNot(rel) === 'outside') throw new StaleInput(`${JSON.stringify(String(rel).slice(0, 200))} is listed by the input but is not a plain path inside ${root}`);
+    let b = null;
+    if (real) try { b = fs.readFileSync(real); } catch { /* gone or unreadable: said below */ }
+    if (!b) throw new StaleInput(`${rel} is listed by the input but cannot be read under ${root}`);
     h.update(rel + '\0' + createHash('sha256').update(b).digest('hex') + '\n');
   }
   return h.digest('hex');

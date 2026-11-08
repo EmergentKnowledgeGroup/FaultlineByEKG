@@ -2,7 +2,7 @@
 // The same rules as the model loader: a duplicate id is a refusal, never a quiet "last one wins". A story that is refused gets no verdicts at all.
 import fs from 'node:fs';
 import path from 'node:path';
-import { cmp } from './canon.mjs';
+import { cmp, jsonWhere } from './canon.mjs';
 
 export const STORY_SCHEMA = 'faultline.model/1';
 const ID_FIELD = { stages: 'id', boxes: 'id', routes: 'id', loops: 'id', paths: 'id', charts: 'id' };
@@ -13,7 +13,7 @@ const refuse = (code, msg, at) => ({ code, msg, at: at ?? '' });
 function readFragment(file) {
   let text;
   try { text = fs.readFileSync(file, 'utf8').replace(/^﻿/, ''); } catch { return { err: refuse('S-read', 'cannot read the story file', path.basename(file)) }; }
-  try { return { data: JSON.parse(text) }; } catch (e) { return { err: refuse('S-json', `not valid JSON: ${String(e.message).slice(0, 80)}`, path.basename(file)) }; }
+  try { return { data: JSON.parse(text) }; } catch (e) { return { err: refuse('S-json', jsonWhere(e), path.basename(file)) }; }
 }
 
 /** Merge parsed fragments [{file, data}] into one story. Returns { story, refusals }. */

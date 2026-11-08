@@ -1,6 +1,6 @@
 {
   "name": "@emergentknowledgegroup/faultline",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "description": "One system, one map, two readers. A map read from the code with no agent, an interactive atlas for people and a token-efficient view for agents, showing where things start to break.",
   "type": "module",
   "bin": {
@@ -18,7 +18,8 @@
     "docs/SCALE.md",
     "examples/toy/",
     "THIRD_PARTY.md",
-    "README.md"
+    "README.md",
+    "SECURITY.md"
   ],
   "license": "MIT",
   "repository": {

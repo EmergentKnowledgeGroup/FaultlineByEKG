@@ -1,7 +1,7 @@
 // Commands that build the map: init extract propose check place build look analyze.
 import fs from 'node:fs';
 import path from 'node:path';
-import { resolveProject, readProject, readJson, writeJson, CliError, isDir, isToolMapProject, requireProject } from '../src/build/project.mjs';
+import { resolveProject, readProject, readJson, writeJson, CliError, isDir, isToolMapProject, requireProject, requireRoot, mayQuoteCode, rootSetAsideNote } from '../src/build/project.mjs';
 import { analyzeProject, buildProject, placeWithProgress, Refused } from '../src/build/pipeline.mjs';
 import { pickHints } from '../src/model/propose.mjs';
 import { chartsFromModel } from '../src/build/charts.mjs';
@@ -13,7 +13,7 @@ import { plural } from '../src/build/util.mjs';
 const out = (s = '') => console.log(s);
 const note = (s) => process.stderr.write(s + '\n');
 const rel = (p) => path.relative(process.cwd(), p).split(path.sep).join('/') || '.';
-export const proj = (o) => ({ ...resolveProject({ project: o.project, root: o.root }), arg: o.project ?? null });
+export const proj = (o) => ({ ...resolveProject({ project: o.project, root: o.source || o.root }), arg: o.project ?? null });   // --source and --root name the same folder
 /** Stops with the plain "no project" sentence (what to run, and the folder that is missing) unless p is a project a command can read. */
 export const needProject = (p) => requireProject(p, p.arg);
 const quote = (x) => (/\s/.test(x) ? `"${x}"` : x);
@@ -48,8 +48,8 @@ export async function init(argv) {
 }
 
 export async function extract(argv) {
-  const { o } = parse(argv, { str: ['include', 'exclude'], bool: ['no-defaults'] });
-  const p = proj(o); needProject(p); handOnly(p, 'extract');
+  const { o } = parse(argv, { str: ['include', 'exclude', 'source'], bool: ['no-defaults'] });
+  const p = proj(o); needProject(p); handOnly(p, 'extract'); requireRoot(p);
   const cfg = readJson(path.join(p.dir, 'config.json'), {}) || {};
   const { extract: run, writeOutputs, summary } = await import('../src/extract/index.mjs');
   if (!isDir(p.root)) throw new CliError(`Source folder ${p.root} does not exist. Fix: pass --root DIR.`, 2);
@@ -183,11 +183,19 @@ export async function place(argv) {
   return hard.length ? 1 : 0;
 }
 
-// `build` on a tool map's project: rebuild its page the way faultline map built it (the Reader and all), from the map and reading already there. No source is read and nothing is placed.
+// --excerpts copies lines of the code into the page, so it reads only a folder the person named or one that holds the project or lies inside it. Says so, on stderr, when it leaves them out.
+function wantExcerpts(p, o) {
+  if (!o.excerpts) return false;
+  if (mayQuoteCode(p)) return true;
+  note(`build: source excerpts left out. ${rootSetAsideNote(p) || 'The project does not say which folder holds the code, so Faultline did not copy lines from a folder it guessed. Fix: pass  --source <the code folder>'}`);
+  return false;
+}
+
+// `build` on a tool map's project: rebuild its page the way faultline map built it (the Reader and all), from the map and reading already there. No source is read (but for --excerpts) and nothing is placed.
 async function buildToolMap(p, o) {
   if (o.finished || o.draft) throw new CliError(`A tool map has no gates to finish and no draft state, so ${o.finished ? '--finished' : '--draft'} does not apply. faultline build  rebuilds its page; to read the code again: ${refreshCommand(p)}`, 2);
   const { rebuildToolPage } = await import('../src/read/page/run.mjs');
-  const r = await rebuildToolPage(p.dir, { root: p.root, excerpts: !!o.excerpts, keepMessages: !!o['keep-messages'], sourceBase: o['source-base'] || '', fix: refreshCommand(p) });
+  const r = await rebuildToolPage(p.dir, { root: p.root, excerpts: wantExcerpts(p, o), keepMessages: !!o['keep-messages'], sourceBase: o['source-base'] || '', fix: refreshCommand(p) });
   out(`build: tool map page  ${rel(r.html)} (${Math.round(r.bytes / 1024)} KB, ${r.svgs.length} charts, ${r.walks} walk path(s))`);
   out(`  also: ${rel(path.join(r.out, 'atlas.agent.json'))}, ${rel(path.join(r.out, 'BRIEF.md'))}, ${rel(path.join(r.out, 'svg'))}/`);
   out('Next: faultline status   (or open the atlas.html in a browser)');
@@ -195,13 +203,13 @@ async function buildToolMap(p, o) {
 }
 
 export async function build(argv) {
-  const { o } = parse(argv, { str: ['source-base', 'seed', 'budget'], bool: ['finished', 'draft', 'no-place', 'excerpts', 'keep-messages'] });
+  const { o } = parse(argv, { str: ['source-base', 'seed', 'budget', 'source'], bool: ['finished', 'draft', 'no-place', 'excerpts', 'keep-messages'] });
   const p = proj(o); needProject(p);
   if (o.finished && o.draft) throw new CliError('Choose --draft or --finished, not both.', 2);
   if (isToolMapProject(p.dir)) return buildToolMap(p, o);
   const finished = !!o.finished;
   let r;
-  try { r = await buildProject(p.dir, { finished, draft: !!o.draft, place: !o['no-place'], excerpts: !!o.excerpts, keepMessages: !!o['keep-messages'], sourceBase: o['source-base'] || '', root: p.root, seed: +o.seed || 1, budgetSeconds: o.budget ? +o.budget : undefined, log: note }); }
+  try { r = await buildProject(p.dir, { finished, draft: !!o.draft, place: !o['no-place'], excerpts: wantExcerpts(p, o), keepMessages: !!o['keep-messages'], sourceBase: o['source-base'] || '', root: p.root, seed: +o.seed || 1, budgetSeconds: o.budget ? +o.budget : undefined, log: note }); }
   catch (e) { if (e instanceof Refused) { for (const x of e.refusals) out(x.msg); out(`build: REFUSED (${e.refusals.length}). Fix the lines above, or build without --finished.`); return 1; } throw e; }
   const g = r.state.gaps;
   out(`build: ${r.draft ? 'DRAFT' : 'FINISHED'}  ${rel(r.html)} (${Math.round(r.bytes / 1024)} KB, ${r.svgs.length} charts, ${r.walks} walk path(s))`);

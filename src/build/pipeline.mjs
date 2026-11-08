@@ -3,6 +3,7 @@
 //        throws Refused when the model cannot be judged, unless {lenient}: then the gates run on what loaded and state.loadRefusals keeps the rest
 //   placeWithProgress(dir, model, charts, {only, force, seed, budgetSeconds, log}) -> rows    placeProject one chart at a time: [n/total] lines, seconds, capped
 //   buildProject(dir, {finished, draft, place, excerpts, keepMessages, sourceBase, root, log}) -> report      state + atlas.html, svg/, atlas.agent.json, BRIEF.md in <dir>/dist
+//        excerpts read lines of the code from `root` (no root: none); the caller decides whether that folder may be quoted (mayQuoteCode in project.mjs)
 //        a draft build (or --no-place) still builds when charts have no layout: they are listed as not drawn; a finished build refuses
 //   pageInfo(dir) -> {built, current, builtAt, changed, recorded}    is dist/atlas.html there, and was it built from the model and layouts that are there now (by content)
 //   agentView(dir, opts) -> agentData blob      the compact map, no layout work
@@ -152,7 +153,7 @@ export async function buildProject(dir, opts = {}) {
     for (const id of unplaced) if (data.charts[id]) data.charts[id].unplaced = true;
   }
   const out = path.join(dir, 'dist');
-  const asm = assemble(data, out, { excerpts, root: root || s.facts.root });
+  const asm = assemble(data, out, { excerpts, root });                                  // the folder the caller named, never the one facts.json remembers: that file may be someone else's
   const honest = unplaced.length && s.gaps.state === 'finished' ? { ...s, gaps: { ...s.gaps, state: 'draft' } } : s;   // gates may pass, but a page with blank charts is not finished
   const agent = agentFrom(honest, { finished: honest.gaps.state === 'finished' });
   if (agent.layout && agent.layout.page) { delete agent.layout.page.builtAt; Object.assign(agent.layout.page, { built: true, current: true, changed: '', recorded: true, inputs: pageInputs(dir) }); }   // a build time makes two builds of the same map differ; `status` reads the page's time from disk, not from this file. The inputs are what it was built from, by content.

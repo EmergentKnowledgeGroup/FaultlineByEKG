@@ -71,7 +71,7 @@ What a project holds after all readers ran and the checkers' answers were handed
 | `rstat` | `{}` | counters the merge fills |
 | `srcDigest`, `nSources` | | what the map stands on |
 
-`checkFresh(P)` throws `StaleInput` when the files under `root` are no longer the ones `P` was loaded from. `loadState` throws it when a reader document's own `source_digest` does not match the files on disk.
+`checkFresh(P)` throws `StaleInput` when the files under `root` are no longer the ones `P` was loaded from (the command line does not call it; `review` and `story check` compare the source digest themselves). `loadState` throws it when a reader document's own `source_digest` does not match the files on disk.
 
 The merge of the checkers' answers into call ops is `resolvemix.mjs`: `setPythonAnswers(P, ty)`, `indexDefs(P)`, `resolverPass(P, fn, op, lang) -> [status, defs]`, `roadTargets(op)`, and `effectsOf(P, op, imports, status, defs, decls, shadow, fileish, efx)`, which takes the effects table as its last argument: `{ classifyCall, lexicalDefs, decide, adjust, boundaryOf, isPure, SQL_WRITE }` (Sets for kinds; `SQL_WRITE` a regular expression anchored at the start). The class lookups it needs (`resolveClass`, `mro`, `findMethod`, `subclassesDefining`) are in `classes.mjs`.
 

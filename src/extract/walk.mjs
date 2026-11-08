@@ -2,6 +2,7 @@
 import fs from 'node:fs';
 import path from 'node:path';
 import crypto from 'node:crypto';
+import { realInside } from '../story/source.mjs';
 
 export const LANG = { '.py': 'py', '.ts': 'ts', '.tsx': 'ts', '.mts': 'ts', '.cts': 'ts', '.js': 'js', '.jsx': 'js', '.mjs': 'js', '.cjs': 'js', '.lua': 'lua' };
 const DIR_EXCLUDE = new Set(['node_modules', '.git', '.hg', '.svn', '.faultline', 'dist', 'build', 'out', 'target', 'coverage', '.next', '.nuxt', '.cache',
@@ -34,17 +35,47 @@ export function globToRe(g) {
 
 const literalPrefix = (g) => { const i = g.search(/[*?]/); const p = i < 0 ? g : g.slice(0, i); return p.slice(0, p.lastIndexOf('/') + 1).replace(/\/$/, ''); };
 
-/** Reads the HEAD commit id straight from the .git folder (no git command). */
+const COMMIT_ID = /^(?:[0-9a-f]{40}|[0-9a-f]{64})$/;
+const LINKED_GIT = /\/\.git\/(?:worktrees\/[^/]+|modules\/.+)$/;       // where a `.git` pointer file may lead: a linked worktree or a submodule keeps its state there
+const fwd = (p) => p.replace(/\\/g, '/');
+// a ref name as git writes it: under refs/, no part that is empty or starts with a dot, none of the characters git forbids
+const okRef = (r) => /^refs\/[^\s\\:*?[\]^~\u0000-\u001f\u007f]+$/.test(r) && !r.includes('..') && !r.includes('@{') && r.split('/').every((s) => s && !s.startsWith('.'));
+
+/** Text of a small file in the git folder `rg` (a real path): null when it is missing, false when it is a link or its real path leaves `rg`. */
+function gitFile(rg, f) {
+  let st;
+  try { st = fs.lstatSync(f); } catch { return null; }
+  if (!st.isFile()) return false;
+  try { return realInside(fwd(rg), fwd(fs.realpathSync(f))) ? fs.readFileSync(f, 'utf8') : false; } catch { return false; }
+}
+
+/** Reads the HEAD commit id straight from the .git folder (no git command). No link is followed; only a 40 or 64 digit hex id comes back, else null. */
 export function gitHead(root) {
   try {
-    let g = path.join(root, '.git');
-    if (fs.statSync(g).isFile()) g = path.resolve(root, fs.readFileSync(g, 'utf8').replace(/^gitdir:\s*/, '').trim());
-    const head = fs.readFileSync(path.join(g, 'HEAD'), 'utf8').trim();
-    if (!head.startsWith('ref:')) return head;
-    const ref = head.slice(4).trim();
-    try { return fs.readFileSync(path.join(g, ref), 'utf8').trim(); } catch { /* packed */ }
-    const packed = fs.readFileSync(path.join(g, 'packed-refs'), 'utf8').split('\n').find((l) => l.endsWith(' ' + ref));
-    return packed ? packed.split(' ')[0] : null;
+    const dot = path.join(root, '.git');
+    const st = fs.lstatSync(dot);
+    let g = dot, pointed = false;
+    if (st.isFile()) {                                              // a worktree or submodule: `gitdir: <path>`
+      const m = /^gitdir:[ \t]*(.+)/.exec(fs.readFileSync(dot, 'utf8').slice(0, 4096));
+      if (!m) return null;
+      g = path.resolve(root, m[1].trim());
+      pointed = true;
+    } else if (!st.isDirectory()) return null;                      // a link is not followed
+    const rg = fs.realpathSync(g);
+    if (pointed ? !LINKED_GIT.test(fwd(rg)) : !realInside(fwd(fs.realpathSync(root)), fwd(rg))) return null;
+    const head = gitFile(rg, path.join(rg, 'HEAD'));
+    if (typeof head !== 'string') return null;
+    const h = head.trim();
+    if (!h.startsWith('ref:')) return COMMIT_ID.test(h) ? h : null;
+    const ref = h.slice(4).trim();
+    if (!okRef(ref)) return null;
+    const loose = gitFile(rg, path.join(rg, ref));
+    if (loose === false) return null;
+    if (loose !== null) return COMMIT_ID.test(loose.trim()) ? loose.trim() : null;
+    const packed = gitFile(rg, path.join(rg, 'packed-refs'));
+    const line = typeof packed === 'string' ? packed.split('\n').find((l) => l.endsWith(' ' + ref)) : null;
+    const id = line ? line.split(' ')[0] : '';
+    return COMMIT_ID.test(id) ? id : null;
   } catch { return null; }
 }
 

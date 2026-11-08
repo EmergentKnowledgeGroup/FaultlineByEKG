@@ -9,7 +9,7 @@ The map exists so you do not have to dig. Use it before you open files. Every an
 | To know what might be wrong | `faultline breaks [--stage s] [--all] [--silent]` | 800 |
 | To know how you get from here to there | `faultline path <a> <b>` (`--shortest` for fewest hops) | 300 |
 | To know what a change could affect | `faultline impact <box \| file>` | 500 |
-| To know whether the page exists and is current | `faultline status` | 200 |
+| To know whether the page exists and matches the stored map (not the code) | `faultline status` | 200 |
 
 A cut answer says so and tells you how to get more: `--budget 2400`. `faultline mcp` serves the same six over MCP stdio. On a map written by hand, `where` also takes a function id such as `parcelworks/worker.py::Worker.run`. On a tool map it does not.
 
@@ -19,7 +19,7 @@ On a tool map the page and the text view use short box ids such as `f58.0` (a bo
 
 ## A good session
 
-1. `faultline status`. Does the page exist, and is it current?
+1. `faultline status`. Does the page exist, and does it match the stored map? It does not say the code is unchanged.
 2. `faultline brief` once, at the start. Note the stages, the loops, the endings and the top candidates.
 3. `faultline where` on the thing you were asked about.
 4. Read the code it names. The map tells you where to look. It does not replace looking.
@@ -33,7 +33,7 @@ On a tool map the page and the text view use short box ids such as `f58.0` (a bo
 - **Not confident:** the tool wrote a label or a road but the evidence is thinner than the words. The page draws it dashed with a "?". `faultline review` is how it gets looked into.
 - **Seen:** a run or a coverage report touched this. "Seen" does not mean correct.
 - **Proved:** a replayable walk or a model check reached this.
-- **Stale:** the cited function changed since the evidence or the drawing.
+- **Stale:** the cited function changed between the map the evidence was loaded against and the latest `map` run. Code edited since that run is not seen.
 
 "Not found in what was checked" is not "no problem". Only an exhaustive walk with passing controls may say "no violation found", and only within its model. Keep that difference when you report.
 
@@ -43,4 +43,4 @@ On a tool map the page's **Where it can break** lists the ranked questions the r
 
 ## Keeping it honest
 
-When code changes, the map is out of date. For a tool map, run `faultline map --source <folder>` again; `review` and `story` refuse a map whose code changed. For a map written by hand, update the boxes and roads in `model/*.json`, run `faultline check`, and rebuild. Map and code travel together, or the map starts to lie.
+When code changes, the map is out of date. For a tool map, run `faultline map --source <folder>` again; `review` and `story check` refuse a map when a file it read has changed (a file added since is not noticed). For a map written by hand, update the boxes and roads in `model/*.json`, run `faultline check`, and rebuild. Map and code travel together, or the map starts to lie.

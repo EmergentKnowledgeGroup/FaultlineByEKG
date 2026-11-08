@@ -1,6 +1,7 @@
 // Project directory handling: where the .faultline folder is, what is in it, and plain JSON reads and writes.
 //   resolveProject({project, root, cwd}) -> {dir, root, rootKnown, rootFrom, rootSetAside, exists, fresh}   (exists: a project was named or found; fresh: none was, dir is where init would make one;
 //                                            rootFrom: 'flag' | 'config' | 'facts' | 'guess'; rootSetAside: a remembered root outside the project's folder, not used)
+//   requireRoot(p) stops with rootSetAsideNote(p) when the code folder was set aside (extract, signals); mayQuoteCode(p) says whether build --excerpts may copy lines from p.root
 //   readProject(dir) -> {facts, census, signals, graph, dismissed, config}
 // "Every step works from a project dir": run from the repo, from inside .faultline, or pass --project.
 import fs from 'node:fs';
@@ -52,19 +53,21 @@ export function resolveProject({ project, root, cwd = process.cwd() } = {}) {
   }
   const fresh = !dir;
   if (!dir) dir = path.join(path.resolve(cwd), NAME);
+  const link = isDir(dir) ? linkIn(dir) : null;
+  if (link) throw new CliError(`The project folder ${shown(dir)} holds a link (${shown(link)}). Faultline writes into that folder and will not write through a link. Delete the folder and map again, or map into a new one with  --project <new folder>`, 2);
   const facts = readJson(path.join(dir, 'facts.json'));
   const cfg = readJson(path.join(dir, 'config.json'), {}) || {};
   let src = root ? path.resolve(cwd, root) : null;
   let rootFrom = src ? 'flag' : null;
   // A root the project remembers (config.json, facts.json) travels with a cloned repo or a map someone else made, so it is taken only when it is the
   // folder that holds the project or a folder inside it. One that points anywhere else is set aside: the commands that read code then ask for --source.
-  const holder = path.basename(dir) === NAME ? path.dirname(dir) : dir;
+  const holder = holderOf(dir);
   let rootSetAside = null;
   const remembered = (cand, from) => {
     if (src || !cand) return;
     if (holds(holder, cand)) { src = cand; rootFrom = from; } else if (!rootSetAside) rootSetAside = cand;
   };
-  if (cfg.root) remembered(path.resolve(dir, cfg.root), 'config');
+  if (typeof cfg.root === 'string' && cfg.root) remembered(path.resolve(dir, cfg.root), 'config');
   const stored = resolveRoot(facts && facts.root, dir);                    // facts.json holds '..'-style or an older absolute root
   if (stored && isDir(stored)) remembered(stored, 'facts');
   const rootKnown = !!src;                                                // false: the folder below is a guess (the project's parent), not something the project remembers
@@ -72,17 +75,52 @@ export function resolveProject({ project, root, cwd = process.cwd() } = {}) {
   return { dir, root: src, rootKnown, rootFrom: rootFrom || 'guess', rootSetAside, exists: !fresh && isDir(dir), fresh, named: !!project };
 }
 
+// The folder that holds a project: the parent of its .faultline folder, or the project folder itself when it has another name.
+const holderOf = (dir) => (path.basename(dir) === NAME ? path.dirname(dir) : dir);
+
 // Is `inner` the folder `outer` or below it? Links are resolved first, so a linked folder inside `outer` that leads elsewhere does not count.
 function holds(outer, inner) {
-  const real = (p) => { try { return lower(fs.realpathSync(p).replace(/\\/g, '/')); } catch { return lower(path.resolve(p).replace(/\\/g, '/')); } };
-  const a = real(outer).replace(/\/+$/, ''), b = real(inner).replace(/\/+$/, '');
-  return b === a || b.startsWith(a + '/');
+  const real = (p) => { try { return lower(fs.realpathSync(p).replace(/\\/g, '/')).replace(/\/+$/, ''); } catch { return null; } };
+  const a = real(outer), b = real(inner);
+  return a != null && b != null && (b === a || b.startsWith(a + '/')); // a folder that cannot be resolved is not held: it may be a spelling Windows reads differently
 }
+
+// A project folder that holds a link is refused: Faultline writes into it, and a write through a planted link lands outside. -> the first link's path, or null.
+function linkIn(dir) {
+  try { if (fs.lstatSync(dir).isSymbolicLink()) return '.'; } catch { return null; }
+  const walk = (d, rel) => {
+    let ents; try { ents = fs.readdirSync(d, { withFileTypes: true }); } catch { return null; }
+    for (const e of ents) {
+      const r = rel ? rel + '/' + e.name : e.name;
+      if (e.isSymbolicLink()) return r;
+      if (e.isDirectory()) { const hit = walk(path.join(d, e.name), r); if (hit) return hit; }
+    }
+    return null;
+  };
+  return walk(dir, '');
+}
+
+const shown = (s) => String(s).replace(/\\/g, '/').replace(/[\u0000-\u001f\u007f]/g, '?'); // someone else's text: no control characters reach the terminal
 
 /** The line a command prints when the project remembered a root outside the folder that holds it and that root was not used. '' when nothing was set aside. */
 export const rootSetAsideNote = (p) => (p && p.rootSetAside && !p.rootKnown
-  ? `This project remembers its code at ${p.rootSetAside.replace(/\\/g, '/')}, outside the folder that holds the project, so Faultline did not read there. If that is right, pass  --source ${p.rootSetAside.replace(/\\/g, '/')}`
+  ? `This project remembers its code at ${shown(p.rootSetAside)}, outside the folder that holds the project, so Faultline did not read there. If that is right, pass  --source ${shown(p.rootSetAside)}`
   : '');
+
+/** Stops with that note when the project remembers its code outside the folder that holds it and the person gave no --source: a command that reads the code asks, it does not read a guess. */
+export function requireRoot(p) {
+  const n = rootSetAsideNote(p);
+  if (n) throw new CliError(n, 2);
+}
+
+/**
+ * May a command copy lines of the code into what it writes (build --excerpts)? Yes when the person named the folder, or the folder is the one that holds the project or lies inside it.
+ * No when a remembered root was set aside, and no when the folder is only where the person stands: a received project must not pick which files get copied.
+ */
+export function mayQuoteCode(p) {
+  if (p.rootFrom === 'flag') return true;
+  return !rootSetAsideNote(p) && holds(holderOf(p.dir), p.root);
+}
 
 /**
  * What a project folder holds: 'tool-map' (faultline map made it), 'hand' (a map written by hand, or its extract), 'unfinished' (faultline map began

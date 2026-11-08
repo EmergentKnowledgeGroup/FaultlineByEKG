@@ -12,12 +12,13 @@ import { cmpCp } from './canon.mjs';
 
 const SKIP = new Set(['node_modules', '.git', 'dist', 'build', 'vendor', '.faultline', 'tests', 'test', '__tests__']);
 
+// listDir leaves links out, so no file is read through one; the walk always starts at `root` (a prefix only filters what it finds), so no other start folder needs a check
 function walkDir(d, rel = '') {
   const res = [];
   for (const e of listDir(d)) {
     const r = rel ? rel + '/' + e.name : e.name;
     if (e.isDir) { if (!SKIP.has(e.name)) res.push(...walkDir(path.join(d, e.name), r)); }
-    else if (/\.(ts|tsx|js|mjs|cjs)$/.test(e.name) && !/\.d\.ts$/.test(e.name) && !/\.(test|spec)\./.test(e.name)) res.push(r);
+    else if (e.isFile && /\.(ts|tsx|js|mjs|cjs)$/.test(e.name) && !/\.d\.ts$/.test(e.name) && !/\.(test|spec)\./.test(e.name)) res.push(r);
   }
   return res;
 }

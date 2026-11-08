@@ -2,6 +2,8 @@
 
 export const normPath = (p) => String(p ?? '').replace(/\\/g, '/').replace(/^\.\//, '');
 export const symbolPath = (sym) => normPath(String(sym ?? '').split('::')[0]);
+/** A path (after normPath) that names something outside the code folder: absolute, with a drive letter, or climbing out with a '..' step. */
+export const outsidePath = (p) => /^(?:\/|[A-Za-z]:)/.test(p) || p.split('/').includes('..');
 
 export function indexFacts(facts) {
   const functions = facts?.functions || {};

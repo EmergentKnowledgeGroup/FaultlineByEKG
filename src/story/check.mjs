@@ -79,8 +79,10 @@ export function checkStory(story, opts) {
   const src = new RootedSource(opts.root);
   const fresh = L.isFresh(src.root);
   const base = { schema: CHECK_SCHEMA, tool: TOOL };
-  if (fresh === false && !opts.allowStale) {
-    return { ...base, refused: [{ code: 'M-stale', msg: 'the files under the source root are not the ones the tool map was built from; build the map again', at: '' }] };
+  if (fresh !== true && !opts.allowStale) { // a map that cannot be compared with the code is not vouched for either
+    const msg = fresh === false ? 'the files under the source root are not the ones the tool map was built from; build the map again'
+      : 'the tool map cannot be compared with the files under the source root (it holds no digest, lists no file, or lists one that is missing or not inside the root); build the map again';
+    return { ...base, refused: [{ code: 'M-stale', msg, at: '' }] };
   }
   const ctx = { L, src, S: new Seen(L), names: new CodeNames(L, src) };
   const skip = new Set(story.boxes.flatMap((b) => [b.id, String(b.id).split('.').pop()]));

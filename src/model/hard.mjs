@@ -1,7 +1,7 @@
 // Gates that are always hard, draft or finished: G1 G2 G3 G4 G5 K1 L1 T1. Each pushes {code,msg,at} records.
 import { refusal } from './refusal.mjs';
 import { LIMITS, KINDS, STATUSES, OUTCOMES, ROUTE_TYPES, len, startsWithDescriptionVerb } from './text.mjs';
-import { normPath, symbolPath, refSymbol, lookupSymbol, nearestSymbol, allRefs } from './refs.mjs';
+import { normPath, symbolPath, refSymbol, lookupSymbol, nearestSymbol, allRefs, outsidePath } from './refs.mjs';
 
 const isObj = (v) => v && typeof v === 'object' && !Array.isArray(v);
 const HARD_METRICS = ['nodeOverlaps', 'edgeThroughNode', 'trackOverlaps', 'labelOverlapsLabel', 'labelOverlapsNode', 'diagonalSegs', 'shortArrowStubs', 'labelMissing'];
@@ -26,6 +26,8 @@ export function g1(model, fx) {
     const sym = refSymbol(ref), p = normPath(ref.path || '');
     const line = ref.line == null || ref.line === 0 || ref.line === '' ? null : Number(ref.line);
     if (!sym && !p) { b.add('G1', 'ref cites nothing', `${where} has a ref with no path and no symbol`, 'cite a function as path::Qual.name from facts.json', id); continue; }
+    const out = [p, symbolPath(sym)].find((x) => x && outsidePath(x));            // a cited file must sit inside the code folder: facts.json can be someone else's, so listing it there proves nothing
+    if (out) { b.add('G1', 'cited path is outside the code folder', `${where} cites ${out}`, 'cite a file inside the code folder by a relative path with no .. in it', id); continue; }
     if (line != null && !Number.isInteger(line)) { b.add('G1', 'cited line is not a whole number', `${where} cites line "${ref.line}"`, 'use an integer line inside the cited function', id); continue; }
     if (sym) {
       const f = lookupSymbol(fx, sym);
@@ -34,6 +36,7 @@ export function g1(model, fx) {
         b.add('G1', 'cited symbol missing from facts', `${where} cites ${sym}`, near ? `use a symbol that facts.json lists (nearest: ${near}), or drop the ref` : 'use a symbol that facts.json lists (faultline where <file> names the box and symbols there), or drop the ref', id);
         continue;
       }
+      if (outsidePath(normPath(f.path ?? ''))) { b.add('G1', 'cited path is outside the code folder', `${where} cites ${sym}, which facts.json places in ${normPath(f.path)}`, 'cite a file inside the code folder by a relative path with no .. in it', id); continue; }
       if (p && p !== f.path) { b.add('G1', 'cited path does not match its symbol', `${where} cites path ${p} but ${sym} lives in ${f.path}`, 'make path the file part of the symbol', id); continue; }
       if (line != null && !(line >= f.line && line <= (f.end ?? f.line))) {
         b.add('G1', 'cited line outside its function', `${where} cites ${sym} at line ${line}, but that function spans ${f.line}-${f.end ?? f.line}`, 'cite a line inside the function body', id);

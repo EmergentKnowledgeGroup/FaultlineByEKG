@@ -9,6 +9,7 @@ import { fileURLToPath } from 'node:url';
 import { familyOf, MSG_ENUM_NAME } from './signals_words.mjs';
 import { lostWakeups } from './signals_wake.mjs';
 import { portableRoot } from './root.mjs';
+import { RootedSource } from '../story/source.mjs';
 
 const here = path.dirname(fileURLToPath(import.meta.url));
 export const SIGNALS_SCHEMA = 'faultline.signals/1';
@@ -165,11 +166,28 @@ function runPython(rootDir, files, findPython) {
   }
 }
 
+// facts.json can be someone else's, so a listed path is read only when it is a plain relative path to a file inside the root. One that is absolute, climbs out with '..' or goes out through
+// a link is left unread (and listed as skipped). A file that is merely gone stays in the list: the readers say so themselves.
+function insideRoot(root, files) {
+  const src = new RootedSource(root), dirs = new Map(), keep = [], refused = [];
+  // each folder is judged once; a file that is not itself a link is inside when its folder is (a realpath per file costs ~0.5 ms, too much for a big tree)
+  const outside = (rel) => {
+    const d = path.posix.dirname(rel);
+    if (d !== '.') { if (!dirs.has(d)) dirs.set(d, outside(d)); if (dirs.get(d)) return true; }
+    let link; try { link = fs.lstatSync(path.join(root, rel)).isSymbolicLink(); } catch { return false; }
+    return link && !src.resolve(rel) && src.whyNot(rel) === 'outside';
+  };
+  for (const f of files) { const r = src.ref(f.path); (!r.ok || outside(r.rel) ? refused : keep).push(f); }
+  return { keep, refused };
+}
+
 // files: [{path, lang:'py'|'ts'|'js'}] (source files only; tests are not read)
 export async function buildSignals(rootDir, files, opts = {}) {
   const t0 = Date.now(), root = path.resolve(rootDir);
+  const gate = insideRoot(root, files);
+  files = gate.keep;
   const py = files.filter((f) => f.lang === 'py'), tsf = files.filter((f) => f.lang === 'ts' || f.lang === 'js');
-  const parts = [], skipped = [];
+  const parts = [], skipped = gate.refused.map((f) => ({ path: String(f.path).slice(0, 120), why: 'outside the source folder, so not read', lang: f.lang }));
   if (py.length) {
     const { findPython } = await import('./index.mjs');
     const raw = runPython(root, py, findPython);

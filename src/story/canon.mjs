@@ -28,6 +28,12 @@ function norm(v) {
 export function canonJson(v) { return JSON.stringify(norm(v)) + '\n'; }
 export function sha256(text) { return createHash('sha256').update(text).digest('hex'); }
 
+/** Why JSON.parse stopped, in our own words. Its message can quote a piece of the file, and a file in a folder someone else made may be a link to one never meant to be shown. */
+export function jsonWhere(e) {
+  const m = /\(line (\d+) column (\d+)\)$/.exec(String(e?.message ?? '')); // V8 ends the message with the place only when it quotes nothing
+  return m ? `not valid JSON (line ${m[1]}, column ${m[2]})` : 'not valid JSON';
+}
+
 /** A function id with the suffix that tells apart two functions of one name taken off, and a module-level script named the way the map names it. */
 export function normSymbol(sym) {
   return String(sym ?? '').replace(/~\d+$/, '').replace('::<script>', '::<module>');

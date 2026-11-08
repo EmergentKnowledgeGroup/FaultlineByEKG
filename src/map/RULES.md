@@ -42,7 +42,7 @@ first written in: code-point order and length, Python's truthiness and white spa
 
 ## Commands
 
-`faultline map --source <root>` runs the readers and these rules, writes `map/model.json`, `claims.json`, `calls.json`, `review-index.json` and `story-index.json` into the project, and goes on to the reading and the page (`--no-page` stops before the page). `faultline review queue|check|view` reads them; a map whose sources changed since it was written is refused.
+`faultline map --source <root>` runs the readers and these rules, writes `map/model.json`, `claims.json`, `calls.json`, `review-index.json` and `story-index.json` into the project, and goes on to the reading and the page (`--no-page` stops before the page). `faultline review queue|check|view` reads them; a map is refused when a file it read changed since (a file added since is not noticed).
 
 ## What gets a box, and what draws a road
 

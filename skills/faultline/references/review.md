@@ -12,7 +12,7 @@ faultline review check --answers answers.json --source <folder>
 faultline review view  --source <folder> [--without-agent] [--out file.json]
 ```
 
-`<folder>` is the folder you gave to `faultline map`. Add `--project DIR` if the project is not in `./.faultline`. If the code changed after the map was made, all three refuse and say to run `faultline map` again.
+`<folder>` is the folder you gave to `faultline map`. Add `--project DIR` if the project is not in `./.faultline`. If a file the map read changed after the map was made, all three refuse and say to run `faultline map` again. A file added since is not noticed. They read only inside `<folder>` and skip links that leave it. The check is a drift check, not a tamper check: a `.faultline` folder that came with a repo you cloned is someone else's input, so run `faultline map` yourself before you trust it.
 
 ## A question
 

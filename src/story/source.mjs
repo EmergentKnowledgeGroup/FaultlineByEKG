@@ -36,6 +36,7 @@ export class RootedSource {
     if (rel.includes('\\')) return { ok: false, why: 'path uses a backslash; write it with forward slashes, relative to the root' };
     if (rel.startsWith('/') || DRIVE.test(rel)) return { ok: false, why: 'path is outside the root (absolute)' };
     const clean = path.posix.normalize(rel);
+    if (clean.split('/').some((s) => /[. ]$/.test(s) && s !== '..')) return { ok: false, why: 'a path part ends in a dot or a space' }; // Windows drops those, so the name read is not the name checked
     if (clean === '..' || clean.startsWith('../')) return { ok: false, why: 'path is outside the root' };
     if (clean === '.' || clean.endsWith('/')) return { ok: false, why: 'path names a folder, not a file' };
     return { ok: true, rel: clean };

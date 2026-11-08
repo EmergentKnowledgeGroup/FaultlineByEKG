@@ -5,6 +5,7 @@ import fs from 'node:fs';
 import path from 'node:path';
 import { BUILTIN_EXCEPTIONS } from './pybuiltins.mjs';
 import { SKIP_DIRS, StaleInput, fileDigest, listDir } from './files.mjs';
+import { RootedSource } from '../story/source.mjs';
 import { tkey } from './canon.mjs';
 import { resolveClass } from './classes.mjs';
 import { cmpStr, startsUpper, isUpperStr, sorted } from './pyrt.mjs';
@@ -190,18 +191,21 @@ export function normalizeRaises(P) {
 
 /** Every file under the project root that the map did not read and that mentions one of `names`: {name: [path, line]}. The first mention in path
  *  order wins. "Nothing names this function" is said only after this search comes back empty. Source-like files only (prose is not searched), plus the extensionless build and launch files in OUTSIDE_NAMES; no
- *  dot-folders except OUTSIDE_DOT_DIRS, and none of SKIP_DIRS; a file larger than MAX_OUTSIDE_BYTES is skipped. */
+ *  dot-folders except OUTSIDE_DOT_DIRS, and none of SKIP_DIRS; a file larger than MAX_OUTSIDE_BYTES is skipped. A link is never opened (listDir leaves them
+ *  out, and each file is opened through the gate as well), so a name cannot be looked for in a file outside the root. */
 export function outsideMentions(P, names) {
   const want = new Set(names);
   const found = new Map();
   if (!want.size) return found;
+  const gate = new RootedSource(P.root);
   const walk = (dir, rel) => {
     const ents = listDir(dir);
     for (const e of ents) {
       if (!e.isFile || !(OUTSIDE_EXTS.some((x) => e.name.endsWith(x)) || OUTSIDE_NAMES.has(e.name) || OUTSIDE_NAME_RE.test(e.name))) continue;
       const r = rel ? `${rel}/${e.name}` : e.name;
       if (P.mods.has(r)) continue;
-      const full = path.join(dir, e.name);
+      const full = gate.resolve(r);
+      if (!full) continue;
       let text;
       try {
         if (fs.statSync(full).size > MAX_OUTSIDE_BYTES) continue;

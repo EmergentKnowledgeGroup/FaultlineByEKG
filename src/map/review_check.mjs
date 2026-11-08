@@ -1,8 +1,8 @@
 // The gate that re-checks an agent's answer to a review question, and the view of the claim register with the checked answers beside it.
 //
 //   checkAnswer(item, answer, src, claimsById) -> result   the answer must be {item, choice, cite, quote} and nothing else. The tool re-reads the cited
-//                                                          file: the line must exist, hold the quote, and (for a positive answer) hold evidence that
-//                                                          the rule for that question accepts.
+//                                                          file (one the map lists, inside the source folder): the line must exist, hold the quote, and
+//                                                          (for a positive answer) hold evidence that the rule for that question accepts.
 //   view(claims, results, withAgent) -> claims             withAgent = false is the claim list byte for byte.
 //
 // What an answer can and cannot do:
@@ -12,6 +12,7 @@
 //   - status: checked (line holds evidence the rule accepts) | cited-only (line exists and holds the quote; nothing more is shown) | opinion (negative
 //     answer) | no-answer (cannot-tell) | refused (why).
 import { createHash } from 'node:crypto';
+import { RootedSource } from '../story/source.mjs';
 import { TEMPLATES, CANT, norm } from './review.mjs';
 import { cpSlice, cpLen, pyStrip, dumps, pyRepr } from './pyrt.mjs';
 
@@ -29,6 +30,7 @@ const LOCKS = /(?:Lock|RLock|Semaphore|BoundedSemaphore|Condition|Event|Queue|Ba
 const MIN_QUOTE = 3; // a quote shorter than this proves nothing
 const MAX_QUOTE = 200;
 const ALLOWED_KEYS = ['item', 'choice', 'cite', 'quote'];
+const PLAIN_PATH = new RootedSource('.'); // its text test never looks at the disk or the root: the same test the story check gives a cited path
 const idents = (s) => new Set(s.match(/[A-Za-z_][A-Za-z0-9_]*/g) ?? []);
 const escapeRe = (s) => s.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
 const hasAny = (a, b) => [...a].some((x) => b.has(x));
@@ -50,16 +52,17 @@ export function checkAnswer(item, ans, src, claimsById, strict = true) {
   const { cite, quote } = ans;
   if (typeof cite !== 'string' || typeof quote !== 'string' || !cite.includes(':')) return refuse('cite', 'cite must be "path:line" and quote a string');
   const at = cite.lastIndexOf(':');
-  const rel = cite.slice(0, at);
   const lnText = cite.slice(at + 1);
-  if (!/^\p{Nd}+$/u.test(lnText) || Number(lnText) < 1 || rel.startsWith('/') || rel.startsWith('..') || rel.split('/').includes('..') || rel.includes(':')) return refuse('cite', 'cite is not a project-relative path:line');
+  const where = PLAIN_PATH.ref(cite.slice(0, at)); // refuses a backslash, an absolute path, a drive letter and a `..` that climbs out, on every system
+  if (!/^\p{Nd}+$/u.test(lnText) || Number(lnText) < 1 || !where.ok || where.rel.includes(':')) return refuse('cite', 'cite is not a project-relative path:line');
+  const rel = where.rel;
   const ls = src.lines(rel);
-  if (ls === null) return refuse('line-exists', `${rel} is not a file in the project`);
+  if (ls === null) return refuse('line-exists', typeof src.has === 'function' && !src.has(rel) ? `${rel} is not one of the files the map was made from` : `${rel} is not a file in the project`);
   const ln = Number(lnText);
   if (ln > ls.length) return refuse('line-exists', `${rel} has ${ls.length} lines, not ${ln}`);
   const text = ls[ln - 1];
   const q = norm(quote);
-  if (cpLen(q) < MIN_QUOTE || cpLen(q) > MAX_QUOTE || !norm(text).includes(q)) return refuse('quote', 'the cited line does not hold the quote', { line_text: cpSlice(pyStrip(text), 0, 200) });
+  if (cpLen(q) < MIN_QUOTE || cpLen(q) > MAX_QUOTE || !norm(text).includes(q)) return refuse('quote', 'the cited line does not hold the quote'); // a refused answer stores nothing of the line: it would be a way to read it without knowing it
   const res = { ...base, line_text: cpSlice(pyStrip(text), 0, 200), line_sha: createHash('sha256').update(text, 'utf8').digest('hex').slice(0, 16) };
   const tpl = item.template;
   const spec = TEMPLATES[tpl];

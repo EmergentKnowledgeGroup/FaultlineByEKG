@@ -167,7 +167,7 @@ export function findName(source) {
   let where = 'package metadata';
   if (!meta) {
     for (const d of source.rootNames()) {
-      if (/^(?:node_modules|\.git|docs?|tests?|examples?|scripts?|vendor)$/i.test(d) || d.startsWith('.')) continue;
+      if (/^(?:node_modules|\.git|docs?|tests?|examples?|scripts?|vendor)$/i.test(d) || d.startsWith('.') || source.isLink(d)) continue;     // a linked folder may lead out of the project
       meta = metadataName(source, d);
       if (meta) break;
     }

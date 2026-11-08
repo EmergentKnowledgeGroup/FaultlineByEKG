@@ -2,6 +2,7 @@
 import fs from 'node:fs';
 import path from 'node:path';
 import { refusal, ModelRefusal } from './refusal.mjs';
+import { realInside } from '../story/source.mjs';
 
 export const SCHEMA = 'faultline.model/1';
 // array key -> the field that names a row. Terms are named by the word they define.
@@ -84,8 +85,17 @@ export function modelDirOf(projectDir) {
   return isDir(b) ? b : a;
 }
 
+// " at line 3, column 5": where the parser stopped, as two numbers. Its own message can quote the start of the file, and that text (a linked or foreign file's) must not reach a refusal.
+function where(e, text) {
+  const m = /(?:in|after) JSON at position (\d+)/.exec(String(e && e.message));
+  if (!m) return '';
+  const lines = text.slice(0, +m[1]).split('\n');
+  return ` at line ${lines.length}, column ${lines[lines.length - 1].length + 1}`;
+}
+
 export function readFragments(projectDir) {
   const dir = modelDirOf(projectDir);
+  let realDir = null; try { realDir = fs.realpathSync(dir).replace(/\\/g, '/'); } catch { /* no folder: no fragments, said below */ }
   const refusals = [];
   let names = [];
   try { names = fs.readdirSync(dir).filter((n) => n.toLowerCase().endsWith('.json') && !n.startsWith('.')); } catch { /* handled below */ }
@@ -96,9 +106,13 @@ export function readFragments(projectDir) {
   }
   const fragments = [];
   for (const n of names) {
-    let data;
-    try { data = JSON.parse(fs.readFileSync(path.join(dir, n), 'utf8').replace(/^﻿/, '')); }
-    catch (e) { refusals.push(refusal('F1', 'fragment is not valid JSON', `${n}: ${String(e.message).slice(0, 90)}`, 'fix the JSON syntax in that file')); continue; }
+    let data, text = '';
+    try {
+      const real = fs.realpathSync(path.join(dir, n)).replace(/\\/g, '/');          // a fragment that is a link to a file outside the model folder is not read: its text must not reach a message
+      if (!realInside(realDir, real)) { refusals.push(refusal('F1', 'fragment is a link to a file outside the model folder', n, 'copy the fragment into the model folder, or remove the link')); continue; }
+      text = fs.readFileSync(real, 'utf8').replace(/^﻿/, '');
+      data = JSON.parse(text);
+    } catch (e) { refusals.push(refusal('F1', 'fragment is not valid JSON', `${n}${where(e, text)}`, 'fix the JSON syntax in that file')); continue; }
     fragments.push({ file: n, data });
   }
   return { dir, fragments, refusals };

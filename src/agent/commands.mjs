@@ -3,7 +3,7 @@
 import { shortestRoute, weightedRoute, trunc, uniq, plural } from '../build/util.mjs';
 import { HEARD_WORDS } from '../model/heard.mjs';
 import { makeCtx, finish, resolve, levelOf, routeWords, stageTitle, tok, BUDGET, ACCEPTED } from './view.mjs';
-import { readLines, questionLines, failingLine, breaksText, statusLines } from './toolmap.mjs';
+import { readLines, questionLines, failingLine, breaksText, statusLines, pinSaid } from './toolmap.mjs';
 import { locate, fnOfBox } from './locate.mjs';
 import { whereFunction, whereFile, calledFromLines } from './fnwhere.mjs';
 import { whole } from './words.mjs';
@@ -25,7 +25,7 @@ export function brief(data, o = {}) {
   const cands = data.findings.filter((f) => f.shown), tmx = data.toolMap || null;     // a tool map: the reading's numbers and questions, none of the hand-written way's words
   const build = (lv) => {
     const L = [], i = lv + 1, pathCap = [400, 60, 28, 14, 8][i], blurb = [400, 90, 60, 30, 0][i], candCap = [40, 8, 5, 3, 2][i], per = [40, 10, 6, 4, 3][i];
-    L.push(`FAULTLINE BRIEF  ${data.system.name || 'system'}  ${tmx ? 'TOOL MAP' : data.state.toUpperCase()}${data.pin ? '  pin ' + data.pin : ''}`);
+    L.push(`FAULTLINE BRIEF  ${data.system.name || 'system'}  ${tmx ? 'TOOL MAP' : data.state.toUpperCase()}${data.pin ? '  pin ' + pinSaid(data.pin) : ''}`);
     if (data.system.tagline || data.system.summary) L.push(trunc(data.system.summary || data.system.tagline, [800, 320, 220, 140, 90][i]));
     if (data.system.purpose && !tmx && lv < 3) L.push('Success means: ' + trunc(data.system.purpose, [500, 220, 140, 90][i] || 90));
     const ce = data.census, acc = (k) => (ce[k] ? `${k} ${ce[k].accounted}/${ce[k].total}` : '');
@@ -311,7 +311,7 @@ export function status(data, o = {}) {
   const gates = data.state === 'finished', allPlaced = !lay || (lay.placed === lay.charts && !lay.stale.length);
   const done = gates && allPlaced && (!lay || (page && page.built && page.current));
   const head = done ? 'FINISHED' : gates ? 'GATES PASS, NOT FINISHED' : data.state.toUpperCase();
-  L.push(`STATUS ${head}${data.pin ? '  pin ' + data.pin : ''}  ${data.counts.boxes} boxes, ${data.counts.routes} routes, ${data.counts.stages} stages`);
+  L.push(`STATUS ${head}${data.pin ? '  pin ' + pinSaid(data.pin) : ''}  ${data.counts.boxes} boxes, ${data.counts.routes} routes, ${data.counts.stages} stages`);
   if (data.gaps.length) { for (const g of data.gaps.slice(0, 2)) L.push(` gap ${g.code}: ${trunc(g.msg, 80)}`); if (data.gaps.length > 2) L.push(` ... ${data.gaps.length - 2} more gaps: faultline check`); }
   else L.push(gates ? ' no gaps: every gate passed' : ' no gaps');
   if (lay) {

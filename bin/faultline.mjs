@@ -5,6 +5,10 @@ import { fileURLToPath } from 'node:url';
 import { HELP } from './args.mjs';
 import { CliError } from '../src/build/project.mjs';
 
+// Windows looks for a bare program name (python, py, git) in the current folder before PATH. Faultline is often run from inside a repo it did not write,
+// so that search is off for every program it starts.
+process.env.NoDefaultCurrentDirectoryInExePath = '1';
+
 const LOAD = {
   setup: ['./cmds_map.mjs', 'setup'], map: ['./cmds_map.mjs', 'map'], review: ['./cmds_map.mjs', 'review'], story: ['./cmds_map.mjs', 'story'],
   init: ['./cmds_project.mjs', 'init'], extract: ['./cmds_project.mjs', 'extract'], propose: ['./cmds_project.mjs', 'propose'], check: ['./cmds_project.mjs', 'check'],

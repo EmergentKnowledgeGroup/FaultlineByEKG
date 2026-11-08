@@ -24,7 +24,7 @@
 
 <p align="center"><sub>Faultline's own source code, drawn by Faultline.</sub></p>
 
-Faultline reads your code and draws what it does on one map: every decision, every wait, every way it can end. Programs draw it, not a model, so the same commit gives the same bytes.
+Faultline reads your code and draws what it does on one map: every decision, every wait, every way it can end. Programs draw it, not a model, so the same code gives the same bytes.
 
 People get one HTML file to zoom, hover and walk. Agents get the same map as short text, with a token cap on every answer. Same box, same id, so you can hand your agent the exact spot you mean.
 
@@ -66,7 +66,7 @@ Faultline draws the same way. A box or road is solid when a type checker or the 
 | `faultline breaks` | the ranked questions | 800 |
 | `faultline path <a> <b>` | a route the roads allow, with its conditions | 400 |
 | `faultline impact <box or file>` | what's downstream, which endings are reachable | 500 |
-| `faultline status` | what was read, whether the page matches the map | 200 |
+| `faultline status` | what was read, whether the page matches the stored map (not the code) | 200 |
 
 The same six are served over MCP with `faultline mcp`. The rules for an agent are in [`skills/faultline/SKILL.md`](skills/faultline/SKILL.md).
 
@@ -93,21 +93,30 @@ Measured on the last full round of tests, just before the final fixes, and not r
 | | Result | What it doesn't show |
 |---|---|---|
 | **Same bytes** | Two runs on Faultline's own code: 2,690 files, every one byte-identical apart from timing logs. The same on BullMQ | Holds for the same tool versions and Python environment, on one Windows PC. It shows the drawing repeats, not that it's right |
-| **Attacker** | {{attacker_read}} boxes and roads read against the source on three systems: {{attacker_false}} false, upper bound {{attacker_bound}} | Scripts did find six false roads on one large system, through a finally block inside a loop. Some words on top of the map were wrong too. Treat switch defaults and error-handler wording as leads |
-| **Blind readers** | 12 tasks, page only: tool map {{reader_tool_bm}} of 24, story map {{reader_story_bm}} of 24 | One reader per page |
+| **Attacker** | 129 boxes and roads read against the source on three systems: 0 false, upper bound 2.3% | Scripts did find six false roads on one large system, through a finally block inside a loop. Some words on top of the map were wrong too. Treat switch defaults and error-handler wording as leads |
+| **Blind readers** | 12 tasks, page only: tool map 18 of 24, story map 22 of 24 | One reader per page |
 | **Exam** | 75 facts, map's text commands only: tool map 32, story map 61 | The map alone gets about half as far. Commands were improved after this and not re-tested |
 | **Agents with and without the map** | Orientation on a large system: about half the tokens (57k vs 115k). Pointed questions: no real difference. Known defects by symptom: no faster | One run per question. The map doesn't find bugs. Asking who hears does |
-| **Who hears** | Put to three real systems. A separate checker: {{chk_total}} verdicts, {{chk_held}} held, {{chk_partly}} partly, {{chk_wrong}} wrong, {{chk_unclear}} unclear | On hand-written maps. Read, not run, apart from two tiny scripts |
-| **Story check** | {{story_fakes_clean}} of {{story_fakes}} planted fakes still read clean | It proves two lines are joined, nothing about what the words claim |
+| **Who hears** | Put to three real systems. A separate checker: 97 verdicts, 65 held, 26 partly, 4 wrong, 2 unclear | On hand-written maps. Read, not run, apart from two tiny scripts |
+| **Story check** | 36 of 123 planted fakes still read clean | It proves two lines are joined, nothing about what the words claim |
 
 ## What this map can't tell you
 
 - **It reads code. It doesn't run it.** A candidate is a shape worth a question.
 - **It can't read intent.** It doesn't know what matters, what success means, or why a retry exists. That is what the story layer is for.
+- **It is the code as of the last `map` run.** `status` checks the page against the stored map, not against the code. Run `map` again after the code changes.
 - **Callbacks, decorators and dynamic names** are flagged, not guessed.
 - **Stages are groups of folders,** not steps. The tool claims no running order.
 - **Very large code** doesn't get a chart for every function. The page stays under about 16 MB, and the rest are outlines. The tool map has no whole-system chart in the page yet; the story map does.
 - **Reads Python, TypeScript, JavaScript and Lua.** Tested only on Windows 10 with Node 24 and Python 3.13. Treat anything else as unknown, and tell us. Pull requests for other languages and platforms are welcome.
+
+## Limits and safety
+
+- **What it reads.** The source folder you point `--source` at, as text. It never runs it. It writes only into the `.faultline` folder, or the folder you give with `--project`. Everything runs offline after install, except `setup`, which downloads one file and checks its hash.
+- **It stays inside that folder.** A link that leads outside the source folder is skipped, and a path in a map, answers or story file that leaves it is refused.
+- **A `.faultline` folder from someone else is untrusted input.** A repo you clone can ship one. Delete it and run `faultline map` yourself, or map into a new `--project` folder, before you trust it, review it or build on it.
+- **The freshness check is a drift check.** `review` and `story check` refuse when a file the map read has changed. They do not notice a file added since, and the check value sits in the map folder, so it is no seal on a folder someone else made.
+- **Found a problem?** Open an issue on [GitHub](https://github.com/EmergentKnowledgeGroup/FaultlineByEKG/issues). More in [`SECURITY.md`](SECURITY.md).
 
 ## What it isn't
 
@@ -115,7 +124,7 @@ It isn't a linter: it doesn't tell you what to change. It isn't a call graph: ro
 
 ## More
 
-[Guide](docs/GUIDE.md): every command, the review and story layers, files, languages, writing a map by hand. [Contracts](docs/CONTRACTS.md): what each command reads and writes. [Contributing](CONTRIBUTING.md).
+[Guide](docs/GUIDE.md): every command, the review and story layers, files, languages, writing a map by hand. [Contracts](docs/CONTRACTS.md): what each command reads and writes. [Contributing](CONTRIBUTING.md). [Security](SECURITY.md).
 
 BullMQ is an independent open source project under the MIT licence, used here as a test subject. It has no connection to Faultline.
 

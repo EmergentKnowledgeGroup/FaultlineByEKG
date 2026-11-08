@@ -15,6 +15,7 @@ import { createHash } from 'node:crypto';
 import { Lsp } from './lsp.mjs';
 import { cmpCp, canonJson } from './canon.mjs';
 import { requireAbsolute, fwd } from './files.mjs';
+import { RootedSource } from '../story/source.mjs';
 import { tyBinary, versionOf, resolverEnv, toolsBase } from './tools.mjs';
 import { findPython, headerEnv } from './pyenv.mjs';
 
@@ -141,12 +142,17 @@ export function canon(locs, mirror) {
 }
 
 // ---- the run -------------------------------------------------------------------------------------------------------------
-/** Copy the included Python sources to `dest` (same relative paths). -> a hash of their content. */
-export function mirrorSources(root, rels, dest) {
-  const h = createHash('sha256');
+/** Copy the included Python sources to `dest` (same relative paths). -> a hash of their content. Only files the gate allows are copied: a path that is not a
+ *  plain one inside `root`, or a link that leads outside it, is never read, so the mirror (a folder that gets shared) cannot hold text from outside the source.
+ *  `took`, when given, gets the paths that were copied. */
+export function mirrorSources(root, rels, dest, took = new Set()) {
+  const h = createHash('sha256'), gate = new RootedSource(root);
   for (const rel of [...rels].sort(cmpCp)) {
-    const src = path.join(root, rel), dst = path.join(dest, rel);
-    const data = fs.readFileSync(src);
+    const real = gate.resolve(rel);
+    if (!real) continue;
+    const dst = path.join(dest, rel);
+    const data = fs.readFileSync(real);
+    took.add(rel);
     h.update(Buffer.concat([Buffer.from(rel, 'utf8'), Buffer.from([0]), createHash('sha256').update(data).digest()]));
     let same = false;
     try { same = fs.statSync(dst).size === data.length && fs.readFileSync(dst).equals(data); } catch { /* not copied yet */ }
@@ -298,8 +304,10 @@ export async function resolvePython({ doc, name = 'system', root, rels, work, to
   fs.mkdirSync(cache, { recursive: true });
   const mirror = fwd(path.join(work, 'mirror', name));
   fs.mkdirSync(mirror, { recursive: true });
-  const srcHash = mirrorSources(root, rels.filter((r) => r.endsWith('.py')), mirror);
+  const took = new Set();
+  const srcHash = mirrorSources(root, rels.filter((r) => r.endsWith('.py')), mirror, took);
   const sites = collectSites(doc);
+  for (const rel of [...sites.keys()]) if (!took.has(rel)) sites.delete(rel);   // a file that was not copied cannot be asked about
   const ver = await versionOf(exe, cache);
   const py = await findPython(interpreter);
   writeTyConfig(mirror, py);

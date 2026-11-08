@@ -80,7 +80,7 @@ faultline story page   --source <folder>                      # dist/atlas.story
 
 The check also compares the kind of box with what the tool sees at the cited lines, and a condition with the side of the test the tool draws, in the few ways a program can compare words. Its flags (`cite-loose`, `refs-apart`, `no-wait-at-cite` and the like) are in `check.json`. Treat every flagged item as a research list: read the code, cite a better line, or drop the item. Nothing you write can raise a verdict, and a road that stands on a road the tool is not sure of is passed on as "related in the code".
 
-Exit codes: 3 when the story is refused whole (an id used twice, bad JSON), 4 when the map cannot be used (missing, or the code changed after it was made; `--allow-stale` lets the check run anyway).
+Exit codes: 3 when the story is refused whole (an id used twice, bad JSON), 4 when the map cannot be used (missing, or a file it read changed after it was made, but not a file added since; `--allow-stale` lets the check run anyway).
 
 ## Five ways this goes wrong
 
