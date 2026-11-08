@@ -306,7 +306,10 @@ export function impact(data, query, o = {}) {
 // ---------------------------------------------------------------------------------------------------------------- status
 // FINISHED is printed only when the gates pass AND the page is built, current, and every chart has a layout. Anything less says what is missing.
 export function status(data, o = {}) {
-  if (data.toolMap) { const c0 = makeCtx(data, o); return finish(statusLines(data, data.layout && data.layout.page, o.refresh), c0.link('overview', null), c0.budget('status'), 'faultline status --budget ' + c0.budget('status') * 2); }
+  if (data.toolMap) {       // the code line lists up to 5 file names per kind; fewer, then none, when the page, that line and `next:` would not fit the budget
+    const c0 = makeCtx(data, o), T0 = c0.budget('status');
+    return fixLevels((k) => statusLines(data, data.layout && data.layout.page, o.refresh, o.code, k), [5, 4, 3, 2, 1, 0], T0, c0.link('overview', null), 'faultline status --budget ' + T0 * 2);
+  }
   const c = makeCtx(data, o), T = c.budget('status'), L = [], lay = data.layout, page = lay && lay.page;
   const gates = data.state === 'finished', allPlaced = !lay || (lay.placed === lay.charts && !lay.stale.length);
   const done = gates && allPlaced && (!lay || (page && page.built && page.current));

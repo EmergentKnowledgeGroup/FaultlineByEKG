@@ -51,7 +51,7 @@ Start here: the tool map, in one command
                              documentation folders at the top of the source folder (docs, doc, documentation, website, docs_src). A "note:" line names the
                              documentation folders that held code. To map one, give it as the source:  faultline map --source docs
                              It writes <project>/map/ (model.json claims.json calls.json review-index.json
-                             story-index.json), <project>/read/ (the reading) and the page project. Give it a folder of its own: it does not mix with a map
+                             story-index.json sources.json), <project>/read/ (the reading) and the page project. Give it a folder of its own: it does not mix with a map
                              an agent wrote by hand.
   brief, where, breaks, path, impact, status    (listed below) work on that project at once, a few hundred tokens each.
 
@@ -134,7 +134,7 @@ For an agent (each answer is under a token budget and ends with a link to open)
                              (the first few are always shown after the candidates)
   path <a> <b>               the route between two boxes: along a declared path when both are on one (it says which), else a route the roads allow (each road 1, a change of stage 6, a main-path road far less)   [--shortest: fewest hops]
   impact <box|file>          what is downstream by forward roads: counts by hop, boxes within 2 hops, endings within 4; stops at shared funnels and says so
-  status                     on a tool map: what was read, what is open, whether the page matches the stored map (by content, not file time; the code is not checked) and what to do next.
+  status                     on a tool map: what was read, what is open, whether the page matches the stored map (by content, not file time), whether the code still matches the map (files changed, added or missing since the map was made) and what to do next. [--source DIR  the folder the map was made from, when the project does not remember it]
                              On a map written by hand: draft or finished (FINISHED only when the gates pass and the page is built and current), gaps, charts not placed
   mcp                        serve the six above over MCP stdio (JSON-RPC, no dependency)
   Any of them takes --budget TOKENS to raise the cap.

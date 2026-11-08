@@ -13,7 +13,7 @@ import { cmpCp } from './canon.mjs';
 const SKIP = new Set(['node_modules', '.git', 'dist', 'build', 'vendor', '.faultline', 'tests', 'test', '__tests__']);
 
 // listDir leaves links out, so no file is read through one; the walk always starts at `root` (a prefix only filters what it finds), so no other start folder needs a check
-function walkDir(d, rel = '') {
+export function walkDir(d, rel = '') {
   const res = [];
   for (const e of listDir(d)) {
     const r = rel ? rel + '/' + e.name : e.name;
@@ -23,13 +23,18 @@ function walkDir(d, rel = '') {
   return res;
 }
 
+/** The files a read of `root` takes: every TypeScript or JavaScript file the walk finds whose path starts with `prefix`, not with an `exclude` prefix, and (given `only`) is listed there. */
+export const tsFiles = (root, { prefix = '', exclude = [], only = null } = {}) => {
+  const wanted = only ? new Set(only) : null;
+  return walkDir(root).filter((r) => r.startsWith(prefix) && !exclude.some((x) => r.startsWith(x)) && (!wanted || wanted.has(r)));
+};
+
 export async function readTypeScript({ ts, root, prefix = '', exclude = [], only = null, tsconfig = null, check = 'auto' }) {
 const K = ts.SyntaxKind;
 const incPrefix = prefix, excl = exclude;
 let CHECK = check || null;                         // 'auto' | 'zero' | 'tsconfig' | null
 const TSCONFIG_REL = tsconfig || null;
-const wanted = only ? new Set(only) : null;
-const files = walkDir(root).filter((r) => r.startsWith(incPrefix) && !excl.some((x) => r.startsWith(x)) && (!wanted || wanted.has(r)));
+const files = tsFiles(root, { prefix: incPrefix, exclude: excl, only });
 const modOf = (rel) => rel.replace(/\.(d\.)?(tsx?|jsx?|mjs|cjs)$/, '').replace(/\/index$/, '').replace(/\//g, '.');
 const fileSet = new Set(files.map(modOf));
 // the checker's configuration is part of the answer, so it is decided here and written to the header: a tsconfig.json at the root (or the one named

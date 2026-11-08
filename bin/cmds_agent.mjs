@@ -7,6 +7,7 @@ import * as C from '../src/agent/commands.mjs';
 import { loadReading } from '../src/agent/reading.mjs';
 import { parse } from './args.mjs';
 import { proj, needProject, refreshCommand } from './cmds_project.mjs';
+import { codeCheck } from '../src/map/stale.mjs';
 
 const rel = (p) => path.relative(process.cwd(), p).split(path.sep).join('/');
 
@@ -16,7 +17,7 @@ export async function view(o) {
   const { data, state } = await agentView(p.dir, {});
   const linkBase = rel(path.join(p.dir, 'dist', 'atlas.html'));
   const reading = data.toolMap ? loadReading(p.dir, { facts: state.facts }) : null;    // every function the scan found, the call list and the drawn bodies
-  return { data, linkBase, dir: p.dir, root: p.root, rootKnown: p.rootKnown, reading };
+  return { data, linkBase, dir: p.dir, root: p.root, rootKnown: p.rootKnown, reading, p };
 }
 /** A command asked about something the map does not have exits 1, so a script can tell. The answer says so on its first line: `WHERE <what>: <why>` where a match reads `WHERE <what> -> <box>`. */
 const NO_MATCH = { where: (text, q) => text.startsWith(`WHERE ${q}: `), impact: (text, q) => text.startsWith(`IMPACT ${q}: `), path: (text) => /^PATH: .* matches no box/.test(text) };
@@ -62,8 +63,8 @@ export async function impact(argv) {
   return exitFor('impact', text, pos.join(' '));
 }
 export async function status(argv) {
-  const { o } = parse(argv, { str: ['budget', 'link-base'] });
+  const { o } = parse(argv, { str: ['budget', 'link-base', 'source'] });
   const v = await view(o);
-  console.log(C.status(v.data, opts(o, v)));
+  console.log(C.status(v.data, { ...opts(o, v), code: v.data.toolMap ? codeCheck(v.p) : null }));       // a tool map: does the code still match it
   return 0;
 }

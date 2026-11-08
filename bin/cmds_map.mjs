@@ -117,7 +117,7 @@ export async function map(argv) {
   if (docs) out(`note: ${docs}`);
   const t = r.times;
   out(`times (seconds): ${Object.entries(t).map(([k, v]) => `${k} ${v}`).join(', ')}; ${((performance.now() - t0) / 1000).toFixed(1)} in all`);
-  out(`map files: ${rel(r.files.map)}/ (model.json claims.json review-index.json story-index.json calls.json)   reading: ${rel(r.files.read)}/`);
+  out(`map files: ${rel(r.files.map)}/ (model.json claims.json review-index.json story-index.json calls.json sources.json)   reading: ${rel(r.files.read)}/`);
   if (r.page) {
     out(`page: ${rel(r.page)} (${(r.pageBytes / 1048576).toFixed(2)} MB)${r.hardLeft ? `; ${r.hardLeft} chart(s) still have a hard layout defect` : ''}`);
     out('Open it in a browser, or ask for a small text view:  faultline brief   faultline breaks   faultline where <name>');

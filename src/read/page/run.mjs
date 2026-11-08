@@ -7,12 +7,12 @@ import path from 'node:path';
 import { spawn } from 'node:child_process';
 import { fileURLToPath } from 'node:url';
 import { readSystem as readCode } from '../../map/index.mjs';
-import { discover } from '../../extract/walk.mjs';
 import { findPython } from '../../map/pyenv.mjs';
 import { mapSystem, modelText, claimsText } from '../../map/mapsystem.mjs';
 import { readRouteFacts } from '../../map/routefacts.mjs';
 import { reviewIndex } from '../../map/review.mjs';
 import { dumps } from '../../map/pyrt.mjs';
+import { scanSources, sourcesText } from '../../map/stale.mjs';
 import { callTableText } from '../../map/calltable.mjs';
 import { storyIndex, storyIndexText } from '../../story/export.mjs';
 import { extract, writeOutputs, summary as scanSummary } from '../../extract/index.mjs';
@@ -66,11 +66,11 @@ export async function chooseLanguages(root, opt, notes, scan = {}) {
   if (opt.python) c.python = { include: opt.python, exclude: opt['python-exclude'] ?? [] };
   if (opt.typescript !== undefined) c.typescript = { prefix: folderPrefix(opt.typescript), exclude: opt['ts-exclude'] ?? [], ...(opt.tsconfig ? { tsconfig: opt.tsconfig } : {}) };
   if (opt.lua !== undefined) c.lua = { prefix: folderPrefix(opt.lua) };
+  let scanned = false;
   if (!c.python && !c.typescript && !c.lua) {
+    scanned = true;
     // no language named: read exactly the files the scanner counts as source, so every box can cite a file the scan lists
-    const src = discover(root, { include: scan.include || [], exclude: scan.exclude || [], defaults: !scan.noDefaults }).files.filter((f) => f.role === 'src');
-    const by = (...langs) => src.filter((f) => langs.includes(f.lang)).map((f) => f.path);
-    const py = by('py'), ts = by('ts', 'js'), lua = by('lua');
+    const { py, ts, lua } = scanSources(root, { include: scan.include || [], exclude: scan.exclude || [], noDefaults: !!scan.noDefaults });
     if (py.length) c.python = { include: py, exclude: [] };
     if (ts.length) c.typescript = { prefix: '', exclude: [], only: ts };
     if (lua.length) c.lua = { prefix: '', only: lua };
@@ -86,7 +86,9 @@ export async function chooseLanguages(root, opt, notes, scan = {}) {
     }
   }
   if (!c.python && !c.typescript && !c.lua) throw new Error(`nothing to read: no ${noPython ? 'readable ' : ''}Python, TypeScript, JavaScript or Lua files under ${root}${noPython ? ' (Python was not found)' : ''}`);
-  return { config: c, noPython };
+  // `walk` is what map/sources.json records so that files added later can be found by the same walk
+  const walk = scanned ? { by: 'scan', include: scan.include || [], exclude: scan.exclude || [], noDefaults: !!scan.noDefaults } : { by: 'config', python: c.python, typescript: c.typescript, lua: c.lua };
+  return { config: c, noPython, walk };
 }
 
 const noteText = (n) => (n.code === 'no-checker' ? 'the Python type checker (ty) is not installed: run  faultline setup  for it. Until then the map makes no negative claims about Python and leaves its effects as "maybe:".' : n.text);
@@ -163,7 +165,7 @@ export async function mapToPage(opt, say = console.log) {
   const cfgFile = `${L.dir}/config.json`;
   if (!fs.existsSync(cfgFile)) fs.writeFileSync(cfgFile, JSON.stringify({ include: [], exclude: [] }, null, 2) + '\n');
   const cfg = readJsonFile(cfgFile) || {};
-  const { config, noPython } = await chooseLanguages(root, opt, notes, cfg);
+  const { config, noPython, walk } = await chooseLanguages(root, opt, notes, cfg);
   config.root = root;
   config.work = opt.work ? fwd(opt.work) : `${L.map}/_work`;
   if (opt.tools) config.tools = fwd(opt.tools);
@@ -184,6 +186,7 @@ export async function mapToPage(opt, say = console.log) {
   put(L.map, 'review-index.json', dumps(reviewIndex(res.P, res.claims), 0));
   const index = storyIndex(sys.ir, sys.sourceDigest);
   put(L.map, 'story-index.json', storyIndexText(sys.ir, sys.sourceDigest));
+  put(L.map, 'sources.json', sourcesText(root, sys.ir, walk));       // what the readers took, to tell later whether the code still matches this map
   put(L.map, 'calls.json', callTableText(res.P));
   const confident = res.claims.filter((c) => c.conf === 'confident').length;
   const line = `${name}: ${plural(res.model.boxes.length, 'box', 'boxes')}, ${plural(res.model.routes.length, 'road')}, ${plural(res.claims.length, 'claim')} (${confident} confident, ${res.claims.length - confident} not)`;

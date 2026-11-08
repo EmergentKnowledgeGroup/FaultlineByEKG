@@ -55,7 +55,7 @@ If a run stops with a message:
 Use the map before you open files. Each answer is small and ends with a link a person can open.
 
 ```
-faultline status               # what exists, whether the page matches the stored map
+faultline status               # what exists, whether the page and the code still match the map
 faultline brief                # the whole picture, about 1200 tokens
 faultline where <box | file:line | words from a title>
 faultline breaks               # candidates, one question each
@@ -65,7 +65,7 @@ faultline impact <box | file>  # what is downstream
 
 Take box ids (such as `f58.0`) from `brief` or `where`; the long ids that `review` and `story` print work as well, and so do a function id (`path/file.py::Class.method`), a bare function name and `file:line`. A `path` answer is a route the roads allow, not a promise that one request takes it. Details and what the words mean: `references/reading-a-map.md`.
 
-On a tool map `status` says what was read, what is open and what to do next, `brief` opens with the same three lines, and `breaks` lists the same ranked questions the page lists, with the same counts. Read `status` first: it also says if the page no longer matches the stored map. It never opens the code, so after the code changes run `map` again; a page that matches the stored map can still describe old code.
+On a tool map `status` says what was read, what is open and what to do next, `brief` opens with the same three lines, and `breaks` lists the same ranked questions the page lists, with the same counts. Read `status` first: it also says if the page no longer matches the stored map, and its `code:` line says whether the code still matches the map. If it says the code is BEHIND, run `faultline map` again before you trust any answer; `status` reports that and does not update the map.
 
 ## Job 3: work the review queue
 

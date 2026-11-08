@@ -36,9 +36,10 @@ test('a git pin is labelled as where HEAD was; a tree pin and no pin are left as
   assert.equal(statusLines(data('tree 0123456789'), page())[0], 'STATUS TOOL MAP  pin tree 0123456789  read from the code; no agent, nothing run');
 });
 
-test('the MCP status tool says the code is not re-checked, in under 40 words; the server reports the package version', async () => {
+test('the MCP status tool says the page and the code are compared with the map, in under 40 words; the server reports the package version', async () => {
   const t = TOOLS.find((x) => x.name === 'faultline_status');
-  assert.match(t.description, /matches the stored map \(the code is not re-checked\)/);
+  assert.match(t.description, /whether the page and the code still match the map/);
+  assert.doesNotMatch(t.description, /not re-checked/);
   assert.doesNotMatch(t.description, /before trusting/);
   for (const x of TOOLS) assert.ok(x.description.split(/\s+/).length < 40, `${x.name} is ${x.description.split(/\s+/).length} words`);
   const r = await makeServer({ dir: os.tmpdir() }).handle({ jsonrpc: '2.0', id: 1, method: 'initialize', params: { protocolVersion: '2025-03-26' } });

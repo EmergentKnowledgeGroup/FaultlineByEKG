@@ -66,8 +66,26 @@ export function breaksText(data, o, c, T) {
 // a git pin is where HEAD was, not the bytes read: the files are read as they lie, uncommitted edits too, so agent text says so
 export const pinSaid = (pin) => (/^git /.test(pin || '') ? `${pin} (HEAD; the files read may hold uncommitted edits)` : pin || '');
 
-/** `faultline status` on a tool map: what was read, what is open, whether the page matches the stored map (the code is not looked at), what to do next. Under 200 tokens. */
-export function statusLines(data, page, refresh) {
+const clean = (s, n) => String(s).replace(/[\u0000-\u001f\u007f]/g, '?').slice(0, n);       // file names may come from a map someone else made: no control characters reach the terminal, and none runs long
+const nameList = (a, k) => `${a.slice(0, k).map((x) => clean(x, 60)).join(', ')}${a.length > k ? `, +${a.length - k} more` : ''}`;
+
+/** The status line about the code. `code` is what codeVsMap (src/map/stale.mjs) returned; `fix` is the whole command that makes the map again; `names` caps the file names listed
+ *  per kind (5). Status has 200 tokens in all, so `status` asks for fewer names, down to none, until the page, this line and `next:` fit (fixLevels in commands.mjs). */
+export function codeLine(code, fix = 'faultline map --source <the code folder>', names = 5) {
+  if (code.state === 'unknown') return `code: not checked (${clean(code.why || 'no record of the files the map read', 200)})`;
+  if (code.state === 'matches') return `code: matches the map (${plural(code.checked, 'file')} checked${code.why ? `; ${clean(code.why, 120)}` : ''})`;
+  const make = (k) => {
+    const bits = [[code.changed, 'changed'], [code.added, 'added'], [code.missing, 'missing']].filter(([a]) => a.length).map(([a, w]) => `${a.length} ${w}${k ? ` (${nameList(a, k)})` : ''}`);
+    if (code.refused) bits.push(`${plural(code.refused, 'path')} outside the code folder, not opened`);
+    return `code: BEHIND the map: ${bits.join(', ')}. Run  ${fix}  to update.`;
+  };
+  let line = make(names);
+  for (let k = names - 1; k >= 0 && line.length - fix.length > 200; k--) line = make(k);       // alone, the line stays near 200 characters besides the command
+  return line;
+}
+
+/** `faultline status` on a tool map: what was read, what is open, whether the page matches the stored map, whether the code still matches it (`code`, from codeVsMap; left out when not given), what to do next. Under 200 tokens. */
+export function statusLines(data, page, refresh, code, names = 5) {
   const t = data.toolMap, n = t.nums, notes = t.notes || [];
   const L = [`STATUS TOOL MAP${data.pin ? `  pin ${pinSaid(data.pin)}` : ''}  read from the code; no agent, nothing run`];
   L.push(`read: ${plural(n.functions, 'function')} in ${plural(n.files, 'file')}${langs(n.languages) ? ` (${langs(n.languages)})` : ''}; ${n.boxes} boxes, ${n.roads} roads, ${plural(n.stages, 'stage')}; ${n.claims} claims, ${n.claimsNotConfident} not confident`);
@@ -76,8 +94,9 @@ export function statusLines(data, page, refresh) {
   L.push(`open: ${plural(n.questions, 'question')} (${n.questionsSure} sure), ${plural(n.gaps, 'gap')} in the drawing, ${n.hearerUnknown}/${n.failing} failing endings with no known hearer`);
   const f = data.findings.filter((x) => x.shown).length;
   const fresh = !page || (page.built && page.current);
-  L.push(!page ? 'page: not checked' : !page.built ? 'page: NOT BUILT' : page.current ? 'page: built, matches the map as stored (code not checked)' : page.recorded ? `page: OUT OF DATE (${page.changed})` : 'page: built by an older version, cannot tell if it matches the map');     // matches = the page's recorded inputs equal the project files now; no source file is opened
+  L.push(!page ? 'page: not checked' : !page.built ? 'page: NOT BUILT' : page.current ? `page: built, matches the map as stored${code ? '' : ' (code not checked)'}` : page.recorded ? `page: OUT OF DATE (${page.changed})` : 'page: built by an older version, cannot tell if it matches the map');     // matches = the page's recorded inputs equal the project files now (the code line below is the one that opens the source files)
   const src = refresh || 'faultline map --source <the code folder>';       // refresh is the whole command that makes the map again
-  L.push(!page || !page.built ? `next: ${src}` : !fresh ? 'next: faultline build   (rebuilds the page from the map, no source needed)' : f ? 'next: faultline breaks   (the questions, ranked)' : n.claimsNotConfident ? 'next: faultline review queue --source <the code folder>' : 'next: faultline brief');
+  if (code) L.push(codeLine(code, src, names));
+  L.push(!page || !page.built ? `next: ${src}` : code && code.state === 'behind' ? 'next: update the map with the command above' : !fresh ? 'next: faultline build   (rebuilds the page from the map, no source needed)' : f ? 'next: faultline breaks   (the questions, ranked)' : n.claimsNotConfident ? 'next: faultline review queue --source <the code folder>' : 'next: faultline brief');
   return L;
 }

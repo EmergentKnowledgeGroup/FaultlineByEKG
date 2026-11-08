@@ -6,6 +6,7 @@ import path from 'node:path';
 import readline from 'node:readline';
 import { agentView } from '../build/pipeline.mjs';
 import { resolveProject } from '../build/project.mjs';
+import { codeCheck } from '../map/stale.mjs';
 import * as C from './commands.mjs';
 
 const VERSIONS = ['2025-06-18', '2025-03-26', '2024-11-05'];
@@ -23,7 +24,7 @@ export const TOOLS = [
     inputSchema: { type: 'object', properties: { from: str('Start box id or anything where resolves.'), to: str('End box id or anything where resolves.'), shortest: { type: 'boolean', description: 'Ignore declared paths; give the shortest road.' }, ...budgetProp }, required: ['from', 'to'] } },
   { name: 'faultline_impact', description: 'Downstream of a box or file by forward roads: counts by hop, boxes within 2 hops, endings within 4, the rest by stage; says where it stops at a shared funnel. Also what feeds it.',
     inputSchema: { type: 'object', properties: { target: str('Box id, file, file:line or symbol.'), ...budgetProp }, required: ['target'] } },
-  { name: 'faultline_status', description: 'What was read and what is open on a tool map, or draft or finished on a map written by hand; whether the page matches the stored map (the code is not re-checked); the next step. Cheap.',
+  { name: 'faultline_status', description: 'What was read and what is open on a tool map, or draft or finished on a hand-written map; whether the page and the code still match the map (if behind, run faultline map); the next step. Cheap.',
     inputSchema: { type: 'object', properties: { ...budgetProp } } },
 ];
 
@@ -51,7 +52,11 @@ export function makeServer({ dir, cwd = process.cwd() }) {
       case 'faultline_breaks': return C.breaks(data, { ...o, stage: a.stage || null, all: !!a.all, leads: !!a.leads, silent: !!a.silent });
       case 'faultline_path': return C.path(data, need(a.from, 'from'), need(a.to, 'to'), { ...o, shortest: !!a.shortest });
       case 'faultline_impact': return C.impact(data, need(a.target, 'target'), o);
-      case 'faultline_status': return C.status(data, o);
+      case 'faultline_status': {       // the code line is made fresh on every call: it is the one part of the answer that can change without the project folder changing
+        if (!data.toolMap) return C.status(data, o);
+        const p = resolveProject({ project: dir }), q = (x) => JSON.stringify(path.resolve(x).replace(/\\/g, '/'));
+        return C.status(data, { ...o, code: codeCheck(p), refresh: `faultline map --source ${p.rootKnown ? q(p.root) : '<the code folder>'} --project ${q(dir)}` });
+      }
       default: throw Object.assign(new Error(`Unknown tool ${name}`), { rpc: -32602 });
     }
   }

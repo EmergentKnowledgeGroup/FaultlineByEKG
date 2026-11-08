@@ -9,7 +9,7 @@ The map exists so you do not have to dig. Use it before you open files. Every an
 | To know what might be wrong | `faultline breaks [--stage s] [--all] [--silent]` | 800 |
 | To know how you get from here to there | `faultline path <a> <b>` (`--shortest` for fewest hops) | 300 |
 | To know what a change could affect | `faultline impact <box \| file>` | 500 |
-| To know whether the page exists and matches the stored map (not the code) | `faultline status` | 200 |
+| To know whether the page exists and matches the stored map, and whether the code still matches the map | `faultline status` | 200 |
 
 A cut answer says so and tells you how to get more: `--budget 2400`. `faultline mcp` serves the same six over MCP stdio. On a map written by hand, `where` also takes a function id such as `parcelworks/worker.py::Worker.run`. On a tool map it does not.
 
@@ -19,7 +19,7 @@ On a tool map the page and the text view use short box ids such as `f58.0` (a bo
 
 ## A good session
 
-1. `faultline status`. Does the page exist, and does it match the stored map? It does not say the code is unchanged.
+1. `faultline status`. Does the page exist, and does it match the stored map? Its `code:` line says whether the code still matches the map. If it says BEHIND, run `faultline map` again before you trust the answers.
 2. `faultline brief` once, at the start. Note the stages, the loops, the endings and the top candidates.
 3. `faultline where` on the thing you were asked about.
 4. Read the code it names. The map tells you where to look. It does not replace looking.

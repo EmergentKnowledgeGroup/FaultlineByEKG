@@ -26,7 +26,7 @@ The code, the page and the tests all build against this file. If you change a co
   dist/svg/<chartId>.svg
   dist/png/<chart>.png  dist/shots/*.png from `look` (needs a browser)
   receipts.json
-  map/                                   tool output of `faultline map`: model.json claims.json calls.json review-index.json story-index.json (and _work/, the type checker's scratch folder)
+  map/                                   tool output of `faultline map`: model.json claims.json calls.json review-index.json story-index.json sources.json (and _work/, the type checker's scratch folder)
   map/review-checked.json                `faultline review check`: the checked answers (replaced by each check)
   read/                                  tool output of `faultline map`: reading.json charts.json words.json journeys.txt
   page/side.json                         tool output of `faultline map`: which boxes and roads are not confident, for the page
@@ -194,12 +194,12 @@ Same map, compact text. Every answer names box ids and ends with a deep link the
 | `faultline breaks [--stage s]` | Candidates and proved breaks with their shapes, evidence and one question each; a line says how many failures nobody is told about and the first few follow (`--silent` lists them all) | 800 |
 | `faultline path <a> <b>` | Along the declared path when both boxes lie on one (it says which); else a route the roads allow: a weighted search over forward roads, each road 1, each change of stage about 6, a main-path road far less, ties broken the same way every time. Not a promise that one request takes it. `--shortest` is the plain fewest-hops search | 300 |
 | `faultline impact <box\|file>` | What's downstream, which endings are reachable, what depends on this | 500 |
-| `faultline status` | Draft or finished, gaps, stale boxes, unexplored (a tool map: what was read, what is open, whether the page matches the stored map and not the code, the next step) | 200 |
+| `faultline status` | Draft or finished, gaps, stale boxes, unexplored (a tool map: what was read, what is open, whether the page matches the stored map, whether the code still matches it, the next step) | 200 |
 | `faultline mcp` | The same six over MCP stdio. Tool descriptions under 40 words each | |
 
 On a tool map the ids in these answers are the page's short ids (`f58.0` for a box, `c58` for a chart, `d1` for a stage, `l_f58.0` for a loop), numbered by the reading, so they can change when the code changes; `file:line`, a function id (`path::qualified.name`), a bare function name and words from a title also work. The review and story files use the map's own long ids (`map/model.json`); every command takes those too, and `review queue`, `review view` and `story check` print the short id beside each long one (`page` / `fromPage` / `toPage` in their files). A long id the page draws no box for is answered as its function. A function the page lists only as an outline is answered as a function, and one the reading drew no box for cannot be found by name.
 
-On a tool map the text commands use the reading's words: `status` and `brief` say what was read, what was not and what is open (never DRAFT, a ledger or census rows, a run order or "Accounted"), and `breaks` and `brief` list the page's own ranked questions (the reading's `triage.questions`, kept in `page/ask.json`) with the same count, as many as fit the cap. `status` says whether the page matches the map by content: the build records a digest of its inputs (the model fragments and layouts, and for a tool map the reading) in `dist/atlas.agent.json` as `layout.page.inputs`, and file times are not looked at on either kind of map. `status` never opens the source: a page can match the stored map while the code has moved on, and only `faultline map` again brings the map up to date.
+On a tool map the text commands use the reading's words: `status` and `brief` say what was read, what was not and what is open (never DRAFT, a ledger or census rows, a run order or "Accounted"), and `breaks` and `brief` list the page's own ranked questions (the reading's `triage.questions`, kept in `page/ask.json`) with the same count, as many as fit the cap. `status` says whether the page matches the map by content: the build records a digest of its inputs (the model fragments and layouts, and for a tool map the reading) in `dist/atlas.agent.json` as `layout.page.inputs`, and file times are not looked at on either kind of map. A page can match the stored map while the code has moved on, so `status` on a tool map also prints one `code:` line from `map/sources.json` (`{schema: 'faultline.sources/1', files: {<path>: {size, sha256}}, walk}`: every file the readers took, and the options that found them). It opens those files only through the shared gate (a recorded path that leaves the code folder is counted and never opened) and runs the same walk again for files added since, and says `code: matches the map`, `code: BEHIND the map: N changed, N added, N missing` (with up to 5 names of each and the command to run) or `code: not checked (why)` when there is no `sources.json` (a map from an older version) or the project does not say which folder holds its code (pass `--source`). The MCP `faultline_status` gives the same line. It reports and does not update: only `faultline map` again brings the map up to date.
 
 Token budgets are measured as chars/4. A human's page has a "copy pointer" on each box producing `faultline where <box>`, so a person can hand an agent an exact spot, and an agent can hand a person an exact link.
 
@@ -274,7 +274,7 @@ Added for large maps; every addition is optional data, nothing above was removed
 | Stage | What it does | Writes |
 |---|---|---|
 | 1 read | the language readers and the checkers' answers | `map/_work/` (the checker's scratch) |
-| 2 map | the rules draw boxes and roads and make every claim | `map/model.json` `claims.json` `calls.json` `review-index.json` `story-index.json` |
+| 2 map | the rules draw boxes and roads and make every claim | `map/model.json` `claims.json` `calls.json` `review-index.json` `story-index.json` `sources.json` |
 | 3 scan | facts, census, graph, signals (section 2 to 4) | `facts.json` `census.json` `graph.json` `signals.json` |
 | 4 reading | the code's name and purpose, journeys, main path, endings, who hears, switches, terms, one chart per function worth a picture, and the one record of numbers | `read/reading.json` `charts.json` `words.json` `journeys.txt` |
 | 5 project | the reading as a Faultline project, marked `toolMap` | `model/00-system.json` `model/10-flows.json` `page/side.json` `page/ask.json` |
@@ -347,6 +347,6 @@ Every command takes `--project DIR` (default `./.faultline`, or the nearest one 
 | `plan`, `worklist`, `parts` | `stageplan.json`, the model | nothing |
 | `join` | `handoffs/*.json`, the model | `model/80-handoffs.json` `handoffs.review.json` `handoffs.unresolved.json` |
 | `walk add`, `coverage import`, `evidence ...` | a walk, report or log file | `walks/*.walk.jsonl` (a cleaned copy) |
-| `walk list`, `brief`, `where`, `breaks`, `path`, `impact`, `status`, `mcp` | the project (model, facts, signals, layouts, walks) | nothing |
+| `walk list`, `brief`, `where`, `breaks`, `path`, `impact`, `status`, `mcp` | the project (model, facts, signals, layouts, walks); `status` also the source files `map/sources.json` lists | nothing |
 
 `faultline map` is the only command that writes `read/` and `page/` and the only one that rewrites `map/` (`review check` adds `map/review-checked.json`). A project written by hand has none of them.

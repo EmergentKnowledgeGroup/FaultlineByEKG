@@ -77,7 +77,7 @@ The second command treats the toy's hand-written map as a story and checks it ag
 | `faultline breaks [--stage s] [--all] [--silent]` | the ranked questions, one each (on a tool map the same list as the page) | 800 |
 | `faultline path <a> <b>` | a route the roads allow, with its conditions (`--shortest` for fewest hops) | 300 |
 | `faultline impact <box or file>` | what is downstream, which endings are reachable | 500 |
-| `faultline status` | what was read, what is open, whether the page matches the stored map (the code is not checked), what to do next | 200 |
+| `faultline status` | what was read, what is open, whether the page matches the stored map, whether the code still matches it, what to do next | 200 |
 
 The cap is characters divided by four. `--budget N` raises it for one answer. `faultline mcp` serves the same six over MCP stdio. On a tool map `where`, `path` and `impact` take a box id (the page's `f58.0`, or the long id from `map/model.json` that `review` and `story` print), a function id (`path/file.py::Class.method`), a bare function name, `file` or `file:line`, or words from a box title. `brief` and `breaks` list the same ranked questions as the page's "Where it can break", with the same counts, as many as fit the cap.
 
@@ -107,7 +107,7 @@ The same code, the same tool commit, the same tool versions (the TypeScript comp
 - A main path is named only when the project's own examples name an entry or one journey clearly dominates. Otherwise the page says "No main path found".
 - A page stays under about 16 MB, so on a large codebase not every function gets a chart. The rest are in the Reader as outlines.
 - `faultline build` on a tool map's project folder rebuilds the page from the map and reading already there, the Reader included. It reads no code (except with `--excerpts`, which copies today's source lines in under the old drawing), so to see changed code run `faultline map` again. The commands of the hand-written way (`extract`, `propose`, `check`, `place`, `analyze`, `signals`, `plan`, `parts`, `worklist`, `join`) refuse on a tool map's project and name the command to use.
-- The map is the code as it was when `map` last ran. `status` checks the page against the stored map and never opens the code. `review` and `story check` compare a digest of the files the map read: they notice a changed file and miss an added one. The README, docs and package files that the purpose and glossary come from, and `config.json`, are not in the digest, and a file edited while `map` runs can give a map that mixes versions. A digest kept in a map folder someone else made proves nothing about that folder. Run `faultline map` yourself on any repo you cloned before you trust its `.faultline` folder.
+- The map is the code as it was when `map` last ran. `status` checks the page against the stored map and compares the files the map read with the code now (changed, added, missing; `map/sources.json`): it says when the map is behind and does not update it. `review` and `story check` compare a digest of the files the map read: they notice a changed file and miss an added one. The README, docs and package files that the purpose and glossary come from, and `config.json`, are not in the digest, and a file edited while `map` runs can give a map that mixes versions. A digest kept in a map folder someone else made proves nothing about that folder. Run `faultline map` yourself on any repo you cloned before you trust its `.faultline` folder.
 - A function the reading drew no box for (it only calls other functions, or was not reduced) cannot be found by name; `status` counts them.
 - Only Windows has been tested.
 
@@ -134,7 +134,7 @@ Anything that watches the code can write a walk, a small JSON-lines file listing
 
 ```
 .faultline/
-  map/       model.json claims.json calls.json review-index.json story-index.json (+ review-checked.json after a review)
+  map/       model.json claims.json calls.json review-index.json story-index.json sources.json (+ review-checked.json after a review)
   read/      reading.json charts.json words.json journeys.txt
   story/     check.json                          from story check
   model/     00-system.json 10-flows.json        the page project, written by map

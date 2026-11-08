@@ -66,7 +66,7 @@ Faultline draws the same way. A box or road is solid when a type checker or the 
 | `faultline breaks` | the ranked questions | 800 |
 | `faultline path <a> <b>` | a route the roads allow, with its conditions | 400 |
 | `faultline impact <box or file>` | what's downstream, which endings are reachable | 500 |
-| `faultline status` | what was read, whether the page matches the stored map (not the code) | 200 |
+| `faultline status` | what was read, whether the page and the code still match the map | 200 |
 
 The same six are served over MCP with `faultline mcp`. The rules for an agent are in [`skills/faultline/SKILL.md`](skills/faultline/SKILL.md).
 
@@ -104,7 +104,7 @@ Measured on the last full round of tests, just before the final fixes, and not r
 
 - **It reads code. It doesn't run it.** A candidate is a shape worth a question.
 - **It can't read intent.** It doesn't know what matters, what success means, or why a retry exists. That is what the story layer is for.
-- **It is the code as of the last `map` run.** `status` checks the page against the stored map, not against the code. Run `map` again after the code changes.
+- **It is the code as of the last `map` run.** `status` tells you when the map is behind (files changed, added or missing since `map`); it does not update it. Run `map` again after the code changes.
 - **Callbacks, decorators and dynamic names** are flagged, not guessed.
 - **Stages are groups of folders,** not steps. The tool claims no running order.
 - **Very large code** doesn't get a chart for every function. The page stays under about 16 MB, and the rest are outlines. The tool map has no whole-system chart in the page yet; the story map does.
@@ -116,7 +116,7 @@ Measured on the last full round of tests, just before the final fixes, and not r
 - **It stays inside that folder.** A link that leads outside the source folder is skipped, and a path in a map, answers or story file that leaves it is refused.
 - **TypeScript follows its config out of the folder.** The TypeScript checker follows imports and a `tsconfig.json`'s `extends`, `paths` and `typeRoots` the way `tsc` does, so it may open files those name outside the source folder. Only each file's name and the names it declares reach the map (as `excluded:<file>` in `map/calls.json`), never its text. It is not blocked because that would break monorepos whose `tsconfig` extends a parent file.
 - **A `.faultline` folder from someone else is untrusted input.** A repo you clone can ship one. Delete it and run `faultline map` yourself, or map into a new `--project` folder, before you trust it, review it or build on it.
-- **The freshness check is a drift check.** `review` and `story check` refuse when a file the map read has changed. They do not notice a file added since, and the check value sits in the map folder, so it is no seal on a folder someone else made.
+- **The freshness check is a drift check.** `review` and `story check` refuse when a file the map read has changed. They do not notice a file added since (`status` does, from `map/sources.json`), and the check value sits in the map folder, so it is no seal on a folder someone else made.
 - **Found a problem?** Open an issue on [GitHub](https://github.com/EmergentKnowledgeGroup/FaultlineByEKG/issues). More in [`SECURITY.md`](SECURITY.md).
 
 ## What it isn't
